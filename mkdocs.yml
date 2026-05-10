@@ -61,7 +61,9 @@ theme:
     - content.code.copy
     - content.code.annotate
     - content.tabs.link
-    - content.action.edit
+    # content.action.edit intentionally OMITTED — these docs are
+    # auto-generated from pyarchinit source-tree docstrings; per-page
+    # edit links would point to malformed paths in the wrong repo.
     - content.tooltips
     - announce.dismiss
 
