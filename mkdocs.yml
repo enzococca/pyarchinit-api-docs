@@ -3,7 +3,7 @@ site_description: >-
   API reference for PyArchInit, the QGIS plugin for archaeological data
   management. Auto-generated from source-tree docstrings.
 site_author: pyarchinit team
-site_url: https://pyarchinit-api-docs.readthedocs.io/
+site_url: https://pyarchinit-api.readthedocs.io/
 copyright: Copyright &copy; 2026 pyarchinit team — GPL v2
 
 # Top-right toolbar: link to the pyarchinit source on the active dev branch.
