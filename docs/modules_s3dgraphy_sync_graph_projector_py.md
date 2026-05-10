@@ -2,9 +2,35 @@
 
 ## Overview
 
-This file contains 10 documented elements.
+This file contains 13 documented elements.
 
 ## Functions
+
+### compute_primary(memberships, priority_order)
+
+Pick exactly one primary group_uuid per us_id following priority.
+
+memberships: list of dicts with at least these keys:
+  - us_id: graph node_id of the US
+  - group_uuid: target group node_id
+  - group_kind: pyarchinit dimension (struttura, area, ..., toponym)
+
+priority_order: list of group_kind names, highest priority first.
+  Toponym is excluded automatically (never primary).
+
+Returns: dict us_id → group_uuid (the primary). US without any
+eligible spatial/activity membership get no entry.
+
+**Parameters:**
+- `memberships`
+- `priority_order`
+
+### _is_us_node(node)
+
+Return True if *node* is a stratigraphic unit (US/USM/USVs/...).
+
+**Parameters:**
+- `node`
 
 ### _is_epoch_node(node)
 
@@ -41,8 +67,9 @@ graphml_writer.py.
 
 ##### __init__(self, vocab_provider)
 
-*No description available.*
-##### populate_graph(self, db_path, sito, include_paradata, strict_schema, groups)
+## `__init__`
+
+##### populate_graph(self, db_path, sito, include_paradata, strict_schema, groups, primary_priority)
 
 Build and return a s3dgraphy.Graph populated with the
 stratigraphic rows of `sito` from the SQLite at `db_path`.
@@ -68,6 +95,11 @@ Args:
         which only needs labels/edges/swimlanes — node_uuid is
         irrelevant there and AC-2 fixtures pre-date the
         migration.
+    primary_priority: optional list of dimension names ordered
+        from highest to lowest priority for the AI07
+        ``is_primary`` selection (compute_primary). When None,
+        ``DEFAULT_PRIMARY_PRIORITY`` is used. Toponym is
+        always excluded.
 
 Returns:
     A populated `s3dgraphy.Graph`. Empty graph (zero nodes) is
@@ -136,9 +168,33 @@ pyArchInit-shaped data.
 Mutates the graph in place. No-op if the DB file lacks the
 expected tables.
 
-##### _merge_groups(self, graph, db_path, sito, dimensions)
+##### _merge_groups(self, graph, db_path, sito, dimensions, primary_priority)
 
-Materialize ActivityNodeGroup nodes + is_in_activity edges
-from SQL columns and ad-hoc store. Each group node carries
-a ``group_kind`` attribute distinguishing the dimension.
+Materialize group nodes per dimension. AI07: dispatch per
+dimension — 6 spatial dims → LocationNodeGroup + is_in_location,
+attivita → ActivityNodeGroup + is_in_activity (unchanged).
+
+primary_priority: list[str] of dimension names ordered from highest
+to lowest priority for is_primary selection. None = use
+DEFAULT_PRIMARY_PRIORITY.
+
+##### _emit_toponym_chain(self, graph, db_path, sito)
+
+AI07 Stage 3: emit a recursive LocationNodeGroup(kind='toponym')
+chain from site_table.{nazione,regione,provincia,comune}.
+
+Empty levels are skipped (Q4=c). If all 4 levels are empty, no
+chain is emitted.
+
+Cross-site dedupe: each (name, "toponym") pair maps to a
+deterministic group_uuid (sha1) so two sites in the same comune
+share the node.
+
+Each US in the projected graph gets one is_in_location edge to
+the DEEPEST non-empty level (typically `comune`), always
+is_primary=false (toponym never primary).
+
+The chain itself is structured top-down via is_in_location edges:
+nazione ← regione ← provincia ← comune (each lower level
+"is_in_location" of the next level up).
 

@@ -40,6 +40,12 @@ DocumentNode / ExtractorNode / CombinerNode. Falls back to the
 hardcoded `_HARDCODED_PARADATA_EDGES` set when the datamodel is
 unavailable.
 
+Structural edges listed in `_STRUCTURAL_NON_PARADATA_EDGES` are
+always reported as non-paradata, even if their connections-datamodel
+`allowed_connections` includes paradata-class endpoints (e.g.
+`is_in_location` allows PropertyNode sources for "this property
+measurement was taken at this place").
+
 **Parameters:**
 - `edge_type`
 

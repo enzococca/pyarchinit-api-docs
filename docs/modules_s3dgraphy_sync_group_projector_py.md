@@ -2,9 +2,19 @@
 
 ## Overview
 
-This file contains 4 documented elements.
+This file contains 5 documented elements.
 
 ## Functions
+
+### _resolve_node_class_and_kind(group_kind)
+
+AI07: map pyarchinit group_kind → (node_class, kind_enum).
+
+Returns ("LocationNodeGroup", "functional") for unknown kinds — defensive
+default. Never raises.
+
+**Parameters:**
+- `group_kind`
 
 ### dimensions_with_data(db_path, sito)
 
@@ -53,5 +63,6 @@ spec §10 D6 risk mitigation.
 
 Pre-render specification of a group.
 
-Resolved to ActivityNodeGroup by GraphProjector._merge_groups.
+Resolved to ActivityNodeGroup or LocationNodeGroup by
+GraphProjector._merge_groups (AI07).
 

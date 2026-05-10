@@ -61,7 +61,8 @@ perform actual I/O).
 
 ##### __init__(self, db_path, sito)
 
-*No description available.*
+## `__init__`
+
 ##### file_path(self)
 
 Resolved paradata file path for this (db, sito) pair.
@@ -72,7 +73,8 @@ Whether the paradata file is present on disk.
 
 ##### sito(self)
 
-*No description available.*
+## `sito`
+
 ##### read(self)
 
 Return a Graph populated with only the paradata-family
@@ -143,11 +145,13 @@ Create + persist a LicenseNode.
 
 ##### list_licenses(self)
 
-*No description available.*
+## `list_licenses`
+
 ##### add_embargo(self, until_date, reason)
 
 Create + persist an EmbargoNode.
 
 ##### list_embargos(self)
 
-*No description available.*
+## `list_embargos`
+

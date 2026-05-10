@@ -16,7 +16,8 @@ User-writable overrides location.
 
 ### get_default_provider()
 
-*No description available.*
+## `get_default_provider`
+
 ## Classes
 
 ### VocabProvider
@@ -29,28 +30,37 @@ Process-wide vocabulary provider with hot-reload.
 
 ##### __init__(self, bundled_dir, overrides_dir, parent)
 
-*No description available.*
+## `__init__`
+
 ##### _on_directory_changed(self, path)
 
-*No description available.*
+## `_on_directory_changed`
+
 ##### get_unit_types(self, *args, **kwargs)
 
-*No description available.*
+## `get_unit_types`
+
 ##### get_edge_types(self)
 
-*No description available.*
+## `get_edge_types`
+
 ##### get_legal_targets_for(self, source_type, edge_name)
 
-*No description available.*
+## `get_legal_targets_for`
+
 ##### get_paradata_types(self)
 
-*No description available.*
+## `get_paradata_types`
+
 ##### get_visual_rule(self, node_type)
 
-*No description available.*
+## `get_visual_rule`
+
 ##### get_cidoc_mapping(self, type_abbreviation)
 
-*No description available.*
+## `get_cidoc_mapping`
+
 ##### versions(self)
 
-*No description available.*
+## `versions`
+

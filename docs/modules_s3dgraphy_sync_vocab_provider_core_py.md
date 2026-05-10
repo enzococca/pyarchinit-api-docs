@@ -15,7 +15,8 @@ Parse a 'M.N.P' version string into a comparable tuple.
 
 ### _first_existing(directory, names)
 
-*No description available.*
+## `_first_existing`
+
 **Parameters:**
 - `directory`
 - `names`
@@ -38,34 +39,45 @@ Parses the s3dgraphy JSON pillars; query API for client tools.
 
 ##### __init__(self, bundled_dir, overrides_dir, min_versions)
 
-*No description available.*
+## `__init__`
+
 ##### _enforce_minimum_versions(self)
 
-*No description available.*
+## `_enforce_minimum_versions`
+
 ##### versions(self)
 
-*No description available.*
+## `versions`
+
 ##### reload(self)
 
-*No description available.*
+## `reload`
+
 ##### _load_with_override(self, names)
 
-*No description available.*
+## `_load_with_override`
+
 ##### get_unit_types(self, family)
 
-*No description available.*
+## `get_unit_types`
+
 ##### get_edge_types(self)
 
-*No description available.*
+## `get_edge_types`
+
 ##### get_legal_targets_for(self, source_type, edge_name)
 
-*No description available.*
+## `get_legal_targets_for`
+
 ##### get_paradata_types(self)
 
-*No description available.*
+## `get_paradata_types`
+
 ##### get_visual_rule(self, node_type)
 
-*No description available.*
+## `get_visual_rule`
+
 ##### get_cidoc_mapping(self, type_abbreviation)
 
-*No description available.*
+## `get_cidoc_mapping`
+

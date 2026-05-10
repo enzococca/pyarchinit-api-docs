@@ -8,21 +8,27 @@ This file contains 6 documented elements.
 
 ### Family
 
-*No description available.*
+## `Family`
+
 **Inherits from**: str, Enum
 
 ### UnitType
 
-*No description available.*
+## `UnitType`
+
 ### EdgeType
 
-*No description available.*
+## `EdgeType`
+
 ### VisualRule
 
-*No description available.*
+## `VisualRule`
+
 ### ParadataType
 
-*No description available.*
+## `ParadataType`
+
 ### VocabularyVersion
 
-*No description available.*
+## `VocabularyVersion`
+

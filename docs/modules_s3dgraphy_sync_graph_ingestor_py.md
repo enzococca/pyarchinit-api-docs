@@ -2,23 +2,45 @@
 
 ## Overview
 
-This file contains 22 documented elements.
+This file contains 24 documented elements.
 
 ## Functions
 
+### _promote_legacy_activitynodegroup(graph)
+
+AI07 Stage B: scan *graph* for ActivityNodeGroup nodes whose
+attributes carry ``group_kind`` ∈ ``SQL_BACKED_KINDS_SPATIAL``, and
+promote them in-memory to ``LocationNodeGroup`` with ``kind`` set
+per :data:`_DIM_TO_KIND`. Also rewires incoming ``is_in_activity``
+edges to ``is_in_location``.
+
+Detection: looks at ``node.attributes`` for either:
+
+- direct key ``'group_kind'`` (newer AI07 exports), or
+- any ``'pyarchinit.<dim>'`` key where ``<dim>`` is in
+  ``SQL_BACKED_KINDS_SPATIAL`` (legacy 5.5.x exports that retained
+  the data attributes through the importer).
+
+Emits exactly one ``DeprecationWarning`` per call (not per node) if
+any promotion happens. The warning references AI07 / pyarchinit
+5.6.0+ and instructs the user to re-export to migrate the on-disk
+representation.
+
+Returns: number of nodes promoted.
+
+**Parameters:**
+- `graph`
+
 ### _apply_group_folders_to_sql(cur, graphml_path, sito)
 
-Parse *graphml_path* for ``yfiles.foldertype="group"`` folder
-nodes whose id starts with ``grp_`` and apply
-``UPDATE us_table SET <kind>=<group_name>`` for every member US.
+AI07: recursive walker — descend yEd folder-in-folder structures
+and apply ``UPDATE us_table SET <kind>=<group_name>`` per
+SQL-backed folder.
 
-*cur* is an open SQLite cursor inside the caller's transaction —
-we never commit / rollback here. A failure raises and the caller
-rolls back.
+Toponym / unknown / ad-hoc kinds are skipped (AC-14 unchanged).
 
-Returns the number of UPDATEs queued. Folders without a
-discoverable SQL ``group_kind`` (i.e. ad-hoc) are skipped entirely
-— they never write to SQL regardless of caller flag (AC-14).
+Cycle detection: a `visited` set guards against malformed GraphML
+where folder A contains folder B contains folder A.
 
 Member US identification: prefer ``pyarchinit.node_uuid`` (when
 available, byte-identical match to the DB row); fall back to
@@ -43,7 +65,8 @@ enrichment. JSON-serialised columns (rapporti) get parse-then-compare.
 
 ### _is_epoch_node_local(node)
 
-*No description available.*
+## `_is_epoch_node_local`
+
 **Parameters:**
 - `node`
 
@@ -145,6 +168,12 @@ Write-side failure. Always means DB rolled back to pre-call state.
 
 **Inherits from**: GraphSyncError
 
+### CycleDetectedError
+
+AI07: recursive walker detected a cycle in yEd folder nesting.
+
+**Inherits from**: GraphIngestError
+
 ### SchemaMismatchError
 
 us_table.node_uuid column missing (Phase 1 migration not applied).
@@ -181,7 +210,8 @@ can show all the missing keys at once instead of one per call.
 
 ##### __init__(self, missing)
 
-*No description available.*
+## `__init__`
+
 ### GraphIngestor
 
 Persist a s3dgraphy Graph back to the PyArchInit SQL tables.
@@ -194,7 +224,8 @@ ConflictResolution.GRAPH_WINS for value diffs.
 
 ##### __init__(self, conflict_resolver)
 
-*No description available.*
+## `__init__`
+
 ##### populate_list(self, graph, db_path, sito, dry_run, create_missing_epochs, graphml_path, sql_apply_groups)
 
 See spec §3.2 docstring for full contract.
@@ -223,7 +254,8 @@ graphml_path. This lets callers pass just the .graphml file.
 
 ##### _verify_schema(self, db_path)
 
-*No description available.*
+## `_verify_schema`
+
 ##### _verify_sito(self, graph, sito)
 
 Validate the sito parameter.
@@ -236,4 +268,5 @@ node's sito attribute to *sito* before INSERT/UPDATE.
 
 ##### _run(self, graph, db_path, sito, dry_run, create_missing_epochs, graphml_path, sql_apply_groups)
 
-*No description available.*
+## `_run`
+

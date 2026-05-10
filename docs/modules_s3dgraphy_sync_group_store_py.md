@@ -53,16 +53,20 @@ Site-scoped CRUD for groups.graphml.
 
 ##### __init__(self, db_path, sito)
 
-*No description available.*
+## `__init__`
+
 ##### file_path(self)
 
-*No description available.*
+## `file_path`
+
 ##### exists(self)
 
-*No description available.*
+## `exists`
+
 ##### sito(self)
 
-*No description available.*
+## `sito`
+
 ##### read(self)
 
 Return a Graph populated only with ad-hoc group nodes from

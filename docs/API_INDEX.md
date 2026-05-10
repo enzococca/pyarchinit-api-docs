@@ -67,6 +67,7 @@
 | Cronology_convertion | modules/utility/media_ponderata_sperimentale.py | 8 | ## `Cronology_convertion` |
 | Cronology_convertion | modules/utility/media_poderata_sperimentale.py | 8 | ## `Cronology_convertion` |
 | CustomCanvas | modules/utility/pyarchinit_exp_Inventario_A5_pdf.py | 1 | ## `CustomCanvas` |
+| CycleDetectedError | modules/s3dgraphy/sync/graph_ingestor.py | 0 | AI07: recursive walker detected a cycle in yEd folder nesting. |
 | DB_update | modules/db/pyarchinit_db_update.py | 4 | `DB_update` manages schema migrations and structural updates for a pyArchInit archaeological databas |
 | DETETA | modules/db/entities/DETETA.py | 2 | ## `DETETA` |
 | DETETA_table | modules/db/structures/DETETA_table.py | 0 | ## `DETETA_table` |
@@ -662,13 +663,19 @@
 | _hydrate_pyarchinit_data_keys | modules/s3dgraphy/sync/graph_ingestor.py | 2 | None |
 | _inject_group_folders | modules/s3dgraphy/sync/graphml_writer.py | 3 | None |
 | _inject_isolated_paradata_nodes | modules/s3dgraphy/sync/graphml_writer.py | 2 | None |
+| _inject_other_locations_badges | modules/s3dgraphy/sync/graphml_writer.py | 2 | None |
+| _inject_other_locations_data | modules/s3dgraphy/sync/graphml_writer.py | 2 | None |
 | _is_epoch_node | modules/s3dgraphy/sync/graph_projector.py | 1 | bool |
 | _is_epoch_node_local | modules/s3dgraphy/sync/graph_ingestor.py | 1 | bool |
+| _is_us_node | modules/s3dgraphy/sync/graph_projector.py | 1 | bool |
 | _load_connections_datamodel | modules/s3dgraphy/sync/edge_registry.py | 0 | dict | None |
 | _load_visual_rules | modules/s3dgraphy/sync/edge_registry.py | 0 | dict | None |
 | _merge_dicts | modules/s3dgraphy/sync/vocab_provider_core.py | 2 | dict |
+| _promote_legacy_activitynodegroup | modules/s3dgraphy/sync/graph_ingestor.py | 1 | int |
 | _read_first_sito | modules/s3dgraphy/sync/graphml_writer.py | 1 | str |
 | _resolve_display_label | modules/s3dgraphy/sync/graphml_writer.py | 4 | str |
+| _resolve_group_visual | modules/s3dgraphy/sync/graphml_writer.py | 2 | tuple[str, str] |
+| _resolve_node_class_and_kind | modules/s3dgraphy/sync/group_projector.py | 1 | tuple[str, str | None] |
 | _resolve_unita_tipo | modules/s3dgraphy/sync/graph_ingestor.py | 2 | str | None |
 | _resolve_visual | modules/s3dgraphy/sync/graphml_writer.py | 1 | None |
 | _rewrite_rapporti_sito | modules/s3dgraphy/sync/graph_ingestor.py | 2 | str |
@@ -781,6 +788,7 @@
 | compile_translations | scripts/update_translations.py | 0 | None |
 | compute_dem_difference | modules/utility/pyarchinit_dem_visualizer.py | 3 | None |
 | compute_image_hash | modules/utility/pottery_similarity/index_manager.py | 1 | Optional[str] |
+| compute_primary | modules/s3dgraphy/sync/graph_projector.py | 2 | dict |
 | compute_style_categories | modules/utility/rust_helpers.py | 1 | None |
 | compute_volume_stats | modules/utility/pyarchinit_dem_visualizer.py | 2 | None |
 | convert_blockquote | tabs/Tutorial_viewer.py | 1 | None |

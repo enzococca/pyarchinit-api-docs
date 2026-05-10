@@ -17,4 +17,5 @@ timestamp-based or callback-driven strategies.
 
 ##### resolve(self, db_row, graph_value, field)
 
-*No description available.*
+## `resolve`
+

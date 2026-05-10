@@ -2,7 +2,7 @@
 
 ## Overview
 
-This file contains 19 documented elements.
+This file contains 22 documented elements.
 
 ## Functions
 
@@ -236,6 +236,67 @@ Each injected node gets:
 - `paradata_nodes`
 - `xml_path`
 
+### _resolve_group_visual(group_kind, kind)
+
+Resolve fill + border for a group folder.
+
+Lookup order:
+1. dimension key (e.g. "struttura") — AI06 + F2 path, preserves
+   byte-identical AC-2 baseline for all existing dimensions
+2. s3dgraphy LocationNodeGroup.kind enum (e.g. "toponym") — AI07
+   fallback for nodes that have no dimension-key palette entry
+3. defaults (grey + black) — last resort
+
+**Parameters:**
+- `group_kind`
+- `kind`
+
+### _inject_other_locations_badges(us_other_locations, xml_path)
+
+AI07/F1: render non-primary memberships as inline yEd NodeLabel
+badges below each US's main label, so the user can SEE the
+non-primary memberships in yEd directly without a custom Property
+Mapper.
+
+Format: a single sandwich-position NodeLabel reading
+``also: <name> (<kind>), <name> (<kind>), ...``.
+
+yEd renders multiple NodeLabels per ShapeNode by stacking them
+according to ``modelName`` + ``modelPosition``. We use
+``modelName="sandwich"`` ``modelPosition="s"`` to place the badge
+just below the existing main label.
+
+Args:
+    us_other_locations: dict mapping us_emid → list of memberships
+        (each: ``{"name", "kind", "group_uuid"}``).
+    xml_path: path to the GraphML output to post-process.
+
+**Parameters:**
+- `us_other_locations`
+- `xml_path`
+
+### _inject_other_locations_data(us_other_locations, xml_path)
+
+AI07/F1 §5.4: emit `<data key="s3d:other_locations">` on US
+nodes for non-primary memberships.
+
+yEd folders can host a node under at most ONE parent (the primary
+membership). Other memberships are preserved on the US side as a
+JSON-serialised list under the ``s3d:other_locations`` data key,
+so downstream tools (yEd visual-rules badges, triplestore
+reconstruction) can recover them without folder re-parenting.
+
+Schema per entry: ``{"name": str, "kind": str, "group_uuid": str}``.
+
+Args:
+    us_other_locations: dict mapping us_emid → list of memberships.
+        Empty dict is a no-op.
+    xml_path: path to the GraphML output to post-process.
+
+**Parameters:**
+- `us_other_locations`
+- `xml_path`
+
 ### _inject_group_folders(group_snapshot, members_map, xml_path)
 
 Inject yEd folder nodes inside the TableNode for each group.
@@ -260,7 +321,7 @@ _inject_isolated_paradata_nodes).
 - `members_map`
 - `xml_path`
 
-### export_graphml(db_path, mapping, output_path, site_filter, persist_auxiliary, language, groups)
+### export_graphml(db_path, mapping, output_path, site_filter, persist_auxiliary, language, groups, primary_priority)
 
 Run PyArchInitImporter → optional site filter → GraphMLExporter.
 
@@ -274,6 +335,11 @@ Args:
     language: 2-letter QGIS locale code used to localize US/USM
         display labels (Italian by default). EM-canonical types
         (USVs/USVn/SF/...) are language-neutral and unaffected.
+    primary_priority: AI07 — optional list of dimension names
+        ordered from highest to lowest priority for the
+        ``is_primary`` selection on is_in_location edges. When
+        None, ``DEFAULT_PRIMARY_PRIORITY`` is used (struttura first).
+        Toponym is always excluded from primary.
 
 Returns:
     ExportResult with metrics + warnings.
@@ -291,6 +357,7 @@ Raises:
 - `persist_auxiliary`
 - `language`
 - `groups`
+- `primary_priority`
 
 ## Classes
 
@@ -319,4 +386,5 @@ Attributes:
 
 ##### __init__(self, stage, original)
 
-*No description available.*
+## `__init__`
+
