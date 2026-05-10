@@ -128,7 +128,7 @@ nav:
       - Class diagram: CLASS_DIAGRAM.md
       - Full API index: API_INDEX.md
       - Changelog: CHANGELOG.md
-  - Plugin entry points:
+  - Plugin:
       - "__init__.py": __init___py.md
       - "install_dialog.py": install_dialog_py.md
       - "PlaceSelectionDialog.py": PlaceSelectionDialog_py.md
@@ -138,7 +138,7 @@ nav:
       - "searchLayers.py": searchLayers_py.md
       - "searchWorker.py": searchWorker_py.md
       - "storage_server/main.py": storage_server_main_py.md
-  - GUI components:
+  - GUI:
       - Overview: gui.md
       - "backup_restore_dialog.py": gui_backup_restore_dialog_py.md
       - "dbmanagment.py": gui_dbmanagment_py.md
@@ -157,7 +157,7 @@ nav:
       - "ui_mplwidgetmatrix.py": gui_ui_mplwidgetmatrix_py.md
       - "uiarchinit_splash.py": gui_ui_pyarchinit_splash_py.md
       - "user_management_dialog.py": gui_user_management_dialog_py.md
-  - Tabs (form controllers):
+  - Tabs:
       - Overview: tabs.md
       - "Archeozoology.py": tabs_Archeozoology_py.md
       - "Attrezzature.py": tabs_Attrezzature_py.md
@@ -207,7 +207,7 @@ nav:
       - "tabs.pyarchinit_Pottery_mainapp.py": tabs_pyarchinit_Pottery_mainapp_py.md
       - "tabs.pyarchinit_setting_matrix.py": tabs_pyarchinit_setting_matrix_py.md
       - "topsarchinit.py": tabs_tops_pyarchinit_py.md
-  - Database layer:
+  - Database:
       - Overview: database.md
       - "add_uuid_support.py": modules_db_add_uuid_support_py.md
       - "add_versioning_support.py": modules_db_add_versioning_support_py.md
@@ -405,7 +405,7 @@ nav:
       - "sync_vocab_provider_core.py": modules_s3dgraphy_sync_vocab_provider_core_py.md
       - "sync_vocab_provider.py": modules_s3dgraphy_sync_vocab_provider_py.md
       - "sync_vocab_types.py": modules_s3dgraphy_sync_vocab_types_py.md
-  - StratiGraph sync engine:
+  - StratiGraph:
       - Overview: stratigraph.md
       - "__init__.py": modules_stratigraph___init___py.md
       - "bundle_creator.py": modules_stratigraph_bundle_creator_py.md
@@ -416,7 +416,7 @@ nav:
       - "sync_queue.py": modules_stratigraph_sync_queue_py.md
       - "sync_state_machine.py": modules_stratigraph_sync_state_machine_py.md
       - "uuid_manager.py": modules_stratigraph_uuid_manager_py.md
-  - Storage backends:
+  - Storage:
       - Overview: storage.md
       - "__init__.py": modules_storage___init___py.md
       - "base_backend.py": modules_storage_base_backend_py.md
@@ -430,7 +430,7 @@ nav:
       - "storage_manager.py": modules_storage_storage_manager_py.md
       - "unibo_filemanager_backend.py": modules_storage_unibo_filemanager_backend_py.md
       - "webdav_backend.py": modules_storage_webdav_backend_py.md
-  - Reports & utility:
+  - Utility:
       - Overview: utility.md
       - "__init__.py": modules_analysis___init___py.md
       - "ut_heatmap_generator.py": modules_analysis_ut_heatmap_generator_py.md
@@ -514,7 +514,7 @@ nav:
       - "tma_import_parser_extended.py": modules_utility_tma_import_parser_extended_py.md
       - "tma_import_parser.py": modules_utility_tma_import_parser_py.md
       - "tma_inventory_parser.py": modules_utility_tma_inventory_parser_py.md
-  - Other modules:
+  - Other:
       - Overview: misc.md
       - "rust_bridge.py": modules__rust_bridge_py.md
       - "__init__.py": modules_geoarchaeo___init___py.md
