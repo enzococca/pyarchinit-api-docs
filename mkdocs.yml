@@ -6,9 +6,15 @@ site_author: pyarchinit team
 site_url: https://pyarchinit-api-docs.readthedocs.io/
 copyright: Copyright &copy; 2026 pyarchinit team — GPL v2
 
-repo_name: pyarchinit/pyarchinit-api-docs
-repo_url: https://github.com/pyarchinit/pyarchinit-api-docs
-edit_uri: edit/main/docs/
+# Top-right toolbar: link to the pyarchinit source on the active dev branch.
+# (The API docs themselves live in enzococca/pyarchinit-api-docs; the GitHub
+# icon in the toolbar should point users at the actual source code.)
+repo_name: pyarchinit
+repo_url: https://github.com/pyarchinit/pyarchinit/tree/Stratigraph_00001
+# edit_uri intentionally omitted — these docs are auto-generated from the
+# pyarchinit source tree, so per-page "Edit this page" links would point
+# to the wrong file. To suggest doc improvements, edit the docstrings in
+# pyarchinit/pyarchinit upstream.
 
 docs_dir: docs
 site_dir: site
@@ -60,15 +66,19 @@ theme:
     - announce.dismiss
 
 extra:
+  # Top-left logo target: clicking the logo (or "PyArchInit API Reference"
+  # title) navigates to the project website instead of staying on the
+  # docs home. Override of mkdocs-material default behaviour.
+  homepage: https://www.pyarchinit.org/
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/pyarchinit/pyarchinit
     - icon: fontawesome/solid/globe
       link: https://www.pyarchinit.org/
   generator: false
-  version:
-    provider: mike
-    default: stable
+  # NOTE: mike (multi-version selector) was previously declared here but
+  # we don't publish multiple versions yet. Removed — its placeholder
+  # was cluttering the right-hand toolbar without a real version dropdown.
 
 extra_css:
   - assets/extra.css
