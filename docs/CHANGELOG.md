@@ -7,6 +7,128 @@
 
 ---
 
+## [phase3-pgcompat] — 2026-05-11
+
+### Italiano
+
+**Aggiornamento doc API per Phase 3 — PostgreSQL compatibility refactor del s3dgraphy bridge** (pyarchinit tags `phase3-pgcompat-shim-5.6.2-alpha` -> `phase3-pgcompat-consolidation-5.7.4-alpha`).
+
+Phase 3 ha eseguito il flipping completo di tutta la sync pipeline da `sqlite3.connect()` raw a SQLAlchemy + `DbHandle` shim. Sei tag rilasciati in 2 giorni (2026-05-10 -> 2026-05-11), zero residui `sqlite3.connect()` in `modules/s3dgraphy/sync/`. AC-2 byte-identical preservato dall'inizio alla fine.
+
+**Tag rilasciati:**
+
+| Milestone | Tag | Commit |
+|---|---|---|
+| Foundation | `phase3-pgcompat-shim-5.6.2-alpha` | `7420a6cc` |
+| PG-A | `phase3-pgcompat-a-migration-5.7.0-alpha` | `45803d83` |
+| PG-B | `phase3-pgcompat-b-export-5.7.1-alpha` | `2121369e` |
+| PG-C | `phase3-pgcompat-c-import-5.7.2-alpha` | `cf6ed26e` |
+| PG-D | `phase3-pgcompat-d-paradata-5.7.3-alpha` | `b8d73058` |
+| Consolidation | `phase3-pgcompat-consolidation-5.7.4-alpha` | `2446b555` |
+
+**Nuovi simboli pubblici (Phase 3):**
+
+In `modules/s3dgraphy/sync/`:
+
+| Simbolo | Modulo | Ruolo |
+|---|---|---|
+| `DbHandle` | `_db_handle.py` | Wrapper leggero attorno a un engine SQLAlchemy + `sqlite_path` opzionale |
+| `_resolve_db_handle(arg)` | `_db_handle.py` | Shim che accetta `Path \| DbHandle \| str` e ritorna un `DbHandle`; entry point backwards-compatible per tutte le API di sync |
+| `_conn_slug(handle)` | `_workspace.py` | Slug filesystem-safe per connessioni PG (formato `host_port_dbname`) |
+| `_resolve_workspace_dir(handle, sito)` | `_workspace.py` | Ritorna la workspace dir per-sito: SQLite=`handle.sqlite_path.parent`, PG=`<root>/<conn_slug>/<sito>/` |
+| `_resolve_workspace_root()` | `_workspace.py` | NUOVO in Consolidation: fallback a 3 livelli (env var `PYARCHINIT_WORKSPACE_DIR` > QSettings `pyarchinit/paradata_workspace` > default `~/pyarchinit/pyarchinit_DB_folder`) |
+| `_DryRunRollback` | `graph_ingestor.py` | Sentinel exception per rollback dry-run in `populate_list` |
+| `load_sqlite_into_pg(sqlite_path, engine)` | test fixture helper | Mirror di una fixture SQLite in uno schema PG per test cross-engine |
+
+In `scripts/migrations/`:
+
+| Simbolo | Modulo | Ruolo |
+|---|---|---|
+| `_columns_of(handle, table)` | `_2026_05_node_uuid_backfill_lib.py` | Listing colonne engine-agnostic che rimpiazza `PRAGMA table_info` |
+
+In `gui/pyarchinitConfigDialog.py` (Consolidation):
+
+| Elemento UI | Ruolo |
+|---|---|
+| Sezione "Paradata Workspace" (QGroupBox) | Nuova sezione nel tab DB Sync; legge/scrive QSettings `pyarchinit/paradata_workspace` con pulsanti Browse + Reset + signal `editingFinished` + `sync()` difensivo |
+
+**Note sulla regenerazione api-docs:**
+
+Due moduli nuovi sotto `modules/s3dgraphy/sync/` hanno nome con prefisso `_` (privato convenzionale):
+- `_db_handle.py` (Foundation) — definisce la classe `DbHandle` e lo shim `_resolve_db_handle`
+- `_workspace.py` (PG-D + Consolidation) — risoluzione path workspace
+
+Entrambi NON sono attualmente nella nav di `mkdocs.yml` poiché la generatrice salta i moduli underscore-prefissati. Aggiungerli alla nav è deferito alla prossima rigenerazione API completa o a un follow-up doc commit dedicato; i loro docstring sono già aggiornati nel source upstream e popoleranno automaticamente le pagine `.md` generate.
+
+**Decisioni di design Phase 3:**
+
+- Foundation introduce `DbHandle` come thin wrapper: solo `engine` (SQLAlchemy) + `sqlite_path` opzionale (per back-compat su SQLite). Nessuna logica di dispatch nello shim — i call site possono scegliere se branch su `handle.is_postgres`.
+- `db_path` keyword preservato su tutte le API pubbliche per back-compat (`Path | DbHandle | str` accepted); rename a `db_input` deferito a Phase 4 / 5.8.x con DeprecationWarning cycle.
+- SQLite filesystem behavior byte-identical preservato attraverso ogni milestone (workspace dir per ParadataStore/GroupStore = `db_path.parent`, AC-2 byte-identical preservato).
+- PG workspace separa per connessione + per sito (`<root>/<host_port_dbname>/<sito>/`); root configurabile via env var / QSettings / default in Consolidation.
+- `_DryRunRollback` sentinel pattern in PG-C garantisce rollback completo del transazione in dry-run mode senza usare savepoint engine-specific.
+
+### English
+
+**API doc update for Phase 3 — s3dgraphy bridge PostgreSQL compatibility refactor** (pyarchinit tags `phase3-pgcompat-shim-5.6.2-alpha` -> `phase3-pgcompat-consolidation-5.7.4-alpha`).
+
+Phase 3 completed the full flip of the sync pipeline from raw `sqlite3.connect()` to SQLAlchemy + `DbHandle` shim. Six tags shipped over 2 days (2026-05-10 -> 2026-05-11), zero residual `sqlite3.connect()` in `modules/s3dgraphy/sync/`. AC-2 byte-identical preserved end-to-end.
+
+**Tags shipped:**
+
+| Milestone | Tag | Commit |
+|---|---|---|
+| Foundation | `phase3-pgcompat-shim-5.6.2-alpha` | `7420a6cc` |
+| PG-A | `phase3-pgcompat-a-migration-5.7.0-alpha` | `45803d83` |
+| PG-B | `phase3-pgcompat-b-export-5.7.1-alpha` | `2121369e` |
+| PG-C | `phase3-pgcompat-c-import-5.7.2-alpha` | `cf6ed26e` |
+| PG-D | `phase3-pgcompat-d-paradata-5.7.3-alpha` | `b8d73058` |
+| Consolidation | `phase3-pgcompat-consolidation-5.7.4-alpha` | `2446b555` |
+
+**New public symbols (Phase 3):**
+
+In `modules/s3dgraphy/sync/`:
+
+| Symbol | Module | Role |
+|---|---|---|
+| `DbHandle` | `_db_handle.py` | Lightweight wrapper around a SQLAlchemy engine + optional `sqlite_path` |
+| `_resolve_db_handle(arg)` | `_db_handle.py` | Shim that accepts `Path \| DbHandle \| str` and returns a `DbHandle`; backwards-compatible entry point for all sync APIs |
+| `_conn_slug(handle)` | `_workspace.py` | Filesystem-safe slug for PG connections (format `host_port_dbname`) |
+| `_resolve_workspace_dir(handle, sito)` | `_workspace.py` | Returns per-site workspace dir: SQLite=`handle.sqlite_path.parent`, PG=`<root>/<conn_slug>/<sito>/` |
+| `_resolve_workspace_root()` | `_workspace.py` | NEW in Consolidation: 3-tier fallback (env var `PYARCHINIT_WORKSPACE_DIR` > QSettings `pyarchinit/paradata_workspace` > default `~/pyarchinit/pyarchinit_DB_folder`) |
+| `_DryRunRollback` | `graph_ingestor.py` | Sentinel exception for dry-run rollback in `populate_list` |
+| `load_sqlite_into_pg(sqlite_path, engine)` | test fixture helper | Mirrors a SQLite fixture into a PG schema for cross-engine tests |
+
+In `scripts/migrations/`:
+
+| Symbol | Module | Role |
+|---|---|---|
+| `_columns_of(handle, table)` | `_2026_05_node_uuid_backfill_lib.py` | Engine-agnostic column listing replacing `PRAGMA table_info` |
+
+In `gui/pyarchinitConfigDialog.py` (Consolidation):
+
+| UI element | Role |
+|---|---|
+| "Paradata Workspace" QGroupBox | New section in the DB Sync tab; reads/writes QSettings `pyarchinit/paradata_workspace` with Browse + Reset buttons + `editingFinished` signal + defensive `sync()` |
+
+**Notes on api-docs regeneration:**
+
+Two new modules under `modules/s3dgraphy/sync/` are named with a `_` prefix (conventional private modules):
+- `_db_handle.py` (Foundation) — defines the `DbHandle` class and the `_resolve_db_handle` shim
+- `_workspace.py` (PG-D + Consolidation) — workspace path resolution
+
+Neither is currently in `mkdocs.yml` nav since the generator skips underscore-prefixed modules. Adding them to the nav is deferred to the next full API regen or a follow-up doc commit; their docstrings are already updated in the upstream source and will populate the auto-generated `.md` pages automatically.
+
+**Phase 3 design decisions:**
+
+- Foundation introduces `DbHandle` as a thin wrapper: just an `engine` (SQLAlchemy) + optional `sqlite_path` (for SQLite back-compat). No dispatch logic in the shim itself — call sites can choose whether to branch on `handle.is_postgres`.
+- `db_path` keyword preserved across all public APIs for back-compat (`Path | DbHandle | str` accepted); rename to `db_input` deferred to Phase 4 / 5.8.x with DeprecationWarning cycle.
+- SQLite filesystem behavior preserved byte-identically through every milestone (workspace dir for ParadataStore/GroupStore = `db_path.parent`, AC-2 byte-identical preserved).
+- PG workspace splits per connection + per site (`<root>/<host_port_dbname>/<sito>/`); root is configurable via env var / QSettings / default in Consolidation.
+- `_DryRunRollback` sentinel pattern in PG-C ensures full transaction rollback in dry-run mode without using engine-specific savepoints.
+
+---
+
 ## [ai07-locationnodegroup] — 2026-05-10
 
 ### Italiano
