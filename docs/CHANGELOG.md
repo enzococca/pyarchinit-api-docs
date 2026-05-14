@@ -7,6 +7,122 @@
 
 ---
 
+## [yed-aware-import] — 2026-05-14
+
+### Italiano
+
+**Rollout `yEd-aware graphml import` completo** (pyarchinit tags `yed-import-foundation-5.7.5-alpha` → `yed-import-closure-5.8.3-alpha`). 6 milestone yE + 1 dependency bump (s3dgraphy 0.1.42) + 3 PG-pottery hotfix in 3 giorni (2026-05-12 → 2026-05-14). Suite pyarchinit 298 → 354 (+56 test). AC-2 byte-identical preservato attraverso tutti i 10 tag.
+
+**Tag rilasciati nella rollout:**
+
+| Milestone | Tag | Commit |
+|---|---|---|
+| yE-A Foundation (detector) | `yed-import-foundation-5.7.5-alpha` | `eb4fba81` |
+| yE-B Classifier (13 kind) | `yed-import-classifier-5.7.6-alpha` | `640b4e83` |
+| yE-C Parsers (period + folder) | `yed-import-parsers-5.7.7-alpha` | `5d666c67` |
+| yE-D Pipeline (orchestrator + 4 policies + paradata) | `yed-import-pipeline-5.8.0-alpha` | `bfd9c858` |
+| s3dgraphy bump 0.1.42 (RSF spolia) | `s3dgraphy-bump-5.8.1-alpha` | `7f5f82a8` |
+| yE-E Dialog UX (QWizard + sidecar) | `yed-import-dialog-5.8.2-alpha` | `7120dc23` |
+| pg-pottery fix (bidirectional coercion) | `pg-pottery-fix-5.8.2.1-alpha` | `2788ccf7` |
+| pg-pottery belt-and-braces | `pg-pottery-fix-belt-and-braces-5.8.2.2-alpha` | `3f6956d2` |
+| pg-pottery typefix (decl Int→Text) | `pg-pottery-typefix-5.8.2.3-alpha` | `3f30d368` |
+| yE-Closure (sign-off + tutorial 36) | `yed-import-closure-5.8.3-alpha` | `cbc2a5b7` |
+
+**Nuovi simboli pubblici (yE-A → yE-Closure):**
+
+In `modules/s3dgraphy/sync/`:
+
+| Simbolo | Modulo | Ruolo |
+|---|---|---|
+| `detect_flavor(graphml_path) -> 'yed-raw'\|'pyarchinit-projected'` | `yed_detector.py` | Riconosce se un graphml è autorato in yEd raw o esportato da pyarchinit (presenza `pyarchinit.*` data keys). |
+| `ClassificationKind` (Enum, 13 values) | `yed_classifier.py` | US_REAL / US_MASONRY / US_DOCUMENTARY / USV_VIRTUAL / USV_FORMAL / **REUSED_SPECIAL_FIND** (RSF, 5.8.1) / SPECIAL_FIND / VIRTUAL_FIND / DOCUMENT / COMBINER / PROPERTY / UNKNOWN / SKIP. |
+| `ClassifiedNode` (dataclass) | `yed_classifier.py` | `yed_id` + `label` + `auto_kind` + `user_kind` + `extra_attrs`. |
+| `classify_leaves(graphml_path, rules=None) -> list[ClassifiedNode]` | `yed_classifier.py` | Regex order-sensitive: USVs/USVn → USVf; USV → USV_VIRTUAL; USM → US_MASONRY; USD → US_DOCUMENTARY; US → US_REAL; VSF → VIRTUAL_FIND; **RSF → REUSED_SPECIAL_FIND**; SF → SPECIAL_FIND; D./C. → DOCUMENT/COMBINER; keyword `material/position/width/...` → PROPERTY. |
+| `DEFAULT_CLASSIFIER_RULES` | `yed_classifier.py` | Lista `(regex, kind)` ordinata. |
+| `PeriodCandidate` (dataclass) | `yed_table_parser.py` | TableNode row → `yed_row_id`, `auto_label`/`user_label`, `auto_periodo`/`auto_fase`/`user_periodo`/`user_fase`, `member_yed_ids`, `y_min`/`y_max`. |
+| `extract_periods(graphml_path) -> list[PeriodCandidate]` | `yed_table_parser.py` | Trova `<y:TableNode>` con righe; mappa colonne → period/phase. |
+| `FolderCandidate` (dataclass) | `yed_group_walker.py` | Group folder → `yed_id`, `full_label`, `auto_dimension`/`user_dimension`, `auto_value`/`user_value`, `member_yed_ids`, `nested_folder_ids`, `parent_folder_id`. |
+| `walk_folders(graphml_path) -> list[FolderCandidate]` | `yed_group_walker.py` | Walka i group folder ricorsivamente. Auto-dimension da prefix label (VA→attivita / AR→area / SR→struttura / ST→settore / AM→ambient / SG→saggio / QP→quad_par). |
+| `DEFAULT_FOLDER_PREFIX_MAP` | `yed_group_walker.py` | dict `prefix → dimension`. |
+| `FolderEdgePolicy` (StrEnum) | `yed_rapporti_policy.py` | SKIP / FAN_OUT / REPRESENTATIVE / SYNTHETIC. |
+| `FolderEdge`, `FolderEdgeReport`, `ExpandedRapporti` (dataclasses) | `yed_rapporti_policy.py` | Modello dati edges + report classificato + risultato espanso (rapporti list + synthetic_us_rows). |
+| `analyze_edges(graphml, classified, folders) -> FolderEdgeReport` | `yed_rapporti_policy.py` | Splitta gli edge in leaf-to-leaf / folder-touching / folder self-loops (sempre filtrati). |
+| `apply_policy(report, policy, *, all_folders, classified) -> ExpandedRapporti` | `yed_rapporti_policy.py` | Applica una delle 4 policy attive. |
+| `YedOverrides` (dataclass) | `yed_import_pipeline.py` | User diffs (5.8.2-alpha): `classifier: dict[yed_id, ClassificationKind]`, `periods`, `folders`, `policy`. |
+| `apply_overrides_to_drafts(drafts, overrides) -> dict` | `yed_import_pipeline.py` | Pure function: returna nuovo drafts con `user_*` valorizzati. |
+| `import_yed_raw(handle, graphml_path, sito, drafts, *, policy=SKIP, dry_run=False, overrides=None) -> IngestResult` | `yed_import_pipeline.py` | **Orchestrator principale.** Atomic transaction via `engine.begin()`. DbHandle PG+SQLite. `overrides=None` = comportamento yE-D hardcoded-defaults. `dry_run=True` = `_DryRunRollback` sentinel (PG-C heritage). |
+| `_classify_destination(classified)` | `yed_import_pipeline.py` | Buckets: sql_us (5 kind incl. USV* + RSF), sql_inv (SPECIAL_FIND), paradata (4 kind), skipped. |
+| `_resolve_unita_tipo(c)` | `yed_import_pipeline.py` | Mappa ClassifiedNode → unita_tipo str. USV_FORMAL deriva il prefix dal label (USVs/USVn/USVc). |
+| `_write_us_rows`, `_write_inventario_rows`, `_write_periodizzazione_rows`, `_apply_yed_folder_dimensions`, `_write_rapporti`, `_write_paradata_via_store` | `yed_import_pipeline.py` | 5 standalone SQL write functions. Path B per PropertyNode (no US linkage). |
+
+In `modules/s3dgraphy/sync/graph_ingestor.py`:
+
+| Simbolo | Note |
+|---|---|
+| Branch hook in `populate_list()` (lines 166-216) | yEd-raw detection + dispatch + RETURN `import_yed_raw()` result. Legacy `_run()` path UNCHANGED per pyarchinit-projected (AC-2 sacred). yE-E (5.8.2-alpha) extension: probes `QApplication.instance()` e apre `YedImportDialog` se interattivo. |
+| `_S3DGRAPHY_TYPE_TO_UNITA_TIPO` | Aggiunti 2 entry: `"VirtualActivity": "VA"` (5.8.0-alpha, SYNTHETIC policy) + `"ReusedSpecialFind": "RSF"` (5.8.1-alpha, s3dgraphy 0.1.42 spolia). |
+
+In `gui/`:
+
+| Simbolo | Modulo | Ruolo |
+|---|---|---|
+| `YedImportDialog(QWizard)` | `gui/yed_import_dialog.py` | 5-page wizard: classifier / periods / folders / rapporti policy / preview. |
+| `_ClassifierPage`, `_PeriodsPage`, `_FoldersPage`, `_RapportiPolicyPage`, `_PreviewPage` | `gui/yed_import_dialog.py` | QWizardPage subclasses. |
+| `save_sidecar(graphml, overrides) -> Path` | `gui/yed_import_dialog.py` | Persist YedOverrides in `<graphml>.yed_overrides.json` schema versionato. |
+| `load_sidecar(graphml) -> YedOverrides` | `gui/yed_import_dialog.py` | Pre-populate wizard. Forward-compat: unknown ClassificationKind values skipped. |
+| `sidecar_path(graphml) -> Path` | `gui/yed_import_dialog.py` | Helper path computation. |
+
+In `scripts/`:
+
+| Simbolo | Modulo | Ruolo |
+|---|---|---|
+| `import_yed_graphml.py` (CLI) | `scripts/import_yed_graphml.py` | argparse: `<graphml>` + `--site` + `--db|--conn-str` mutex + `--policy {skip|fan_out|representative|synthetic}` + `--overrides PATH` (5.8.2-alpha) + `--dry-run` + `--auto-defaults` (no-op forward-compat) + `-v`. |
+
+In `modules/db/pyarchinit_db_manager.py`:
+
+| Simbolo | Note |
+|---|---|
+| `_normalize_query_params(params, table_class_name)` | **Bidirectional coercion** (5.8.2.1-alpha pg-pottery-fix): str + numeric col → coerce numeric; int/float + str col → coerce str. Bool escluso. Mappato BEFORE cache lookup (pg-media-fix-5.7.9.1-alpha pattern). |
+| `query_bool` body (line 2996-3010) | **Belt-and-braces** (5.8.2.2-alpha): stessa coercion bidirezionale inline nel loop, in caso `_normalize_query_params` venga bypassato (stale `sys.modules`). |
+
+In `modules/db/structures/`:
+
+| File | Cambio | Tag |
+|---|---|---|
+| `Pottery_table.py:19` | `Column('us', Integer)` → `Column('us', Text)` | `pg-pottery-typefix-5.8.2.3-alpha` |
+| `US_table.py:20` | `Column('us', Integer)` → `Column('us', Text)` | `pg-pottery-typefix-5.8.2.3-alpha` |
+
+ORM declarations allineate al PG schema reale (TEXT). SQLite type-loose unaffected.
+
+In `scripts/modules_installer.py`:
+
+| Simbolo | Note |
+|---|---|
+| `_cleanup_stale_dists(package_name)` | NUOVO (5.8.1-alpha): rimuove `<pkg>-*.dist-info/` dirs in `ext_libs/` + `<pkg>/__pycache__/` prima di `pip install --upgrade`. Risolve il pile-up storico di `s3dgraphy-0.1.40.dist-info` + `0.1.41.dist-info` + `0.1.42.dist-info` side-by-side. |
+| `_extract_pkg_name(requirement)` | NUOVO: estrae nome canonico da requirement line (PyPI normalisation: lowercase + underscore→dash). |
+
+**Test count finale post-rollout**: 354 passed / 42 skipped (PG-L1 require psycopg2 — 6 tests). Up from 298 a phase3-pgcompat closure (2026-05-11), **+56 test in 3 giorni**.
+
+**Animazioni / Tutorial**: Tutorial 36 (`docs/tutorials/<lang>/36_extended_matrix_s3dgraphy.md`) esteso in **IT + EN** con sezione "5. yEd-aware Import" coprendo l'intero rollout end-to-end. Altre 8 lingue (de/es/fr/ar/ca/ro/pt/el) deferite a batch separato via `tutorial-updater` agent.
+
+**Dev-log master**: `docs/superpowers/dev-log/T5.4_PyArchInit_Dev_Log.md` prepended con sezioni yE-Closure + yE-E + yE-D.
+
+### English
+
+**`yEd-aware graphml import` rollout complete** (pyarchinit tags `yed-import-foundation-5.7.5-alpha` → `yed-import-closure-5.8.3-alpha`). 6 yE milestones + 1 dependency bump (s3dgraphy 0.1.42) + 3 PG-pottery hotfixes in 3 days (2026-05-12 → 2026-05-14). pyarchinit test suite 298 → 354 (+56 tests). AC-2 byte-identical preserved across all 10 tags.
+
+**Public symbols added** (see Italian table above for the full list): `detect_flavor`, `ClassificationKind` enum (13 values), `classify_leaves`, `PeriodCandidate`/`extract_periods`, `FolderCandidate`/`walk_folders`, `FolderEdgePolicy` (4 active policies), `analyze_edges`, `apply_policy`, `ExpandedRapporti`, `import_yed_raw` orchestrator (with `overrides: YedOverrides | None` parameter from 5.8.2-alpha), `YedOverrides` dataclass, `apply_overrides_to_drafts`, `YedImportDialog(QWizard)` + 5 page subclasses, `save_sidecar`/`load_sidecar`/`sidecar_path`, CLI `scripts/import_yed_graphml.py` with `--overrides PATH` flag.
+
+**Modified internals**: `_normalize_query_params` extended to bidirectional coercion (pg-media-fix-5.7.9.1-alpha + pg-pottery-fix-5.8.2.1-alpha lineage) + inline defensive coercion in `query_bool` body (belt-and-braces, 5.8.2.2-alpha). `_S3DGRAPHY_TYPE_TO_UNITA_TIPO` map extended with `VirtualActivity → VA` and `ReusedSpecialFind → RSF`. `Pottery_table.us` + `US_table.us` ORM declarations aligned to TEXT (matching PG schema; pg-pottery-typefix-5.8.2.3-alpha).
+
+**Tooling addition**: `scripts/modules_installer.py` now auto-cleans stale `<pkg>-*.dist-info/` directories in `ext_libs/` before every `pip install --upgrade` (5.8.1-alpha, fix for user-reported side-by-side dist-info pile-up).
+
+**Final test count**: 354 passed / 42 skipped. AC-2 preserved across all 10 tags.
+
+**Tutorials**: Tutorial 36 (`docs/tutorials/<lang>/36_extended_matrix_s3dgraphy.md`) extended IT + EN with section "5. yEd-aware Import". Other 8 languages deferred to batch via `tutorial-updater` agent.
+
+---
+
 ## [phase3-pgcompat] — 2026-05-11
 
 ### Italiano
