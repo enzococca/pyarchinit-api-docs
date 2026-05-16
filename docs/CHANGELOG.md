@@ -7,6 +7,95 @@
 
 ---
 
+## [yed-fastfix] — 2026-05-16
+
+### Italiano
+
+**Hotfix progressivi yE-D batch A→T** (pyarchinit tag `yed-fastfix-5.8.5-alpha`, commit `a5e8502b` su `Stratigraph_00001`). 19 bug emergi durante manual test su `pyarchinit_test{002..010}.sqlite` — single commit cumulativo dopo iterazioni `cartella senza nome 7→14`. Suite pyarchinit 311 → 354 → **329 dopo refactor** (+18 regression test). AC-2 byte-identical preservato.
+
+**Trade-off principale (Bug R)**: multi-folder visibility > identity-dedup per i tipi paradata. `material`, `D.01`, `position` referenced cross-folder ora producono N us_table rows (una per occurrence yEd, con `us` suffisso `_2`/`_3`, e `d_stratigrafica` = label originale) — restaurato il visual fan-out in yEd ri-esportato. Identity-dedup di varianti tipo `D.001` / `D.001-2` / `D.001bis` collassanti perso; recupero futuro via yE-F design (single row + `other_locations` + render-time fan-out).
+
+**Tag rilasciato:**
+
+| Milestone | Tag | Commit |
+|---|---|---|
+| yE-D Fastfix batch A→T | `yed-fastfix-5.8.5-alpha` | `a5e8502b` |
+
+(Versioning: `5.8.4-alpha` riservato a dry-run interno tra Bug E e Bug R; rilascio pubblico salta a `5.8.5-alpha`.)
+
+**19 bug fixed** (raggruppati per modulo):
+
+In `modules/s3dgraphy/sync/yed_import_pipeline.py`:
+
+| ID | Sintesi |
+|---|---|
+| **A** | `_write_rapporti`: rapporti tuple format corretto `[type, us_target, area, sito]` (posizioni 1 e 3 erano invertite, reader pyarchinit non risolveva mai i target). |
+| **B** | `_write_us_rows`: nuovo arg `member_to_period`; `periodo_iniziale`/`fase_iniziale` propagati su us_table dalla `PeriodCandidate.member_yed_ids` parsata. `period_finale`/`fase_finale` settati pari (MVP single-period US). |
+| **C** | `_write_periodizzazione_rows`: aggiunta colonna `cont_per` (UI "Codice periodo") all'INSERT con valore = `periodo_i` sequenza. |
+| **E** | `_strip_unita_tipo_prefix(label, unita_tipo)` helper: `us_table.us` stripped del prefisso (`US100` → `'100'`, `USV200` → `'200'`, `USVs5` → `'5'`). SF/VSF/RSF aggiunti a `_SQL_US_KINDS` (was inventario-only); `_DUAL_WRITE_INV_KINDS = {SF, VSF, RSF}` nuovo set per dual-write us_table + inventario_materiali. |
+| **F** | Token rapporti via `_select_rapporti_label(edge_type, src_ut, tgt_ut)` (riusato da `graph_ingestor`): verbose IT (`Copre`/`Coperto da`/`Taglia`/...) per US-USM-USM, `>>`/`<<` per altri non-canonici, `>`/`<` per Continuity. |
+| **G** | `_PARADATA_KINDS = frozenset()` empty; DOC/Combinar/Extractor/property → us_table records con `unita_tipo='DOC'`/`'Combinar'`/`'Extractor'`/`'property'` (convenzione pyarchinit verificata su `pyarchinit_db.sqlite` produzione). No più scrittura `paradata_<sito>.graphml` separato per row-paradata. |
+| **H** | Pre-load existing `(us, unita_tipo)` keys (e `numero_inventario`, `(periodo, fase)`) per skip-if-exists. Re-import = no-op senza UNIQUE-collision rollback. Defensive code-path preservato per integrity errors veri. |
+| **M** | `_write_rapporti` default `edge_type='generic_connection'` quando uno degli endpoint è paradata (`overlies` non valido US↔Document per s3dgraphy connection rules). Cross-kind edges emettono `>>` direttamente, niente più warning + auto-demote a generic_connection. |
+| **R** | `_PARADATA_NODEDUP_UTS = {DOC, Combinar, Extractor, property}`: skippa dedup-by-identity per queste 4 famiglie. Counter `paradata_seq[(unita_tipo, base_us)] → int` per suffix incrementale (`material`, `material_2`, `material_3`). Original label in `d_stratigrafica`. Idempotency tramite `existing_paradata: dict[(label, ut), list[(us, node_uuid)]]` consumato in ordine sui re-import. |
+| **S** | `_write_us_rows` ritorna nuovo dict out `us_by_yed_id_out: dict[yed_id, str]` con il us value ATTUALE scritto (post-suffix). `import_yed_raw` lo usa per costruire `id_to_label` → rapporti target risolvono al per-occurrence us value (`01_2` invece di `01` condiviso). |
+| **T** | `_write_rapporti` con `_INVERSE_TOKEN` map e accumulator `rapporti_by_node`: per ogni edge yEd `a→b` scrive forward su a's row E inverse (`<<`, `Coperto da`, etc.) su b's row. DOCs ora hanno rapporti entranti visibili nel form Scheda US. Reader pyarchinit (`graph_projector._enrich_into:706+`) dedupa via stable edge-id quindi reciprocità è zero-cost in rappresentazione grafica. |
+
+In `modules/s3dgraphy/sync/yed_classifier.py`:
+
+| ID | Sintesi |
+|---|---|
+| **D** | `ClassificationKind.EXTRACTOR = "extractor"` aggiunto al 14° enum value; regex `^E\.\d+` matcha pattern Extractor canonical EM. |
+| **I** | `_detect_bpmn_kind(node_element, Y_NS)` helper: legge `<y:Property name="...dataObjectType" value="DATA_OBJECT_TYPE_PLAIN"/>` → DOCUMENT, `name="...type" value="ARTIFACT_TYPE_ANNOTATION"` → PROPERTY. BPMN signal vince sul label fallback. Risolve `D.NN` (BPMN data-object) → DOCUMENT vs `D.NN.MM` (plain) → EXTRACTOR. Senza, dedup pre-Bug-R collassava entrambi nella stessa riga, drop edges Extractor→Document. |
+
+In `modules/s3dgraphy/sync/graph_projector.py`:
+
+| ID | Sintesi |
+|---|---|
+| **K** | `_PARADATA_UNITA_TIPO_TO_CLASS_PATH` + `_PARADATA_CLASS_TO_UNITA_TIPO` maps. Composite-key index `nodes_by_key: dict[(name, unita_tipo), node]` con slot `__STRAT__` per placeholder bridge. Sostituisce `strat_by_name: dict[name, node]` (name-only collisions). `_create_paradata_node_for_unita_tipo()` + `_create_stratigraphic_node_for_unita_tipo()` helper per create-on-demand. Cleanup orphan `__STRAT__` solo per nomi con paradata-row matching (preserva nodi cross-sito del bridge). |
+| **N** | `populate_graph` riordinato: `_propagate_node_uuid_and_us` BEFORE `_enrich_into` (era post). `_enrich_into` ora composite-key aware (`nodes_by_us_ut` + `nodes_by_name` indices). Family-preference target resolver (`_PARADATA_UTS` frozenset + `_ut_family()` helper). Risolve "edges added pre-replacement aliased to wrong class" warning chain. |
+| **P** | `_create_paradata_node_for_unita_tipo` ora ritorna `StratigraphicUnit` Python class con `attributes['unita_tipo']='DOC'/'Combinar'/etc.` (era `DocumentNode`/`CombinerNode`/`ExtractorNode`/`PropertyNode`). Render dentro swimlane GraphMLExporter via dispatch by `unita_tipo` attr; isolated paradata classes (Bug O approach) reverted perché finivano OUT-of-swimlane senza edges. |
+
+In `modules/s3dgraphy/sync/graphml_writer.py`:
+
+| ID | Sintesi |
+|---|---|
+| **Q** | `_VISUAL_BY_UNITA_TIPO`: aggiunto entry `"USV"` mirroring `"USVs"` (blue parallelogram `#248FE7`, black fill `#000000`, white plain text). pyarchinit canonical `unita_tipo='USV'` ora rendered con palette EM 1.5 corretta (era rectangle red-border `#9B3333` default fallback). `_resolve_display_label`: paradata kinds preferiscono `descrizione` (= `d_stratigrafica`) → property label = `material` (non `propertymaterial`); DOC/Extractor/Combinar = label originale (non `D.<us_suffix>`). |
+
+In `modules/s3dgraphy/sync/graphml_writer.py:_filter_by_site`:
+
+Branch `isinstance(StratigraphicNode)` ora copre anche le row-paradata istanze (Bug P le ha rese StratigraphicUnit). Nessuna logica filter-side aggiuntiva richiesta dopo refactor.
+
+In `gui/yed_import_dialog.py`:
+
+| ID | Sintesi |
+|---|---|
+| **J** | `_kind_choices()` lista include `ClassificationKind.EXTRACTOR` (Bug D enum aggiunto ma dialog combobox non aggiornato → `ValueError: 'extractor' is not in list` quando wizard incontra nodo Extractor). |
+
+**Test delta**: 311 → 329 (+18 regression test), 0 regression, AC-2 byte-identical preservato. Coverage espansa per: Bug E strip helper edge cases (paradata fallback + identity variants), Bug F token dispatch per famiglia, Bug G classification destination layout, Bug H pre-existing-skip idempotency, Bug I BPMN-aware classifier, Bug J wizard combobox, Bug K composite-key projector, Bug N row-paradata via StratigraphicNode, Bug R B1 no-dedup multi-folder, Bug S rapporti per-occurrence target.
+
+**Predecessore**: `[yed-aware-import]` (2026-05-14, commit `cbc2a5b7`). Rollout originale del 6+3 milestone yE-A → yE-Closure. Il fastfix corregge i bug residui emersi nei manual test su 9 db reali.
+
+### English
+
+**Progressive yE-D fastfix batch A→T** (pyarchinit tag `yed-fastfix-5.8.5-alpha`, commit `a5e8502b` on `Stratigraph_00001`). 19 bugs surfaced through manual testing on `pyarchinit_test{002..010}.sqlite` — single cumulative commit after iterations `cartella senza nome 7→14`. pyarchinit suite 311 → 354 → **329 after refactor** (+18 regression tests). AC-2 byte-identical preserved.
+
+**Main trade-off (Bug R)**: multi-folder visibility chosen over identity-dedup for paradata kinds. `material`, `D.01`, `position` referenced cross-folder now yield N us_table rows (one per yEd occurrence, with `us` suffix `_2`/`_3`, and `d_stratigrafica` = original label) — restores the visual fan-out in the re-exported yEd graphml. Identity-dedup of `D.001` / `D.001-2` / `D.001bis` variants collapsing into one row lost; future recovery via yE-F design (single row + `other_locations` + render-time fan-out).
+
+**Tag released:**
+
+| Milestone | Tag | Commit |
+|---|---|---|
+| yE-D Fastfix batch A→T | `yed-fastfix-5.8.5-alpha` | `a5e8502b` |
+
+(Versioning: `5.8.4-alpha` reserved for internal dry-run between Bug E and Bug R; public release jumps to `5.8.5-alpha`.)
+
+**19 bugs by module** (see Italian tables above for full descriptions): `yed_import_pipeline.py` (A, B, C, E, F, G, H, M, R, S, T — 11 fixes), `yed_classifier.py` (D EXTRACTOR enum + regex, I BPMN-aware classification — 2 fixes), `graph_projector.py` (K composite-key + create-on-demand helpers, N reorder + family-preference, P row-paradata via StratigraphicNode-class — 3 fixes), `graphml_writer.py` (Q USV palette + property label — 1 fix), `yed_import_dialog.py` (J wizard combobox — 1 fix). Test increment: 311 → 329.
+
+**Predecessor**: `[yed-aware-import]` (2026-05-14, commit `cbc2a5b7`). Original 6+3 milestone rollout (yE-A → yE-Closure). The fastfix corrects residual bugs emerged in manual tests across 9 real DBs.
+
+---
+
 ## [yed-aware-import] — 2026-05-14
 
 ### Italiano
