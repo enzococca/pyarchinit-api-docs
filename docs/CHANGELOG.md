@@ -7,6 +7,150 @@
 
 ---
 
+## [yed-f-multifolder] — 2026-05-16
+
+### Italiano
+
+**yE-F multi-folder paradata** (pyarchinit tag `yed-f-multifolder-5.9.0-alpha`, commit `83d82f40` su `Stratigraph_00001`). Recupero dell'identity-dedup per i tipi paradata persa in `yed-fastfix-5.8.5-alpha` (Bug R), via single us_table row + colonna `other_locations` (JSON list) + render-time fan-out N copie visive nel graphml ri-esportato. Suite pyarchinit 312 → **351 passed / 35 skipped / 0 failed** (+39 regression test). AC-2 byte-identical preservato (3 AC-2 test ancora verdi).
+
+**Design pattern (fold ↔ fan-out)**:
+
+- **Import (fold)**: cross-folder occurrences di un paradata label (`material`, `D.01`, `position` referenced da folder A + folder B + folder C) sono collassate in **1 sola** us_table row. Colonna `other_locations` (Text JSON) memorizza la lista dei folder secondari oltre al primary (`attivita`). Idempotency con 2-tier degradation: `paradata_primary_by_label` lookup, fallback su DB pre-migration senza `other_locations`.
+- **Export (fan-out)**: `_apply_yef_fan_out(graph)` emette **N copie visive** della stessa row paradata (una per ogni folder in primary ∪ other_locations), clonando il node con `_clone_node_for_location()` e stashing `_yef_copies_by_canonical` su graph. Il graphml ri-esportato preserva la presenza cross-folder originale yEd.
+- **Edge resolver per-folder**: `_resolve_target_for_folder(target_canonical_node, source_folder, graph)` in `graph_projector._enrich_into` rapporti loop. Risolve il target edge al cloned node giusto in base al folder sorgente, BEFORE family-preference fallback. AC-2 byte-identical preserved quando il graph non ha `_yef_copies_by_canonical` (path legacy).
+
+**Tag rilasciato:**
+
+| Milestone | Tag | Commit |
+|---|---|---|
+| yE-F Multi-folder paradata | `yed-f-multifolder-5.9.0-alpha` | `83d82f40` |
+
+**Nuovi simboli pubblici (yE-F):**
+
+In `modules/s3dgraphy/sync/yed_import_pipeline.py`:
+
+| Simbolo | Ruolo |
+|---|---|
+| `_resolve_folder_for_leaf(yed_id, folders) -> str \| None` | Helper module-level: dato un `yed_id` di leaf e la lista di `FolderCandidate`, ritorna il folder dimension value associato (o `None` se non in folder). |
+
+`_write_us_rows` modificato:
+- Sostituito branch `_PARADATA_NODEDUP_UTS` no-dedup (Bug R) con yE-F fold (1 row per unique paradata label + `other_locations` JSON).
+- Pre-load loop esteso per caricare `paradata_primary_by_label` ai fini idempotency su re-import, con 2-tier degradation per DB non-migrati.
+
+In `modules/s3dgraphy/sync/graphml_writer.py`:
+
+| Simbolo | Ruolo |
+|---|---|
+| `_clone_node_for_location(primary_node, location, idx, canonical_uuid) -> StratigraphicUnit` | Clona un node primary in una copia visiva per la location specifica; preserva `canonical_uuid` per traceability. |
+| `_apply_yef_fan_out(graph) -> int` | Orchestrator: emette N copie visive per ogni multi-folder paradata row, stash `_yef_copies_by_canonical` su graph, ritorna count copie create. |
+
+`export_graphml` modificato: chiama `_apply_yef_fan_out(graph)` tra `populate_graph` e `_filter_by_site`.
+
+In `modules/s3dgraphy/sync/graph_projector.py`:
+
+| Simbolo | Ruolo |
+|---|---|
+| `_resolve_target_for_folder(target_canonical_node, source_folder, graph)` | Edge resolver per-folder: data una source folder e un target canonical node, ritorna il cloned node corretto (o il canonical se non yE-F). |
+
+`_enrich_into` rapporti loop modificato: chiama `_resolve_target_for_folder` BEFORE family-preference fallback; preserva AC-2 byte-identical quando il graph non ha `_yef_copies_by_canonical`.
+
+In `modules/db/structures/US_table.py`:
+
+| Cambio | Tag |
+|---|---|
+| Aggiunto `Column('other_locations', Text)` alla us_table declaration | `yed-f-multifolder-5.9.0-alpha` |
+
+In `scripts/migrations/` (NUOVO):
+
+| File | Ruolo |
+|---|---|
+| `_2026_05_yef_other_locations_lib.py` | `add_other_locations_column(handle) -> int` — idempotent ALTER TABLE ADD COLUMN. Supporta SQLite + PG via DbHandle. |
+| `2026_05_yef_other_locations.py` | CLI argparse con `--apply`/`--dry-run` + `--db`/`--conn-str` mutex (pattern PG-A). |
+
+In `pyarchinitPlugin.py`:
+
+| Simbolo | Ruolo |
+|---|---|
+| QAction "Migrazioni → Aggiungi colonna other_locations (yE-F)" | Menu entry per migration GUI. |
+| `_run_yef_migration(self)` | Handler: file picker + confirm dialog + auto-backup + chiamata `add_other_locations_column` + result dialog. |
+
+In `tabs/US_USM.py`:
+
+| Simbolo | Ruolo |
+|---|---|
+| `_populate_other_locations_logic(widget, db_rows, current_ol_json)` | Module-level: popola `listWidget_other_locations` da DISTINCT attivita query + selectiona items in current_ol_json. |
+| `_save_other_locations_logic(widget, current_attivita) -> str \| None` | Module-level: raccoglie selezioni dal widget, esclude current_attivita (sta nel primary `attivita` field), serializza in JSON. |
+| `_yef_widget_visible_for_unita_tipo(unita_tipo) -> bool` | Predicate: ritorna `True` per `unita_tipo ∈ _YEF_PARADATA_UTS`. |
+| `_YEF_PARADATA_UTS` (frozenset) | Set dei 4 unita_tipo paradata (`DOC`, `Combinar`, `Extractor`, `property`). |
+
+`fill_fields` modificato: popola `listWidget_other_locations` da DISTINCT attivita query + setta visibility iniziale per `unita_tipo`.
+`change_label` (slot per `comboBox_unita_tipo`) modificato: toggla widget visibility ad ogni cambio di `unita_tipo`.
+`update_record` modificato: side-channel UPDATE su `other_locations` column dopo il main `DB_MANAGER.update`.
+
+In `gui/ui/US_USM.ui`:
+
+| Widget | Ruolo |
+|---|---|
+| `label_other_locations` (QLabel) | Label visibile sopra il list widget (visible solo per paradata UT). |
+| `listWidget_other_locations` (QListWidget) | MultiSelection mode, maxHeight 120px, in tab_2 gridLayout_15. |
+
+In `modules/utility/pyarchinit_i18n_stratigraphic.py`:
+
+| Simbolo | Ruolo |
+|---|---|
+| `_OTHER_LOCATIONS_LABEL` (dict, 10 langs) | Traduzioni label per `it/en/de/es/fr/ar/ca/ro/pt/el`. |
+| `get_other_locations_label(lang)` | Getter con fallback su `en`. |
+
+**Test delta**: 312 → 351 (+39 test). Nuovi file di test:
+
+| File | Tests | Coverage |
+|---|---|---|
+| `test_yef_fold.py` | 6 | Fold cross-folder occurrences → 1 row + other_locations JSON |
+| `test_yef_fanout.py` | 4 | Fan-out N visual copies in export graphml |
+| `test_yef_edge_resolver.py` | 3 | Per-folder edge target resolution + AC-2 preservation no-yE-F path |
+| `test_yef_ui_widget.py` | 4 | Widget visibility toggle + save/load logic |
+| `test_yef_roundtrip.py` | 1 | End-to-end yEd import → DB → graphml export round-trip |
+| `test_yef_migration.py` | 4 | Migration idempotency + dry-run + SQLite + PG via fixtures |
+
+Più 1 test rinamato in `test_yed_import_pipeline.py` + DDL fixture updates. 0 regression, AC-2 byte-identical preservato.
+
+**Predecessore**: `[yed-fastfix]` (2026-05-16, commit `a5e8502b`). Il fastfix 19 bug aveva scelto multi-folder visibility scartando identity-dedup; yE-F le riconcilia entrambe via fold-on-import + fan-out-on-export.
+
+### English
+
+**yE-F multi-folder paradata** (pyarchinit tag `yed-f-multifolder-5.9.0-alpha`, commit `83d82f40` on `Stratigraph_00001`). Recovers the identity-dedup for paradata kinds lost in `yed-fastfix-5.8.5-alpha` (Bug R), via single us_table row + `other_locations` (Text JSON list) column + render-time fan-out of N visual copies in the re-exported graphml. pyarchinit suite 312 → **351 passed / 35 skipped / 0 failed** (+39 regression tests). AC-2 byte-identical preserved (3 AC-2 tests still green).
+
+**Design pattern (fold ↔ fan-out)**:
+
+- **Import (fold)**: cross-folder occurrences of a paradata label (`material`, `D.01`, `position` referenced from folder A + folder B + folder C) are collapsed into **a single** us_table row. The `other_locations` column (Text JSON) stores the list of secondary folders beyond the primary (`attivita`). Idempotency with 2-tier degradation: `paradata_primary_by_label` lookup, fallback for pre-migration DBs lacking `other_locations`.
+- **Export (fan-out)**: `_apply_yef_fan_out(graph)` emits **N visual copies** of the same paradata row (one per folder in primary ∪ other_locations), cloning the node via `_clone_node_for_location()` and stashing `_yef_copies_by_canonical` on the graph. The re-exported graphml preserves the original yEd cross-folder presence.
+- **Per-folder edge resolver**: `_resolve_target_for_folder(target_canonical_node, source_folder, graph)` in `graph_projector._enrich_into` rapporti loop. Resolves the edge target to the correct cloned node based on source folder, BEFORE family-preference fallback. AC-2 byte-identical preserved when the graph has no `_yef_copies_by_canonical` (legacy path).
+
+**Tag shipped:**
+
+| Milestone | Tag | Commit |
+|---|---|---|
+| yE-F Multi-folder paradata | `yed-f-multifolder-5.9.0-alpha` | `83d82f40` |
+
+**Public symbols added (yE-F)** (see Italian tables above for full descriptions):
+
+- `modules/s3dgraphy/sync/yed_import_pipeline.py`: `_resolve_folder_for_leaf(yed_id, folders) -> str | None` module-level helper. `_write_us_rows` modified: Bug R no-dedup branch replaced with yE-F fold (1 row per unique label + `other_locations` JSON) + pre-load `paradata_primary_by_label` with 2-tier degradation.
+- `modules/s3dgraphy/sync/graphml_writer.py`: `_clone_node_for_location(primary_node, location, idx, canonical_uuid) -> StratigraphicUnit` + `_apply_yef_fan_out(graph) -> int` orchestrator. `export_graphml` calls fan-out between `populate_graph` and `_filter_by_site`.
+- `modules/s3dgraphy/sync/graph_projector.py`: `_resolve_target_for_folder(target_canonical_node, source_folder, graph)` per-folder edge resolver. `_enrich_into` rapporti loop modified to call it BEFORE family-preference fallback (AC-2 byte-identical preserved when no `_yef_copies_by_canonical`).
+- `modules/db/structures/US_table.py`: `Column('other_locations', Text)` added to us_table declaration.
+- `scripts/migrations/_2026_05_yef_other_locations_lib.py` (NEW): `add_other_locations_column(handle) -> int` idempotent ALTER TABLE ADD COLUMN (SQLite + PG via DbHandle).
+- `scripts/migrations/2026_05_yef_other_locations.py` (NEW): argparse CLI with `--apply`/`--dry-run` + `--db`/`--conn-str` mutex (PG-A pattern).
+- `pyarchinitPlugin.py`: new menu QAction "Migrazioni → Aggiungi colonna other_locations (yE-F)" + handler `_run_yef_migration` (file picker + confirm + auto-backup + result dialog).
+- `tabs/US_USM.py`: `_populate_other_locations_logic`, `_save_other_locations_logic`, `_yef_widget_visible_for_unita_tipo`, `_YEF_PARADATA_UTS` frozenset (4 paradata UTs: `DOC`, `Combinar`, `Extractor`, `property`). `fill_fields` / `change_label` / `update_record` modified accordingly.
+- `gui/ui/US_USM.ui`: new `label_other_locations` (QLabel) + `listWidget_other_locations` (QListWidget, MultiSelection, maxHeight 120px) in `tab_2` `gridLayout_15`.
+- `modules/utility/pyarchinit_i18n_stratigraphic.py`: `_OTHER_LOCATIONS_LABEL` dict (10 langs) + `get_other_locations_label(lang)` getter with `en` fallback.
+
+**Test delta**: 312 → 351 (+39 tests) across 6 new test files (`test_yef_fold.py` 6, `test_yef_fanout.py` 4, `test_yef_edge_resolver.py` 3, `test_yef_ui_widget.py` 4, `test_yef_roundtrip.py` 1, `test_yef_migration.py` 4) + 1 renamed in `test_yed_import_pipeline.py` + DDL fixture updates. 0 regressions, AC-2 byte-identical preserved.
+
+**Predecessor**: `[yed-fastfix]` (2026-05-16, commit `a5e8502b`). The 19-bug fastfix had chosen multi-folder visibility over identity-dedup; yE-F reconciles both via fold-on-import + fan-out-on-export.
+
+---
+
 ## [yed-fastfix] — 2026-05-16
 
 ### Italiano
