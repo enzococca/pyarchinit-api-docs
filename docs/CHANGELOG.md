@@ -7,6 +7,62 @@
 
 ---
 
+## [yed-f-fix-duplicate-primary] — 2026-05-16
+
+### Italiano
+
+**Hotfix yE-F duplicate-primary** (pyarchinit tag `yed-f-fix-duplicate-primary-5.9.0.1-alpha`, commit `1653363c` + 1 follow-up PG conftest). Predecessore: `yed-f-multifolder-5.9.0-alpha`.
+
+**Bug**: su import yEd graphml reali con paradata multi-folder (es. `DOC.01` referenced da 5 folders `VA01..VA05`), il primary `attivita` veniva sovrascritto dall'ULTIMO folder iterato, e il valore primary risultava duplicato dentro `other_locations`.
+
+**Root cause**: `_apply_yed_folder_dimensions` (`modules/s3dgraphy/sync/yed_import_pipeline.py:911-995`) itera ogni folder ed esegue `UPDATE us_table SET <dim>=<value> WHERE node_uuid IN (...)`. Per le row paradata fold (N occorrenze yEd → 1 us_table row → 1 node_uuid condiviso), ogni `UPDATE` per-folder colpisce la stessa row; vince l'ultima iterazione.
+
+**Fix**: quando `dim == "attivita"`, filtra fuori i node_uuid paradata dall'`UPDATE` di `_apply_yed_folder_dimensions` — yE-F ha già scritto il primary corretto (primo folder in document order) durante l'INSERT fold in `_write_us_rows`. Il SELECT pre-filtro usa `unita_tipo IN ('DOC','Combinar','Extractor','property')` per identificare le row paradata.
+
+**Simboli modificati**:
+
+- `modules/s3dgraphy/sync/yed_import_pipeline.py`:
+  - NEW `_PARADATA_NODEDUP_UTS: frozenset[str]` promosso a module-level (era local in `_write_us_rows`).
+  - `_apply_yed_folder_dimensions(conn, folders, sito, uuid_map)` — aggiunto paradata-skip pre-filtro per `dim == "attivita"` (12 nuove righe, ~966-978).
+- `tests/sync/test_yef_fold.py`:
+  - NEW test `test_apply_yed_folder_dimensions_skips_paradata_attivita` — regression: attivita resta sul primo folder document-order e non duplicata in other_locations.
+- `tests/sync/conftest_pg.py`:
+  - PG `us_table` DDL esteso con colonna `other_locations TEXT` per parità PG-online con SQLite.
+
+**Test delta**: 351 → **352 sync test passed** / 35 skipped (PG offline) / 0 failed.
+
+**PG portability**: fix puro SQL portabile — `text()` + named bind params, nessuna sintassi PG-specific o SQLite-specific. Funziona su entrambi i backend. DDL conftest PG aggiornato per copertura PG-online completa.
+
+**AC-2 byte-identical baseline**: preservato (resolver attiva solo quando il fan-out è stato eseguito; questo fix tocca solo l'`UPDATE` path import-time).
+
+### English
+
+**yE-F duplicate-primary hotfix** (pyarchinit tag `yed-f-fix-duplicate-primary-5.9.0.1-alpha`, commit `1653363c` + 1 follow-up PG conftest update). Predecessor: `yed-f-multifolder-5.9.0-alpha`.
+
+**Bug**: on real yEd graphml imports with multi-folder paradata (e.g. `DOC.01` appearing in 5 folders `VA01..VA05`), the primary `attivita` was overwritten by the LAST iterated folder, and the primary value was duplicated inside `other_locations`.
+
+**Root cause**: `_apply_yed_folder_dimensions` (`modules/s3dgraphy/sync/yed_import_pipeline.py:911-995`) iterates every folder and runs `UPDATE us_table SET <dim>=<value> WHERE node_uuid IN (...)`. For paradata fold rows (N yEd occurrences → 1 us_table row → 1 shared node_uuid), every folder's `UPDATE` hits the same row; the last iteration wins.
+
+**Fix**: when `dim == "attivita"`, filter out paradata node_uuids from the `_apply_yed_folder_dimensions` `UPDATE` — yE-F has already written the correct primary (first folder in document order) during the `_write_us_rows` fold INSERT. The new SELECT pre-filter uses `unita_tipo IN ('DOC','Combinar','Extractor','property')` to identify paradata rows.
+
+**Symbols changed**:
+
+- `modules/s3dgraphy/sync/yed_import_pipeline.py`:
+  - NEW `_PARADATA_NODEDUP_UTS: frozenset[str]` promoted to module-level (was a local in `_write_us_rows`).
+  - `_apply_yed_folder_dimensions(conn, folders, sito, uuid_map)` — added paradata-skip pre-filter for `dim == "attivita"` (12 new lines, ~966-978).
+- `tests/sync/test_yef_fold.py`:
+  - NEW test `test_apply_yed_folder_dimensions_skips_paradata_attivita` — regression: attivita stays at first-document-order folder and is not duplicated in other_locations.
+- `tests/sync/conftest_pg.py`:
+  - PG `us_table` DDL extended with `other_locations TEXT` column for PG-online parity with SQLite.
+
+**Test delta**: 351 → **352 sync tests passed** / 35 skipped (PG offline) / 0 failed.
+
+**PG portability**: fix is pure portable SQL — `text()` + named bind params, no PG-specific or SQLite-specific syntax. Works on both backends. PG conftest DDL updated for full PG-online coverage.
+
+**AC-2 byte-identical baseline**: preserved (resolver only activates when fan-out has run; this fix only touches the import-time `UPDATE` path).
+
+---
+
 ## [yed-f-multifolder] — 2026-05-16
 
 ### Italiano
