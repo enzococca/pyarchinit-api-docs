@@ -7,6 +7,71 @@
 
 ---
 
+## [temporal-paradox] — 2026-06-11
+
+### Italiano
+
+**Feature B — Rilevamento paradossi temporali/stratigrafici** (pyarchinit tag `temporal-paradox-5.12.13-alpha`, commit `61b84387`). Predecessore: `genera-continuita-5.12.12-alpha`.
+
+La *Verifica rapporti* ora rileva quando il periodo/fase assegnato a un'unità contraddice la stratigrafia osservata. La stratigrafia è il dato di riferimento → gli auto-fix spostano i **periodi**, non i rapporti. **Confine d'intervallo stretto** (spec §5): "A interamente più antica di B" = `cron_finale(A) < cron_iniziale(B)`; periodi adiacenti che si toccano in un punto = sovrapposti, non paradosso.
+
+**Simboli nuovi/modificati**:
+
+- NEW `modules/utility/temporal_check.py` (Qt-free, DbHandle PG+SQLite):
+  - Kind: `TEMPORAL_INVERSION`, `TEMPORAL_CONTEMPORANEITY`, `TEMPORAL_UNEVALUABLE`.
+  - `build_chronology(handle, sito)` — `(periodo, fase) → (cron_iniziale, cron_finale)` da `periodizzazione_table`.
+  - `load_unit_periods(handle, sito)` — `us → (pi, fi, pf, ff)` da `us_table` (il projector attacca al grafo solo `periodo_iniziale`).
+  - `unit_span(periods, chrono)` / `_cron_of` (fallback fase vuota → aggrega sul periodo).
+  - `detect_temporal(graph, chrono, unit_periods, *, sito, lang)` — Issues localizzati (it/en/de/es/fr/pt), dedup `seen`, placeholder esclusi via `_real_us`.
+  - `solve_fixes(issues, graph, chrono, unit_periods, *, sito)` — euristica di maggioranza greedy single-pass su mappa-periodi in-memory; sposta solo unità **mono-periodo** (`_is_mono`) al periodo a spostamento minimo; gap-fill contemporaneità (kind promosso UNEVALUABLE→CONTEMPORANEITY); pareggio/multi-periodo/no-target → suggerimento.
+  - `_violated(role, su, sn)` (stretto, coerente col rilevamento — guida `conflict_score` + tie-break) **separato da** `_fix_satisfies(role, cand, nb)` (rifiuta il confine che tocca per le relazioni d'ordine — guida solo `_best_target_period`).
+  - `_build_adjacency` — dedup archi paralleli via set.
+- `modules/utility/rapporti_check.py`:
+  - `check_rapporti(...)` — nuovi kwarg opzionali `chrono=None, unit_periods=None` (assenti → blocco temporale saltato, retro-compatibile); import lazy di `temporal_check`.
+  - `Edit` — nuovo campo `set_fields: tuple = ()`.
+  - `apply_edits`/`rollback` — scrittura+snapshot colonne periodo dietro `_PERIOD_COL_WHITELIST` (anti-injection); rollback misto rapporti+periodi atomico.
+  - `_L` — nuovi template `t_temporal_*`/`s_temporal_*` (6 lingue).
+- `gui/rapporti_check_dialog.py` — `_run` costruisce chrono+unit_periods; `_preview` mostra i `set_fields`; `_apply` auto-backup DB (SQLite + `pg_dump` home-relative) prima delle scritture periodo.
+
+**Test delta**: 24 `test_temporal_check.py` + 15 `test_rapporti_check.py` = **39 passed** (incl. confine-che-tocca in entrambe le direzioni d'arco); suite `tests/sync` **490 passed** (SQLite; residui = PG d'ambiente). AC-2 byte-identical preservato.
+
+### English
+
+**Feature B — Temporal/stratigraphic paradox detection** (pyarchinit tag `temporal-paradox-5.12.13-alpha`, commit `61b84387`). Predecessor: `genera-continuita-5.12.12-alpha`.
+
+*Verifica rapporti* now detects period/phase assignments contradicting observed stratigraphy. Stratigraphy is the reference → auto-fixes move **periods**, not relations. **Strict interval boundary** (spec §5): "A entirely more ancient than B" = `cron_finale(A) < cron_iniziale(B)`; adjacent touching periods = overlap, not a paradox.
+
+**New/changed symbols**: NEW Qt-free `modules/utility/temporal_check.py` (kinds `TEMPORAL_INVERSION`/`TEMPORAL_CONTEMPORANEITY`/`TEMPORAL_UNEVALUABLE`; `build_chronology`, `load_unit_periods`, `unit_span`, `detect_temporal` (localized it/en/de/es/fr/pt), `solve_fixes` (greedy majority heuristic, mono-period only, contemp gap-fill, tie/multi-period/no-target → suggestion); `_violated` (strict, detection-consistent, drives conflict_score+tie-break) split from `_fix_satisfies` (rejects touching boundary for ordered relations, drives `_best_target_period` only); `_build_adjacency` dedups parallel edges). `rapporti_check.py`: `check_rapporti` gains optional `chrono`/`unit_periods` (backward-compatible), `Edit.set_fields`, `apply_edits`/`rollback` write+snapshot period columns behind `_PERIOD_COL_WHITELIST`, new `t_temporal_*`/`s_temporal_*` templates. `gui/rapporti_check_dialog.py`: builds chrono+unit_periods, previews `set_fields`, auto-backups DB before period writes. Tests: 39 temporal/rapporti passed; full `tests/sync` 490 passed (SQLite); AC-2 byte-identical.
+
+---
+
+## [genera-continuita] — 2026-06-11
+
+### Italiano
+
+**Feature A — "Genera continuità" (automatismo schede CON)** (pyarchinit tag `genera-continuita-5.12.12-alpha`, commit `337310d3`). Predecessore: `5.12.11-alpha` (EM export paradata/CON/contemporaneità).
+
+Pulsante esplicito **"Genera continuità"** nel pannello *Verifica rapporti*: per il sito selezionato, scansiona le US/USM con `periodo_iniziale ≠ periodo_finale` e crea/aggiorna idempotentemente una scheda **`CON_<us_madre>`** che copre lo span di periodi della madre, con rapporto di continuità reciproco. Anteprima dry-run, auto-backup, rimozione orfane opt-in.
+
+**Simboli nuovi/modificati**:
+
+- NEW `modules/s3dgraphy/sync/continuity_generator.py` (Qt-free, DbHandle PG+SQLite):
+  - Pure: `scan_candidates`, `build_con_record`, `desired_rapporti`, `diff_continuity`; `CONTINUITY_SOURCE_TYPES = {US, USM}`.
+  - I/O: `load_site_records`, `load_existing_con`, `apply_plan` (transazionale, `id_us = MAX+1`, `node_uuid` solo se la colonna esiste), `generate_continuity`.
+- `modules/s3dgraphy/sync/rapporti.py`:
+  - NEW `CONTINUITY_LABELS` (10 lingue) + `continuity_label()`; registrate in `RAPPORTI_SHORTHAND` (forward → `is_after` no-swap, reverse → `is_after` swap → **stesso** edge `CON is_after US`, nessun 2-ciclo). Nessuna modifica a `parse_rapporti`; blocco *candidate for upstream*.
+- `gui/rapporti_check_dialog.py` — pulsante "Genera continuità" + flusso anteprima/conferma/backup.
+
+**Test delta**: `test_continuity_generator.py` + `test_continuity_vocab.py` = **44 passed**; suite `tests/sync` **463 passed**. AC-2 byte-identical (il generatore non gira all'export).
+
+### English
+
+**Feature A — "Genera continuità" (CON automatism)** (pyarchinit tag `genera-continuita-5.12.12-alpha`, commit `337310d3`). Predecessor: `5.12.11-alpha`.
+
+Explicit **"Genera continuità"** button in the *Verifica rapporti* panel: scans the selected site's US/USM with `periodo_iniziale ≠ periodo_finale` and idempotently creates/updates a **`CON_<us_madre>`** record spanning the madre's period interval, with reciprocal continuity rapporti, dry-run preview, auto-backup and opt-in orphan removal. **Symbols**: NEW Qt-free `modules/s3dgraphy/sync/continuity_generator.py` (pure `scan_candidates`/`build_con_record`/`desired_rapporti`/`diff_continuity` + I/O `load_site_records`/`load_existing_con`/`apply_plan` (transactional, `id_us = MAX+1`, `node_uuid` only if column exists)/`generate_continuity`; `CONTINUITY_SOURCE_TYPES = {US, USM}`). `rapporti.py`: NEW `CONTINUITY_LABELS` (10 languages) + `continuity_label()`, registered in `RAPPORTI_SHORTHAND` (forward/reverse → the **same** `CON is_after US` edge, no 2-cycle; `parse_rapporti` unchanged; block marked *candidate for upstream*). `gui/rapporti_check_dialog.py`: button + preview/confirm/backup flow. Tests: 44 feature tests passed; full `tests/sync` 463 passed; AC-2 byte-identical (generator never runs at export).
+
+---
+
 ## [yed-f-fix-duplicate-primary] — 2026-05-16
 
 ### Italiano
