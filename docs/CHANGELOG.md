@@ -72,6 +72,355 @@ Explicit **"Genera continuità"** button in the *Verifica rapporti* panel: scans
 
 ---
 
+## [5.12.11-alpha] — 2026-06-08
+
+### Italiano
+
+**Export EM: paradata connessi, CON visibili, contemporaneità a doppio arco** (branch `Stratigraph_00001`, untagged interim).
+
+- `modules/s3dgraphy/sync/graphml_writer.py`: `_resolve_display_label` — i nodi paradata (DOC/Extractor/Combinar/property) mostrano il valore `us` (`D.1`, `D.1.1`, `C.1`) invece della descrizione.
+- Nuovo flag `paradata_as_groups` su `GraphMLExporter.export()` (core s3dgraphy): paradata resi come nodi collegati via `extracted_from`/`combines`/`has_property`/`has_documentation`/`has_data_provenance` invece che raggruppati in folder; `graphml_writer` passa `paradata_as_groups=False` difensivamente (`inspect.signature`).
+- Contemporaneità (`has_same_time` e affini) emessa come due archi paralleli senza freccia (core `edge_generator`/`graphml_exporter`).
+- Le righe `unita_tipo='CON'` sopravvivono al `graph_projector` (back-fill stratigrafico, label de-doppiata) e rendono come diamanti di continuità; i sintetici `_synth_BR_*` restano soppressi.
+
+**Test delta**: 415 → **419 passed** (+4 in `tests/sync/test_em_export_rendering.py`), zero nuove regressioni. Parte core su ext_libs (stop-gap) + fork branch `fix/em-paradata-export-rendering` (non pushato, PR upstream in attesa).
+
+### English
+
+**EM export: connected paradata, visible CON, double-edge contemporaneity** (branch `Stratigraph_00001`, untagged interim). Paradata labels use the `us` value via `_resolve_display_label` (`modules/s3dgraphy/sync/graphml_writer.py`); new `paradata_as_groups` flag on s3dgraphy `GraphMLExporter.export()` draws paradata as connected nodes (`extracted_from`/`combines`/`has_property`/`has_documentation`/`has_data_provenance`), pyArchInit passes `False` defensively via `inspect.signature`; contemporaneity renders as two parallel no-arrowhead edges; explicit `unita_tipo='CON'` rows survive the projector and render as continuity diamonds while `_synth_BR_*` stay suppressed. Tests 415 → 419 passed (+4 EM tests), no new regressions; core parts in ext_libs stop-gap + fork branch `fix/em-paradata-export-rendering` (not pushed).
+
+---
+
+## [5.12.10-alpha] — 2026-06-08
+
+### Italiano
+
+**Export EM: niente diamanti di continuità auto-generati** (branch `Stratigraph_00001`, untagged interim).
+
+- `modules/s3dgraphy/sync/graphml_writer.py`: la chiamata a `GraphMLExporter.export()` passa `continuity_diamonds=False` quando supportato (check difensivo `inspect.signature` — un ext_libs ri-vendorizzato senza il parametro non crasha).
+- `ext_libs/s3dgraphy` (stop-gap live, git-ignored): flag `continuity_diamonds` su `export()` + skip paradata in `materialize_continuity`.
+
+**Verifica**: 0 occorrenze `_synth_BR_` nel `.graphml` esportato. Suite `tests/sync` **415 passed**.
+
+### English
+
+**EM export: no auto continuity diamonds** (branch `Stratigraph_00001`, untagged interim). `graphml_writer` now passes `continuity_diamonds=False` to `GraphMLExporter.export()` when supported (defensive `inspect.signature` check); the ext_libs side (flag on `export()` + paradata skip in `materialize_continuity`) is a live stop-gap pending the upstream PR. Continuity stays modelled via explicit `unita_tipo='CON'` rows. Headless: 0 `_synth_BR_` in the export. Suite 415 passed.
+
+---
+
+## [5.12.9-alpha] — 2026-06-08
+
+### Italiano
+
+**Export EM: edge paradata tipizzati + USV/SF connessi** (branch `Stratigraph_00001`, untagged interim).
+
+- NEW `modules/s3dgraphy/sync/paradata_edge_resolver.py` + post-pass in `graph_projector.populate_graph`: ri-tipizza gli edge `generic_connection` (shorthand EM `>>`/`<<`) negli edge specifici s3dgraphy — `extracted_from`, `combines`, `has_property`, `has_documentation`, `has_data_provenance`, `is_part_of` — leggendo le `allowed_connections` dal datamodel, con swap di direzione quando la regola combacia al contrario; il tipo EM viene da `attributes['unita_tipo']`, non dalla classe Python; Combiner/Extractor mai collegati a US/USM. 16 test in `tests/sync/test_paradata_edge_resolver.py`.
+- `graph_projector._is_us_node` (+3 call site in `_propagate`/`_enrich`): da test sul prefisso del nome classe (`startswith("Stratigraphic")`) a walk della MRO (sottoclassi di `StratigraphicNode`) → USV/SF/VSF ora indicizzati e i loro `rapporti` diventano edge.
+
+**Test delta**: suite `tests/sync` **415 passed**, zero nuove regressioni.
+
+### English
+
+**EM export: typed paradata edges + connected USV/SF** (branch `Stratigraph_00001`, untagged interim). New `paradata_edge_resolver.py` post-pass over `populate_graph` retypes EM-shorthand `generic_connection` edges into the specific s3dgraphy types (`extracted_from`/`combines`/`has_property`/`has_documentation`/`has_data_provenance`/`is_part_of`) via `allowed_connections`, node EM type from `attributes['unita_tipo']`, direction swap when matched in reverse; Combiner/Extractor never link plain US/USM. Second fix: `_is_us_node` (+3 call sites) now walks the MRO instead of a class-name prefix, so `StructuralVirtualStratigraphicUnit`/`SpecialFindUnit`/`VirtualSpecialFindUnit` get indexed and their rapporti become edges. 16 new resolver tests; suite 415 passed.
+
+---
+
+## [5.12.8-alpha] — 2026-06-08
+
+### Italiano
+
+**Fix schema: `us_table.other_locations` su updater + template** (branch `Stratigraph_00001`, untagged interim).
+
+La colonna `other_locations` (yE-F) era dichiarata nell'ORM (`US_table.py`) ma esisteva solo come migrazione manuale → un DB nato dal template falliva all'apertura con `OperationalError: no such column`.
+
+- `modules/db/sqlite_db_updater.py` (`update_us_table`): aggiunge `other_locations TEXT` via `add_column_if_missing`.
+- `modules/db/postgres_db_updater.py`: nuovo `update_us_table()` chiamato in `run_essential_migrations` (eseguito ad ogni connessione).
+- Template `resources/dbfiles/pyarchinit.sqlite` e `pyarchinit_db.sqlite` aggiornati: i nuovi DB nascono completi, gli esistenti si auto-riparano alla riconnessione.
+
+### English
+
+**Schema fix: `us_table.other_locations` on updaters + templates** (branch `Stratigraph_00001`, untagged interim). The yE-F column was in the ORM but only existed as a manual migration — absent from the shipped templates and on-open updaters, so template-born DBs errored on open. Added to SQLite `update_us_table` (`add_column_if_missing`), to a new PostgreSQL `update_us_table()` run via `run_essential_migrations` on every connection, and to both shipped sqlite templates. Existing DBs self-heal on reconnect.
+
+---
+
+## [5.12.7-alpha] — 2026-06-08
+
+### Italiano
+
+**s3dgraphy bump 1.6.0.dev8 → 1.6.0.dev9 + stop-gap ritirato** (branch `Stratigraph_00001`, untagged interim).
+
+- `requirements.txt`: pin `s3dgraphy==1.6.0.dev8` → `==1.6.0.dev9`; `ext_libs/s3dgraphy` ri-vendorizzato. dev9 = dev8 + PR #23 mergiato (vocabolario multilingue dei rapporti, 10 relazioni × 10 lingue + `"supports"→is_abutted_by`).
+- `modules/s3dgraphy/sync/rapporti.py` ri-sincronizzato **verbatim** da dev9: il blocco vocabolario locale non è più una divergenza; tutti i simboli consumati (`CANONICAL_UNIT_TYPES`, `strip_us_prefix`, `select_rapporti_label`, …) restano esportati.
+- **Eliminato** il monkeypatch `modules/s3dgraphy/sync/ext_rapporti_patch.py` e la chiamata in `pyarchinitPlugin.initGui()`: il path d13 risolve il vocabolario nativamente da ext_libs dev9.
+- `tests/sync/test_rapporti_multilingual_map.py` resta come guardia anti-drift upstream/i18n.
+
+**Test delta**: suite **399 passed** col core dev9, zero nuove regressioni.
+
+### English
+
+**s3dgraphy bump 1.6.0.dev8 → 1.6.0.dev9 + stop-gap retired** (branch `Stratigraph_00001`, untagged interim). Pin dev8→dev9, ext_libs re-vendored; dev9 includes merged PR #23 (multilingual relationship-label vocabulary). `modules/s3dgraphy/sync/rapporti.py` re-synced verbatim from dev9 (all consumed symbols still exported, no import breaks); **removed** the `ext_rapporti_patch.py` boot monkeypatch and its `initGui()` call — d13 export now resolves the vocab natively from ext_libs. The consistency test stays as a drift guard. Suite 399 passed.
+
+---
+
+## [5.12.6-alpha] — 2026-06-07
+
+### Italiano
+
+**s3dgraphy bump 1.6.0.dev7 → 1.6.0.dev8** (branch `Stratigraph_00001`, untagged interim).
+
+- `requirements.txt`: pin `s3dgraphy==1.6.0.dev7` → `==1.6.0.dev8`; `ext_libs/s3dgraphy` ri-vendorizzato. dev8 = dev7 + PR #22 mergiato (multilingual unita_tipo: `UNITA_TIPO_CANONICAL` dict + `canonical_unita_tipo()` + `_SHORTHAND_TOKENS` + `_source_rapporti_label`), puramente additivo.
+- Resta locale in `modules/s3dgraphy/sync/rapporti.py` il vocabolario multilingue dei rapporti (candidato a secondo PR upstream); il monkeypatch `ext_rapporti_patch.py` resta attivo.
+
+**Test delta**: suite **399 passed**; in repo cambia solo il pin (`ext_libs` è git-ignored).
+
+### English
+
+**s3dgraphy bump 1.6.0.dev7 → 1.6.0.dev8** (branch `Stratigraph_00001`, untagged interim). Pin dev7→dev8, ext_libs re-vendored; dev8 = dev7 + merged PR #22 multilingual unita_tipo fix (now official upstream). The multilingual relationship-label vocabulary stays local in `rapporti.py` (second upstream PR candidate); `ext_rapporti_patch.py` stays active. No breaking changes; suite 399 passed; only `requirements.txt` changes in-repo.
+
+---
+
+## [5.12.5-alpha] — 2026-06-07
+
+### Italiano
+
+**Verifica rapporti: dettaglio direzionale di cicli/contraddizioni, localizzato** (branch `Stratigraph_00001`, untagged interim).
+
+Cicli e contraddizioni mostrano ora la catena completa con il rapporto di ogni passo (es. `US 616 «Coperto da» US 618 ⇄ US 618 «Coperto da» US 616`), nella lingua di QGIS.
+
+- `modules/utility/rapporti_check.py`: `check_rapporti(..., lang=...)`; parole dei rapporti dalla tabella i18n `RELATIONSHIPS` (tutte le 10 lingue), prefisso unità localizzato (US/SU/SE/UE/…), template messaggi it/en/de/es/fr/pt (fallback inglese). Nuova `kind_title(kind, lang)` per i titoli di gruppo.
+- `gui/rapporti_check_dialog.py`: legge la lingua da `QgsSettings("locale/userLocale")` e la passa alla verifica.
+
+**Test delta**: suite **397 passed** (+`test_contradiction_summary_is_localized_and_directional`, `test_kind_title_localized_with_fallback`).
+
+### English
+
+**Verifica rapporti: directional, localized cycle/contradiction detail** (branch `Stratigraph_00001`, untagged interim). Cycles and contradictions now show the full chain with each step's relationship in the QGIS UI language. `check_rapporti(..., lang=...)`: relationship words from pyArchInit's i18n `RELATIONSHIPS` table (all 10 languages), localized unit prefix, message templates for it/en/de/es/fr/pt (English fallback); new `kind_title(kind, lang)`. The dialog reads `QgsSettings("locale/userLocale")` and passes it through. Suite 397 passed.
+
+---
+
+## [5.12.4-alpha] — 2026-06-07
+
+### Italiano
+
+**Reciprocità rapporti: copertura completa di tutte le 10 lingue pyArchInit** (branch `Stratigraph_00001`, untagged interim).
+
+Completa/corregge [5.12.2-alpha]: il reciproco di "Abuts" è **"Supports"** (indice 9 di `RELATIONSHIPS`) e il fallimento di round-trip valeva per ogni lingua, non solo l'inglese.
+
+- `modules/s3dgraphy/sync/rapporti.py`: rimossi gli alias non canonici; `RAPPORTI_TO_EDGE_TYPE` esteso a **10 relazioni × 10 lingue** (it, en, de, es, fr, ar, ca, ro, pt, el), derivato dalla tabella i18n `RELATIONSHIPS` (duplicata, non importata, per non accoppiare il package sync a `pyarchinit.*`). Da 20 → 97 chiavi.
+- NEW `tests/sync/test_rapporti_multilingual_map.py`: la tabella embedded deve combaciare esattamente con `RELATIONSHIPS`; coppie inverse coerenti con `_EDGE_TYPE_INVERSE`.
+
+**Test delta**: suite **397 passed**. Copertura multilingue candidata a PR upstream s3dgraphy.
+
+### English
+
+**Rapporti reciprocity: full coverage of all 10 pyArchInit languages** (branch `Stratigraph_00001`, untagged interim). `parse_rapporti` now recognises relationship labels in all 10 languages, not just it/en — [5.12.2] had patched only English `abuts` with invented aliases. Replaced with the full 10×10 mapping in `RAPPORTI_TO_EDGE_TYPE` (20 → 97 keys), derived from pyArchInit's i18n `RELATIONSHIPS` table (duplicated, not imported); new consistency test `test_rapporti_multilingual_map.py` fails if the duplicate drifts and checks inverse pairs against `_EDGE_TYPE_INVERSE`. Suite 397 passed; upstream PR candidate.
+
+---
+
+## [5.12.3-alpha] — 2026-06-07
+
+### Italiano
+
+**"Verifica rapporti" spostata da menu a tab del dialog di import** (branch `Stratigraph_00001`, untagged interim).
+
+- `gui/rapporti_check_dialog.py`: logica estratta in `RapportiCheckPanel(QWidget)` riutilizzabile, con parametro opzionale `db_provider` (callable → `DbHandle`); `RapportiCheckDialog(QDialog)` resta come thin wrapper.
+- `modules/s3dgraphy/s3dgraphy_dot_bridge.py`: nuovo tab **"Verifica rapporti"** in `S3DGraphyExportDialog`; dopo un import riuscito il dialog passa al tab e preseleziona il sito importato.
+- `pyarchinitPlugin.py`: rimossi l'azione di menu `actionRapportiCheck` (4 rami `initGui`) e l'handler `runRapportiCheck`.
+
+Cambiamento GUI, nessun test automatico; il core `rapporti_check` è invariato e coperto dai test esistenti.
+
+### English
+
+**"Verifica rapporti" moved from menu to a tab in the import dialog** (branch `Stratigraph_00001`, untagged interim). Logic extracted into a reusable `RapportiCheckPanel(QWidget)` with an optional `db_provider` callable (→ `DbHandle`); `RapportiCheckDialog(QDialog)` stays as a thin wrapper. `s3dgraphy_dot_bridge.py` adds a "Verifica rapporti" tab to `S3DGraphyExportDialog` that auto-activates and pre-selects the site after a successful import. `pyarchinitPlugin.py` drops `actionRapportiCheck` (4 initGui branches) and `runRapportiCheck`. GUI change; the `rapporti_check` core is unchanged.
+
+---
+
+## [5.12.2-alpha] — 2026-06-07
+
+### Italiano
+
+**Fix auto-fix reciprocità: l'inverso di "abuts" ora round-trippa (vocab + guardia onestà)** (branch `Stratigraph_00001`, untagged interim).
+
+Su `test_6` (khutm, etichette inglesi) la verifica dichiarava 113 correzioni ma ne risolveva ~6: `RAPPORTI_TO_EDGE_TYPE` non aveva etichette inglesi per `is_abutted_by`, quindi `parse_rapporti("Supports")` scartava silenziosamente l'inverso calcolato da `get_inverse_relationship("Abuts")`.
+
+- `modules/s3dgraphy/sync/rapporti.py`: aggiunti gli alias inglesi `"supports"`, `"abutted by"`, `"is abutted by"` per `is_abutted_by` (su `test_6`: reciprocità **107 → 0**).
+- `modules/utility/rapporti_check.py` — *guardia di onestà*: una reciprocità è auto-correggibile solo se `RAPPORTI_TO_EDGE_TYPE[inv] == _EDGE_TYPE_INVERSE[et]`, altrimenti scelta manuale → il conteggio in anteprima è sempre veritiero.
+
+**Test delta**: suite **394 passed** (+`test_abuts_reciprocity_fix_label_round_trips`, `test_parse_rapporti_knows_english_is_abutted_by`).
+
+### English
+
+**Reciprocity auto-fix: the inverse of "abuts" now round-trips (vocab + honesty guard)** (branch `Stratigraph_00001`, untagged interim). On English-language sites the check claimed 113 fixes but resolved ~6: s3dgraphy's `RAPPORTI_TO_EDGE_TYPE` had no English label for `is_abutted_by`, so `parse_rapporti("Supports")` silently dropped the i18n-derived inverse. Added the missing English aliases in `rapporti.py` (reciprocity 107 → 0 on `test_6`); `rapporti_check.py` gains an honesty guard — a reciprocity is auto-fixable only when the inverse label round-trips to the correct inverse edge type, otherwise it is surfaced as a manual choice. Suite 394 passed.
+
+---
+
+## [5.12.1-alpha] — 2026-06-07
+
+### Italiano
+
+**Fix import round-trip: copia cross-sito invece di spostamento + skip nodi sintetici** (branch `Stratigraph_00001`, untagged interim).
+
+`GraphIngestor.populate_list` abbinava le righe per `node_uuid` senza filtro sito e forzava `sito` al target → importare il GraphML di un sito A in un sito B **spostava** le righe di A (azzerandolo); i nodi `_synth_BR_*` tornavano come finte US.
+
+- `graph_ingestor._resolve_target_row()`: stesso sito → UPDATE in place (round-trip idempotente, AC-2 preservato); cross-sito → **INSERT di una copia con `node_uuid` nuovo (uuid7)**, sorgente intatta; re-import della copia → match per chiave naturale `(sito, area, us, unita_tipo)` → UPDATE idempotente.
+- `graph_ingestor._is_synthetic_node()`: nodi `_synth_*` saltati nei loop detection + write.
+- `node_uuid` mai riscritto in UPDATE.
+
+**Test delta**: NEW `tests/sync/test_round_trip_file.py`; suite **392 passed**, 2 round-trip ex-`xfail` ora passano.
+
+### English
+
+**Import round-trip fix: cross-site copy instead of move + synthetic-node skip** (branch `Stratigraph_00001`, untagged interim). `GraphIngestor.populate_list` matched rows by `node_uuid` with no sito filter and forced `sito` to the target, so importing site A's GraphML into site B **moved** A's rows (emptying A); `_synth_BR_*` diamonds came back as bogus US rows. New `_resolve_target_row()`: same site → UPDATE in place (AC-2 preserved); cross-site → INSERT a copy with a fresh uuid7 `node_uuid`; copy re-import matches the natural key `(sito, area, us, unita_tipo)` → idempotent UPDATE. `_is_synthetic_node()` skips `_synth_*` in both loops; `node_uuid` is never rewritten on UPDATE. New `test_round_trip_file.py`; suite 392 passed, 2 previously-xfail round-trips now pass.
+
+---
+
+## [5.12.0-alpha] — 2026-06-06
+
+### Italiano
+
+**Verifica rapporti stratigrafici + auto-fix conservativo + import copia** (branch `Stratigraph_00001`, untagged interim).
+
+- NEW `modules/utility/rapporti_check.py` (core Qt-free): costruisce il grafo del sito (`GraphProjector`) ed esegue `detect_stratigraphic_cycles` + `validate_connection` di s3dgraphy + scan di reciprocità — ristretto ai soli nodi US reali (placeholder sintetici esclusi). Fix conservativi: self-loop → rimozione; reciprocità mancante → CREA il rapporto inverso localizzato (`get_inverse_relationship`); contraddizioni/cicli → scelta manuale. `apply_edits` fa snapshot poi scrive via `DbHandle` (SQLite + PostgreSQL); `rollback` ripristina **byte-identico**.
+- NEW `gui/rapporti_check_dialog.py` + voce di menu: sito → report ad albero → anteprima diff → Applica / Annulla ultimo fix.
+- Import copia (anti-rename): `regenerate_node_uuids(graph)` + flag `--copy` in `scripts/s3dgraphy_sync.py` (path `populate_list`); wiring GUI in sospeso.
+
+**Test delta**: NEW `tests/sync/test_rapporti_check.py` + `test_import_copy_mode.py`; suite **389 passed** / 6 xfailed.
+
+### English
+
+**Stratigraphic rapporti check + conservative auto-fix + import copy** (branch `Stratigraph_00001`, untagged interim). New Qt-free `modules/utility/rapporti_check.py`: builds the site graph via `GraphProjector`, runs s3dgraphy `detect_stratigraphic_cycles` + `validate_connection` + a reciprocity scan restricted to real us_table-backed nodes; conservative fixes (self-loop removal; missing reciprocity → CREATE the localized inverse rapporto; contradictions/cycles surfaced for manual choice); `apply_edits` snapshots then writes via `DbHandle`, `rollback` restores byte-identical. New `gui/rapporti_check_dialog.py` + menu action. Import-copy helper: `regenerate_node_uuids(graph)` + `--copy` flag in `scripts/s3dgraphy_sync.py` (GUI wiring pending). New tests; suite 389 passed / 6 xfailed.
+
+---
+
+## [5.11.4-alpha] — 2026-06-06
+
+### Italiano
+
+**DB update: coercion `''` → NULL per colonne numeriche (PG strict-typing)** (branch `Stratigraph_00001`, untagged interim).
+
+La scheda Periodizzazione in UPDATE crashava su PostgreSQL con `InvalidTextRepresentation: invalid input syntax for type bigint: "" ... cont_per=''`: il form passa `''` per i line-edit vuoti, PG lo rifiuta per colonne `Integer`/`bigint` (SQLite type-loose lo tollera). Nessun drift di schema; il path INSERT già coerceva, mancava l'UPDATE centrale.
+
+- `modules/db/pyarchinit_db_manager.py`: nuovo `_coerce_numeric_blanks(params, table_class_name)` — companion in scrittura di `_normalize_query_params` — chiamato in `update()`: `''`/spazi → `None` per colonne con `python_type` int/float; colonne testuali e valori valorizzati invariati. Vale per tutte le schede su PostgreSQL, no-op su SQLite.
+
+Nota: `cont_per` resta NULL dopo import GraphML — ricalcolare con `update_cont_per` se serve.
+
+### English
+
+**DB update: `''` → NULL coercion for numeric columns (PG strict-typing)** (branch `Stratigraph_00001`, untagged interim). The central UPDATE path crashed on PostgreSQL when a form handed `''` for an untouched numeric line-edit (`InvalidTextRepresentation` on `cont_per`); no schema drift — the ORM declares `Integer` correctly. New `_coerce_numeric_blanks(params, table_class_name)` in `modules/db/pyarchinit_db_manager.py` (write-path companion of `_normalize_query_params`, called inside `update()`) converts `''`/whitespace to `None` for columns whose SQLAlchemy `python_type` is int/float. Generic across all forms' UPDATE on PostgreSQL; no-op on SQLite.
+
+---
+
+## [5.11.3-alpha] — 2026-06-06
+
+### Italiano
+
+**Import: epoch INSERT robusto al desync di sequence PostgreSQL** (branch `Stratigraph_00001`, untagged interim).
+
+L'import in un sito target nuovo (anche in anteprima dry-run) crashava con `UniqueViolation ... periodizzazione_table_pkey`: le sequence serial del DB PG erano rimaste indietro rispetto ai dati (tipico post-`pg_restore`).
+
+- `modules/s3dgraphy/sync/graph_ingestor.py`: nuovo `_resync_pg_serial_sequences(conn, handle)` chiamato all'apertura della transazione di `populate_list` → `setval` delle sequence di `us_table.id_us` e `periodizzazione_table.id_perfas` a `MAX(pk)` prima di scrivere. Solo PostgreSQL, no-op su SQLite. Ogni `setval` gira in un proprio `SAVEPOINT` (`begin_nested`) così una tabella/colonna assente non aborta la transazione d'ingest.
+
+**Test delta**: `test_graph_ingestor.py::test_resync_pg_serial_sequences_is_noop_on_sqlite`; suite **380 passed** / 6 xfailed.
+
+### English
+
+**Import: epoch INSERT robust to desynced PostgreSQL sequences** (branch `Stratigraph_00001`, untagged interim). Importing into a new target site (even in dry-run preview) raised `UniqueViolation` on `periodizzazione_table_pkey` because the PG serial sequences lagged the data (typical after `pg_restore`). New `_resync_pg_serial_sequences(conn, handle)` in `graph_ingestor.py`, called at the start of `populate_list`'s transaction, `setval`s `us_table.id_us` + `periodizzazione_table.id_perfas` to `MAX(pk)` before writing; PostgreSQL-only, no-op on SQLite; each `setval` runs in its own `SAVEPOINT` (`begin_nested`) so a missing table can't abort the ingest. Test added; suite 380 passed / 6 xfailed.
+
+---
+
+## [5.11.2-alpha] — 2026-06-06
+
+### Italiano
+
+**GraphProjector: riconoscimento US/USM multilingua (export DB non italiani)** (branch `Stratigraph_00001`, untagged interim).
+
+Il gating stratigrafico in `graph_projector.py` usava una tupla solo italiana (`"US","USM","USD","USV",…`): su un DB inglese (khutm: 479/485 righe `SU`/`WSU`) `populate_graph` produceva 6 nodi-us / 0 strat-edge.
+
+- `modules/s3dgraphy/sync/graph_projector.py`: nuova mappa `_UNITA_TIPO_CANONICAL` + `_canonical_unita_tipo()`; gating e factory `_create_stratigraphic_node_for_unita_tipo` usano il codice canonico (`ut_canon`), mentre `attributes['unita_tipo']` conserva l'originale (round-trip + dispatch rapporti language-aware).
+
+Dopo il fix, sul vero Al-Khutm: **485 nodi-us / 2368 strat-edge**, d13 tutto in inglese; sistemata anche la copertura del raggruppamento per area. **Test delta**: `test_graph_projector.py::test_projector_recognizes_localized_su_wsu`; suite **379 passed** / 6 xfailed.
+
+### English
+
+**GraphProjector: multilingual US/USM recognition (non-Italian DB export)** (branch `Stratigraph_00001`, untagged interim). The stratigraphic gating used an Italian-only tuple, so on an English DB (479/485 rows `SU`/`WSU`) `populate_graph` produced 6 us-nodes / 0 strat-edges. New `_UNITA_TIPO_CANONICAL` map + `_canonical_unita_tipo()` in `graph_projector.py`: gating and the `_create_stratigraphic_node_for_unita_tipo` factory use the canonical code while `attributes['unita_tipo']` keeps the original (round-trip + language-aware rapporti dispatch). After the fix on real Al-Khutm: 485 us-nodes / 2368 strat-edges, d13 all English; area-grouping coverage fixed too. Suite 379 passed / 6 xfailed.
+
+---
+
+## [5.11.1-alpha] — 2026-06-06
+
+### Italiano
+
+**d13 physical_relationships: US/USM multilingua + etichette localizzate** (branch `Stratigraph_00001`, untagged interim).
+
+Il dispatch verbose/shorthand di `rapporti.py` riconosceva come canonici solo `{"US","USM"}`: su DB inglesi (`SU`/`WSU`) gli US/USM reali cadevano nello shorthand `>>`/`<<` nel d13.
+
+- `modules/s3dgraphy/sync/rapporti.py`: `CANONICAL_UNIT_TYPES` esteso multilingua (US, USM, SU, WSU, SE, MSE, UE, UEM, USZ, ΣΜ, ΤΣΜ, da `UNIT_TYPE_ABBREV`); `serialize_rapporti_from_edges` preferisce l'etichetta originale del campo `rapporti` del nodo sorgente, capitalizzata (`Covers`/`Copre`/…), con fallback al canonico; le unità virtuali restano `>>`/`<<`, la continuità `>`/`<`.
+- NEW `modules/s3dgraphy/sync/ext_rapporti_patch.py` (`apply()` in `pyarchinitPlugin.initGui`): monkeypatch al boot che ricopia i simboli corretti su `ext_libs/s3dgraphy/sync/rapporti.py` (git-ignored, re-installato da PyPI); da rimuovere quando il fix sarà upstream.
+
+**Test delta**: NEW `tests/sync/test_rapporti_multilingual_d13.py` (16 casi); suite **378 passed** / 6 xfailed.
+
+### English
+
+**d13 physical_relationships: multilingual US/USM + localized labels** (branch `Stratigraph_00001`, untagged interim). The verbose/shorthand dispatch in `rapporti.py` only treated Italian `{"US","USM"}` as canonical, so English `SU`/`WSU` rows fell to the `>>`/`<<` shorthand in d13. `CANONICAL_UNIT_TYPES` extended multilingual (from `UNIT_TYPE_ABBREV`); `serialize_rapporti_from_edges` prefers the source node's own `rapporti` label, capitalized, falling back to the canonical one; virtual units keep `>>`/`<<`, continuity `>`/`<`. New boot monkeypatch `ext_rapporti_patch.py` (`apply()` in `initGui`) copies the corrected symbols onto the git-ignored ext_libs module — to be removed once fixed upstream. 16 new tests; suite 378 passed / 6 xfailed.
+
+---
+
+## [5.11.0-alpha] — 2026-06-06
+
+### Italiano
+
+**Allineamento a s3dgraphy 1.6.0.dev7 (Phase 1)** (branch `Stratigraph_00001`, untagged interim; lavoro svolto sul branch `s3dgraphy-1.6-migration`).
+
+- `requirements.txt`: pin `s3dgraphy>=1.5.0` → `==1.6.0.dev7`; `ext_libs/s3dgraphy` 1.5.0 → dev7 (`pip install --target ext_libs --no-deps --pre`; include **d13** in `exporter/graphml/*` + `importer/import_graphml.py`).
+- `modules/s3dgraphy/sync/` (import path `modules.s3dgraphy.sync.*` invariato → zero churn ai call-site): **ADD** `rapporti.py` (`parse_rapporti` / `serialize_rapporti_from_edges`); **UPDATE** `graph_ingestor.py`, `graph_projector.py`, `graphml_writer.py` alle versioni dev7 canonical-edges; `__init__.py` merge 3-way con innesto di `get_vocab_provider()`; **preservati** `vocab_provider.py`, `_workspace.py`, `edge_registry.py`, `pyarchinit_pg_importer.py`.
+- `tests/sync/`: baseline AC-2 `mini_volterra_baseline_ai03.graphml` rinfrescato all'output canonical-edges+d13 (equivalenza verificata); 6 test marcati `xfail` (debito upstream, in attesa s3Dgraphy #13).
+
+**Verifica zero regressioni**: BEFORE (1.5.0) 9 failed / 368 passed / 9 errors → AFTER (dev7) 9 failed / 362 passed / 6 xfailed / 9 errors; i residui sono tutti `test_*_pg.py` pre-esistenti, **0 fallimenti non-PG**.
+
+### English
+
+**Alignment to s3dgraphy 1.6.0.dev7 (Phase 1)** (branch `Stratigraph_00001`, untagged interim; work done on `s3dgraphy-1.6-migration`). Pin `s3dgraphy>=1.5.0` → `==1.6.0.dev7`; ext_libs re-vendored (includes d13). Vendored sync tree updated with zero call-site churn: ADD `rapporti.py` (`parse_rapporti`/`serialize_rapporti_from_edges`), UPDATE `graph_ingestor.py`/`graph_projector.py`/`graphml_writer.py` to dev7 canonical-edges, `__init__.py` 3-way merge grafting `get_vocab_provider()`; preserved `vocab_provider.py`, `_workspace.py`, `edge_registry.py`, `pyarchinit_pg_importer.py`. AC-2 baseline `mini_volterra_baseline_ai03.graphml` refreshed to the canonical-edges+d13 output; 6 tests marked xfail (upstream test debt). Before/after proof: 368 → 362 passed / 6 xfailed, residual failures all pre-existing `test_*_pg.py`, 0 non-PG failures.
+
+---
+
+## [5.10.1-alpha] — 2026-05-24
+
+### Italiano
+
+**US-USM rapporti save: consistenza posizionale delle celle vuote** (branch `Stratigraph_00001`, untagged interim).
+
+In `tableWidget_rapporti` (4 colonne) e `tableWidget_rapporti2` (7 colonne), `table2dict` saltava le celle mai toccate (`item(r,c)` → `None`) invece di salvare `""` → sottoliste a lunghezza variabile nel campo `rapporti`, fino al caso corrotto posizionalmente (`['Coperto da', '7', 'Roma']` con il sito in posizione area).
+
+- `tabs/US_USM.py`: `table2dict()` nuovo parametro opt-in `preserve_empty: bool = False`; con `True` le celle `None` diventano `""`. Attivato solo ai call site rapporti in `insert_new_rec()` e `set_LIST_REC_TEMP()`; gli altri tableWidget mantengono il comportamento skip-None.
+- Chiude il "Fix C" residuo della serie di master (Fix A `get_all_areas` e Fix B `_update_rapporti_add_area_sito`/`_update_rapporti2_add_area_sito` erano già su questo branch). Nessuna migrazione: le sottoliste corte si riparano col prossimo `update_all_areas` (`Ctrl+U`).
+
+### English
+
+**US-USM rapporti save: positional consistency for empty cells** (branch `Stratigraph_00001`, untagged interim). `table2dict` skipped untouched cells (`item(r,c)` returns `None`) instead of saving `""`, producing length-variable — and in the worst case positionally corrupted — sublists in the `rapporti` field. Added an opt-in `preserve_empty: bool = False` parameter to `table2dict()` in `tabs/US_USM.py`, enabled only at the rapporti call sites in `insert_new_rec()` and `set_LIST_REC_TEMP()`; all other tableWidgets keep the skip-None default. Closes the residual "Fix C" (Fixes A/B were already on this branch via Phase 2); no migration needed — short sublists are repaired by the next `update_all_areas` run.
+
+---
+
+## [5.10.0-alpha] — 2026-05-22
+
+### Italiano
+
+**Extended Matrix renderer (Graphviz dot + EM palette icons)** (pyarchinit tag `5.10.0-alpha`, 11 commit `7cf297fd..5d990988`).
+
+Dopo `pushButton_export_extended_matrix`, il plugin genera automaticamente un `<base>_swimlane.png` usando Graphviz `dot` come layout engine (equivalente batch di "Apply Swimlane Layout + Orthogonal Edges" in yEd).
+
+- 5 nuovi moduli (~1900 righe) in `modules/utility/`: `em_palette_parser.py`, `s3d_json_loader.py`, `harris_swimlane_layout.py`, `matrix_swimlane_renderer.py` (fallback matplotlib), `extended_matrix_renderer.py` (**principale**, dot-based con EM palette icons ufficiali da s3dgraphy).
+- Layout `dot` (`splines=ortho`, `rankdir=TB`, `compound=true`, `pack=true`); edge tipizzati dal campo `pyarchinit.rapporti` (solid navy / dashed rosso per Taglia / doppia linea nera `{rank=same}` per Uguale a / dashed grigio per `<<`/`>>`); dedup archi reciproci via `frozenset((src,tgt))` (204→118 su test_1); output 300 dpi A3; key lookup dinamico via `<key attr.name>`.
+- Wire in `modules/s3dgraphy/s3dgraphy_dot_bridge.py:export_extended_matrix_multi_format`: try `extended_matrix_renderer` → fallback `matrix_swimlane_renderer`; salva `<base>_swimlane.png` + `.dot`.
+- Dipendenza esterna: binario Graphviz `dot` (auto-discovery `shutil.which("dot")` + path fallback); se assente → fallback matplotlib automatico.
+
+Validato su `test_1.graphml` (83 nodi, 118 edge dedup, 7 cluster): PNG 1.1 MB @ 300 dpi, 66/83 paradata con EM icons.
+
+### English
+
+**Extended Matrix renderer (Graphviz dot + EM palette icons)** (pyarchinit tag `5.10.0-alpha`, 11 commits `7cf297fd..5d990988`). After `pushButton_export_extended_matrix` the plugin automatically generates `<base>_swimlane.png` using Graphviz `dot` as the layout engine. 5 new modules (~1900 lines) in `modules/utility/` — `em_palette_parser.py`, `s3d_json_loader.py`, `harris_swimlane_layout.py`, `matrix_swimlane_renderer.py` (matplotlib fallback), `extended_matrix_renderer.py` (primary, dot-based with official EM palette icons). Typed edges from the `pyarchinit.rapporti` field, reciprocal-edge dedup via `frozenset((src,tgt))` (204→118), 300 dpi A3 output, dynamic `<key attr.name>` lookup. Wired in `s3dgraphy_dot_bridge.py:export_extended_matrix_multi_format` (dot → matplotlib fallback; saves `<base>_swimlane.png` + `.dot`). Requires the Graphviz `dot` binary (auto-discovery via `shutil.which` + fallback paths; graceful matplotlib fallback if missing). Validated on `test_1.graphml`: 83 nodes, 118 deduped edges, 66/83 paradata nodes with EM icons.
+
+---
+
 ## [yed-f-fix-duplicate-primary] — 2026-05-16
 
 ### Italiano
