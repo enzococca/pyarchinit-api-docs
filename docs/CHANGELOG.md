@@ -7,6 +7,22 @@
 
 ---
 
+## [palimpsest-5.13.2] — 2026-06-15
+
+### Italiano
+
+**Punteggio tafonomico (taf) per US** — pyarchinit tag `palimpsest-5.13.2-alpha`.
+
+- **`tabs/Palimpsest.py` — `PalimpsestChronologyDialog`** diventa un editor *Cronologia & tafonomia* per US: `_load_existing` ora precarica **tutte** le US del sito da `us_table` (colonne read-only Periodo + N. reperti da `inventario_materiali`/`pottery`) e fonde i valori salvati; tabella a 12 colonne con `taf [0-1]`; `_save_edits`/`_collect_rows` salvano solo le righe compilate; `_save_rows`/`_ddl` con nuova colonna `taf` (migrazione `ALTER TABLE` idempotente) e helper `_periodo_str`.
+- **taf onorato ovunque**: `SEF_FACTS_R` e i tre `.rsx` Processing (`r:palimpsestrfit/intrusions/report`) leggono il taf per US da `palimpsest_chronology` e sovrascrivono `taf_score` prima di `fit_sef` (blocco pyArchInit-local: gli `.rsx` non più byte-identici a upstream 0.22.0).
+- **`tabs/palimpsest_ai_report.py`**: colonna `taf` nelle tabelle cronologia (facts + appendice DOCX/PDF).
+
+### English
+
+**Per-US taphonomic score (taf)** — pyarchinit tag `palimpsest-5.13.2-alpha`. `PalimpsestChronologyDialog` becomes a per-US *Chronology & taphonomy* editor: `_load_existing` pre-loads ALL the site's US from `us_table` (read-only Period + N. finds columns) and merges saved values; 12-column table with a `taf [0-1]` column persisted in a new `taf` column of `palimpsest_chronology` (idempotent `ALTER TABLE`); only filled rows are saved. taf is honoured everywhere — `SEF_FACTS_R` and the three Processing `.rsx` read per-US taf and override `taf_score` before `fit_sef` (a pyArchInit-local block; the `.rsx` are no longer byte-identical to upstream 0.22.0). The AI report shows a `taf` column in the chronology tables.
+
+---
+
 ## [palimpsest-5.13.1] — 2026-06-15
 
 ### Italiano
