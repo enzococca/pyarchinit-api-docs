@@ -7,6 +7,23 @@
 
 ---
 
+## [palimpsest] — 2026-06-15
+
+### Italiano
+
+**Scheda Palimpsest (palimpsestr / SEF)** — pyarchinit tag `palimpsest-5.13.0-alpha`. Predecessore: `temporal-paradox-5.12.13-alpha`. Wrapper della libreria R **palimpsestr ≥ 0.22.0** (modello *Stratigraphic Entanglement Field*) via Processing R Provider.
+
+- **`tabs/Palimpsest.py`** (`pyarchinit_Palimpsest`): costanti `FIT_ALG`/`INTRUSIONS_ALG`/`REPORT_ALG`/`CHRONOLOGY_TABLE`; `RSX_SCRIPTS` con i 3 `.rsx` (fit/intrusions/report) embeddati byte-identici alle sorgenti palimpsestr 0.22.0. Nuovi metodi: `run_report`/`_show_report` (report PDF/DOCX + pannello narrativa, validazione magic-byte `%PDF`/`PK\x03\x04`), `_augment_render_env` (discovery pandoc/LaTeX), `_pg_dsn`/`_db_params` (backend PostgreSQL via DSN libpq `PG_connection`), `open_chronology`, `_gather_sef_facts`/`_has_chronology`/`open_ai_report`. `CHRONO_OXCAL_R`: driver Rscript per la calibrazione OxCal con motore **persistente** (`oxcAAR::setOxcalExecutablePath`, dir `~/.pyarchinit/oxcal`, override `PYARCHINIT_OXCAL_DIR`).
+- **`PalimpsestChronologyDialog`** (in `Palimpsest.py`): DDL idempotente di `palimpsest_chronology` (SQLite/PostgreSQL), calibrazione live C14→OxCal, import CSV calibrato; upsert per chiave `(sito,area,us)`. `read_pyarchinit()` rileva la tabella e la usa al posto della `datazione` testuale.
+- **`tabs/palimpsest_ai_report.py`** (nuovo): `PalimpsestAIReportWorker` (`QThread`) + `PalimpsestAIReportDialog`. Pipeline a 3 agenti (`_methodologist_prompt`/`_analyst_prompt`/`_synthesis_prompt`) su `LLMProviderManager.stream_chat`; `AI_LANGUAGES` (10 lingue), `FIGURE_CAPTIONS`; export DOCX (figure incorporate) / Markdown.
+- Icona `resources/icons/palimpsest.svg|png` collegata in `pyarchinitPlugin.py`; dati esempio OxCal in `docs/examples/`; tutorial 37 in 10 lingue + registri `TUTORIALS_METADATA`.
+
+### English
+
+**Palimpsest dialog (palimpsestr / SEF)** — pyarchinit tag `palimpsest-5.13.0-alpha`, after `temporal-paradox-5.12.13-alpha`. Wraps the R library **palimpsestr ≥ 0.22.0** (Stratigraphic Entanglement Field model) through the Processing R Provider. `tabs/Palimpsest.py` adds `REPORT_ALG`/`CHRONOLOGY_TABLE`, a PG-capable embedded `.rsx` set (`PG_connection`), the narrated PDF/DOCX report (`run_report`/`_show_report`, pandoc/LaTeX auto-discovery via `_augment_render_env`, magic-byte validation), the PostgreSQL backend (`_pg_dsn`/`_db_params`), and the OxCal absolute-chronology table via `PalimpsestChronologyDialog` (idempotent DDL, live C14→OxCal calibration with a **persistent** engine through `oxcAAR::setOxcalExecutablePath`, CSV import). New `tabs/palimpsest_ai_report.py` provides a 3-agent descriptive-report pipeline (`PalimpsestAIReportWorker`/`Dialog`) over `LLMProviderManager.stream_chat`, output in 10 languages as DOCX/Markdown, explaining the model/K/threshold choices. Adds a dedicated icon, OxCal sample data, and a 10-language tutorial 37.
+
+---
+
 ## [temporal-paradox] — 2026-06-11
 
 ### Italiano
