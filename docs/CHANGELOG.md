@@ -7,6 +7,21 @@
 
 ---
 
+## [palimpsest-5.13.3] — 2026-06-15
+
+### Italiano
+
+**Lettura del taf spostata in `read_pyarchinit` (upstream)** — pyarchinit tag `palimpsest-5.13.3-alpha`; richiede palimpsestr **≥ 0.22.1**.
+
+- **palimpsestr 0.22.1** (`enzococca/palimpsestr`, `R/db_connect.R`): `read_pyarchinit()` legge il punteggio tafonomico per US dalla colonna `taf` di `palimpsest_chronology` quando l'argomento `taf` è `NULL` (default 0.5 per le US senza valore); l'argomento `taf` esplicito ha la precedenza. Con test (`tests/testthat/test-read-pyarchinit.R`).
+- **`tabs/Palimpsest.py`**: rimosso il blocco taf pyArchInit-local da `SEF_FACTS_R` e dai 3 `.rsx` Processing (`r:palimpsestrfit/intrusions/report`), che tornano **byte-identici** a `qgis/processing/*.rsx`. Il taf è ora applicato a monte da `read_pyarchinit`, quindi onorato uniformemente da fit/intrusioni/report/report AI.
+
+### English
+
+**taf reading moved to `read_pyarchinit` (upstream)** — pyarchinit tag `palimpsest-5.13.3-alpha`; requires palimpsestr **≥ 0.22.1**. In palimpsestr 0.22.1, `read_pyarchinit()` reads the per-US taphonomic score from the `taf` column of `palimpsest_chronology` when the `taf` argument is `NULL` (0.5 default; explicit `taf` still wins), with tests. The pyArchInit-local taf block is removed from `SEF_FACTS_R` and the three Processing `.rsx`, which are byte-identical to `qgis/processing/*.rsx` again; taf is now applied upstream and honoured uniformly by fit/intrusions/report and the AI report.
+
+---
+
 ## [palimpsest-5.13.2] — 2026-06-15
 
 ### Italiano
