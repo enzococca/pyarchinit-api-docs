@@ -7,6 +7,22 @@
 
 ---
 
+## [palimpsest-5.13.1] — 2026-06-15
+
+### Italiano
+
+**Hotfix scheda Palimpsest + conoscenza del pacchetto negli agenti AI** — pyarchinit tag `palimpsest-5.13.1-alpha`. Consolida i fix post-`palimpsest-5.13.0-alpha` e arricchisce il report AI.
+
+- **`tabs/palimpsest_ai_report.py`**: nuova costante `PALIMPSESTR_KNOWLEDGE` (distillata dal paper *palimpsestR v0.21.0*) iniettata in `_facts_block` → tutti gli agenti; il prompt di sintesi richiede una sezione "Limiti e cautele". Renderer Markdown→DOCX/PDF (`_parse_markdown`, `_inline_runs`, `write_docx`, `write_pdf`) con tabelle reali e figure incorporate; continuazione automatica anti-troncamento in `PalimpsestAIReportWorker._run_agent` (con guard `_supports_meta`); pulsante "Salva PDF".
+- **`tabs/Palimpsest.py`**: nuovo driver `SEF_FACTS_R` (sintesi per fase, composizione, diagnostiche, righe OxCal, figure `gg_*`) + `_gather_sef_facts`/`_find_rscript`; `PalimpsestChronologyDialog` ora carica/modifica le date salvate (colonne `start`/`end`, `_load_existing`, `_save_edits`); plot OxCal per-US più descrittivo; motore OxCal persistente.
+- **`modules/utility/llm_providers.py`**: `stream_chat(..., meta=...)` opzionale e retro-compatibile, riporta `finish_reason`/`truncated`.
+
+### English
+
+**Palimpsest dialog hotfix + package knowledge in the AI agents** — pyarchinit tag `palimpsest-5.13.1-alpha`. `tabs/palimpsest_ai_report.py` gains `PALIMPSESTR_KNOWLEDGE` (distilled from the palimpsestR v0.21.0 paper) injected into every agent's facts block, a Markdown→DOCX/PDF renderer (`write_docx`/`write_pdf`, real tables + embedded figures), anti-truncation auto-continuation (`_run_agent` + `_supports_meta`) and a "Save PDF" action; `LLMProviderManager.stream_chat` gains an optional, backward-compatible `meta` reporting `finish_reason`/`truncated`. `tabs/Palimpsest.py` adds the `SEF_FACTS_R` facts driver and an editable, self-loading `PalimpsestChronologyDialog` (start/end columns, `_load_existing`/`_save_edits`), a more descriptive per-US OxCal calibration plot, and a persistent OxCal engine. The synthesiser must add a "Limits and caveats" section reflecting the package's documented limitations (horizontal-stratigraphy assumption, resolution-bound inference, interpretive taphonomic score).
+
+---
+
 ## [palimpsest] — 2026-06-15
 
 ### Italiano
