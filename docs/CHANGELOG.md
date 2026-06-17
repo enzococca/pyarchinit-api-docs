@@ -7,6 +7,21 @@
 
 ---
 
+## [palimpsest-5.13.4] — 2026-06-17
+
+### Italiano
+
+**Coordinate puntuali dei reperti (piece-plotting)** — richiede palimpsestr **≥ 0.23.0**; nessuna modifica al codice del plugin (i 3 `.rsx` restano byte-identici a `qgis/processing/*.rsx`).
+
+- **palimpsestr 0.23.0** (`enzococca/palimpsestr`, `R/db_connect.R`, commit `f2b3031`): `read_pyarchinit()` usa le coordinate **puntuali** di un reperto quando esso è disegnato come punto nel layer `pyarchinit_reperti` — abbinamento via la vista `pyarchinit_reperti_view` (sito + `numero_inventario` = `id_rep`). Vengono usate la x, y del punto e la z dalla colonna `quota` (o dalla Z della geometria), **al posto del centroide del poligono US**. I reperti senza punto mantengono il centroide US. Nuovi parametri: `reperti_table` (default `"pyarchinit_reperti"`) e `reperti_geometry`; lettura via sf/GDAL (SpatiaLite + PostGIS). Test: nuovo Ciclo 7 (`tests/testthat/test-read-pyarchinit.R`).
+- **pyArchInit**: dà **risoluzione spaziale a livello di reperto** dove il piece-plotting è disponibile, attenuando il limite del centroide US. Tutorial 37 aggiornato in 10 lingue. Nessuna modifica agli `.rsx` (byte-identici a upstream).
+
+### English
+
+**Piece-plotted find coordinates** — requires palimpsestr **≥ 0.23.0**; no plugin code change (the 3 `.rsx` stay byte-identical to `qgis/processing/*.rsx`). In palimpsestr 0.23.0 (`enzococca/palimpsestr`, `R/db_connect.R`, commit `f2b3031`), `read_pyarchinit()` uses a find's **point** coordinates when it is drawn as a point in the `pyarchinit_reperti` layer — matched via the `pyarchinit_reperti_view` join (site + `numero_inventario` = `id_rep`). The point's x, y and z (from the `quota` column or the geometry Z) are used **instead of the US polygon centroid**; finds without a point keep the US centroid. New parameters `reperti_table` (default `"pyarchinit_reperti"`) and `reperti_geometry`; read via sf/GDAL (SpatiaLite + PostGIS); new test Cycle 7. On the pyArchInit side this gives find-level spatial resolution where piece-plotting is available, mitigating the US-centroid limitation. Tutorial 37 updated in 10 languages; the `.rsx` are unchanged (byte-identical to upstream).
+
+---
+
 ## [palimpsest-5.13.3] — 2026-06-15
 
 ### Italiano
