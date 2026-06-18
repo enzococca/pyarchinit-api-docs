@@ -7,19 +7,32 @@
 
 ---
 
-## [palimpsest-5.13.5] — 2026-06-18
+## [palimpsest-5.13.6] — 2026-06-18
 
 ### Italiano
 
-**Funzioni AI/RAG: provider, robustezza e compatibilità langchain 1.x** — pyarchinit tag `palimpsest-5.13.5-alpha`; soli fix lato plugin (`tabs/US_USM.py`, `modules/utility/llm_providers.py`, `requirements.txt`). Nessuna modifica a palimpsestr o agli `.rsx` (byte-identici).
+**Compatibilità langchain 1.x (Windows / QGIS 4.x) + tutorial** — pyarchinit tag `palimpsest-5.13.6-alpha`; fix lato plugin (`tabs/US_USM.py`, `requirements.txt`) + documentazione (tutorial 37 e 30). Nessuna modifica a palimpsestr o agli `.rsx` (byte-identici).
 
 - **Compatibilità langchain 1.x (Windows / QGIS 4.x).** Su Python ≥ 3.10 il plugin installa la linea **langchain 1.x**, che ha rimosso gli shim legacy: `langchain.text_splitter` non esiste più (→ `No module named 'langchain.text_splitter'` all'avvio del RAG) e `Tool` non è più riesportato da `langchain.agents` (→ `cannot import name 'Tool' from 'langchain.agents'` in fase di report). Gli import in `tabs/US_USM.py` sono stati portati ai percorsi canonici `langchain_text_splitters`, `langchain_core.tools`, `langchain_core.callbacks`, `langchain_core.prompts`, `langchain_core.messages`, con fallback ai vecchi percorsi per langchain 0.3.x (QGIS 3.x / Python 3.9). Le chain/memory legacy (`RetrievalQA`, `ConversationSummaryMemory`), spostate in `langchain-classic` nella 1.x, usano un fallback `try/except`; aggiunta la dipendenza `langchain-classic>=1.0.0; python_version>="3.10"` a `requirements.txt`.
-- **Altri fix AI/RAG**: streaming agnostico al provider (OpenAI/Anthropic/Ollama/LM Studio) via `self.llm.stream()`; errori dell'SDK non più mascherati in `LLMProviderManager._annotate_error` (tipo preservato solo se ricostruibile, altrimenti `RuntimeError`); risoluzione del **sito corrente** nel RAG; **materiali reali** iniettati da `raw_data`; export **PDF** del report (PNG del grafico cancellato dopo `doc.build()`); grafico a torta che accetta sia `x/y` sia `labels/values`.
 - **Documentazione**: Tutorial 37 (palinsesto) aggiornato in 10 lingue con la nota sul report AI (provider, errori chiari, QGIS 3.x/4.x) e il rimando alla query AI sul DB; Tutorial 30 (AI Query Database) aggiornato in 5 lingue con la sezione di troubleshooting per l'errore di import langchain.
 
 ### English
 
-**AI/RAG features: provider, robustness and langchain 1.x compatibility** — pyarchinit tag `palimpsest-5.13.5-alpha`; plugin-only fixes (`tabs/US_USM.py`, `modules/utility/llm_providers.py`, `requirements.txt`). No palimpsestr or `.rsx` change (byte-identical). On Python ≥ 3.10 the plugin installs the **langchain 1.x** line, which removed the legacy shims: `langchain.text_splitter` is gone (→ `No module named 'langchain.text_splitter'` when the RAG starts) and `Tool` is no longer re-exported from `langchain.agents` (→ `cannot import name 'Tool' from 'langchain.agents'` during report generation). Imports in `tabs/US_USM.py` were moved to the canonical `langchain_text_splitters` / `langchain_core.{tools,callbacks,prompts,messages}` paths, with fallbacks to the old paths for langchain 0.3.x (QGIS 3.x / Python 3.9). Legacy chains/memory (`RetrievalQA`, `ConversationSummaryMemory`), moved to `langchain-classic` in 1.x, use a `try/except` fallback, and `langchain-classic>=1.0.0; python_version>="3.10"` was added to `requirements.txt`. Other AI/RAG fixes: provider-agnostic streaming via `self.llm.stream()`; unmasked SDK errors in `LLMProviderManager._annotate_error`; current-site resolution in the RAG; real materials injected from `raw_data`; PDF report export (chart PNG deleted after `doc.build()`); pie chart accepting both `x/y` and `labels/values`. Docs: Tutorial 37 (palimpsest) updated in 10 languages (AI report note + cross-reference); Tutorial 30 (AI Query Database) updated in 5 languages with a langchain-import troubleshooting section.
+**langchain 1.x compatibility (Windows / QGIS 4.x) + tutorials** — pyarchinit tag `palimpsest-5.13.6-alpha`; plugin fixes (`tabs/US_USM.py`, `requirements.txt`) + documentation (tutorials 37 and 30). No palimpsestr or `.rsx` change (byte-identical). On Python ≥ 3.10 the plugin installs the **langchain 1.x** line, which removed the legacy shims: `langchain.text_splitter` is gone (→ `No module named 'langchain.text_splitter'` when the RAG starts) and `Tool` is no longer re-exported from `langchain.agents` (→ `cannot import name 'Tool' from 'langchain.agents'` during report generation). Imports in `tabs/US_USM.py` were moved to the canonical `langchain_text_splitters` / `langchain_core.{tools,callbacks,prompts,messages}` paths, with fallbacks to the old paths for langchain 0.3.x (QGIS 3.x / Python 3.9). Legacy chains/memory (`RetrievalQA`, `ConversationSummaryMemory`), moved to `langchain-classic` in 1.x, use a `try/except` fallback, and `langchain-classic>=1.0.0; python_version>="3.10"` was added to `requirements.txt`. Docs: Tutorial 37 (palimpsest) updated in 10 languages (AI report note + cross-reference); Tutorial 30 (AI Query Database) updated in 5 languages with a langchain-import troubleshooting section.
+
+---
+
+## [palimpsest-5.13.5] — 2026-06-17
+
+### Italiano
+
+**Funzioni AI/RAG: provider Anthropic e robustezza** — pyarchinit tag `palimpsest-5.13.5-alpha`; soli fix lato plugin (`tabs/US_USM.py`, `modules/utility/llm_providers.py`). Nessuna modifica a palimpsestr o agli `.rsx` (byte-identici).
+
+- **Fix AI/RAG**: streaming agnostico al provider (OpenAI/Anthropic/Ollama/LM Studio) via `self.llm.stream()`; errori dell'SDK non più mascherati in `LLMProviderManager._annotate_error` (tipo preservato solo se ricostruibile, altrimenti `RuntimeError`); risoluzione del **sito corrente** nel RAG; **materiali reali** iniettati da `raw_data`; export **PDF** del report (PNG del grafico cancellato dopo `doc.build()`); grafico a torta che accetta sia `x/y` sia `labels/values`.
+
+### English
+
+**AI/RAG features: Anthropic provider & robustness** — pyarchinit tag `palimpsest-5.13.5-alpha`; plugin-only fixes (`tabs/US_USM.py`, `modules/utility/llm_providers.py`). No palimpsestr or `.rsx` change (byte-identical). Provider-agnostic streaming via `self.llm.stream()`; unmasked SDK errors in `LLMProviderManager._annotate_error` (type kept only when reconstructible, else `RuntimeError`); current-site resolution in the RAG; real materials injected from `raw_data`; PDF report export (chart PNG deleted after `doc.build()`); pie chart accepting both `x/y` and `labels/values`.
 
 ---
 
