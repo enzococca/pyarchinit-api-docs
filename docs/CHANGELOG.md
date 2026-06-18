@@ -7,6 +7,36 @@
 
 ---
 
+## [palimpsest-5.13.8] — 2026-06-18
+
+### Italiano
+
+**RAG embeddings: OpenAI se disponibile / fastembed offline + shim Pillow.Resampling** — pyarchinit tag `palimpsest-5.13.8-alpha`; fix lato plugin (`modules/utility/llm_providers.py`, `requirements.txt`).
+
+- **Selezione embeddings (Opzione B).** Con un provider di chat senza API di embeddings (es. **Anthropic**) o un server locale senza modello di embedding, `LLMProviderManager.build_embeddings` usa gli **embeddings OpenAI se è salvata una chiave OpenAI** (`get_api_key(OPENAI)` → `~/pyarchinit/bin/gpt_api_key.txt`, letta indipendentemente dal provider di chat — la chiave Anthropic non è mai inviata a OpenAI); **solo se non c'è chiave OpenAI** ricade su **fastembed** offline. `embeddings_signature` rispecchia la priorità: la cache FAISS si ricostruisce se cambia la disponibilità della chiave.
+- **Shim `PIL.Image.Resampling`.** Le trasformazioni immagine di fastembed usano `PIL.Image.Resampling` (Pillow ≥ 9.1); alcune build di QGIS impacchettano un Pillow più vecchio → `module 'PIL.Image' has no attribute 'Resampling'`. `build_embeddings` ora applica uno shim (`_ensure_pil_resampling`) prima di importare fastembed (IntEnum mappato sulle costanti legacy). Pin `Pillow>=9.1.0` in `requirements.txt`.
+
+### English
+
+**RAG embeddings: OpenAI when available / offline fastembed + Pillow.Resampling shim** — pyarchinit tag `palimpsest-5.13.8-alpha`; plugin-only fixes (`modules/utility/llm_providers.py`, `requirements.txt`). With a chat provider that has no embeddings API (e.g. **Anthropic**) or a local server without an embedding model, `LLMProviderManager.build_embeddings` uses **OpenAI embeddings when an OpenAI key is saved** (`get_api_key(OPENAI)` → `~/pyarchinit/bin/gpt_api_key.txt`, read independently of the chat provider — the Anthropic key is never sent to OpenAI); **only when no OpenAI key exists** it falls back to offline **fastembed**. `embeddings_signature` mirrors this priority so the FAISS cache rebuilds when key availability changes. Also a `PIL.Image.Resampling` shim (`_ensure_pil_resampling`) applied before importing fastembed so it works on QGIS shipping Pillow < 9.1 (the image transforms need the enum added in Pillow 9.1), plus a `Pillow>=9.1.0` pin.
+
+---
+
+## [palimpsest-5.13.7] — 2026-06-18
+
+### Italiano
+
+**RAG: embeddings per provider + fallback offline fastembed** — pyarchinit tag `palimpsest-5.13.7-alpha`; fix lato plugin (`tabs/US_USM.py`, `modules/utility/llm_providers.py`, `requirements.txt`).
+
+- **Il RAG funziona con tutti i provider.** Con provider **Anthropic** il RAG dava `Error code: 401 - Incorrect API key provided: sk-ant-…` perché gli embeddings (indice FAISS) venivano sempre richiesti a OpenAI passando la chiave Anthropic (Anthropic **non ha** un'API di embeddings). `_get_embeddings` (3 copie) ora delega a `LLMProviderManager.build_embeddings`, che sceglie il backend per provider: **OpenAI** → embeddings OpenAI; **Ollama / LM Studio** → modello di embedding locale se caricato; altri/locale-senza-modello → fallback (vedi 5.13.8). La chiave del provider non è più inoltrata a OpenAI.
+- **Cache FAISS legata al backend** via `embeddings_signature` (in memoria e su disco) e nuova dipendenza `fastembed>=0.3.0` per il fallback offline.
+
+### English
+
+**RAG: per-provider embeddings + offline fastembed fallback** — pyarchinit tag `palimpsest-5.13.7-alpha`; plugin-only fixes (`tabs/US_USM.py`, `modules/utility/llm_providers.py`, `requirements.txt`). Under the **Anthropic** provider the RAG raised `Error code: 401 - Incorrect API key provided: sk-ant-…` because embeddings (FAISS index) were always requested from OpenAI while passing the Anthropic key (Anthropic has **no** embeddings API). `_get_embeddings` (3 copies) now delegates to `LLMProviderManager.build_embeddings`, which picks the backend by provider: **OpenAI** → OpenAI embeddings; **Ollama / LM Studio** → local embedding model when loaded; others / local-without-model → fallback (see 5.13.8). The provider key is no longer forwarded to OpenAI. The FAISS cache is keyed by backend via `embeddings_signature` (in-memory and on-disk); adds the `fastembed>=0.3.0` dependency for the offline fallback.
+
+---
+
 ## [palimpsest-5.13.6] — 2026-06-18
 
 ### Italiano
