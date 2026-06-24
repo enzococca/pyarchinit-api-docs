@@ -7,6 +7,26 @@
 
 ---
 
+## [webdav-media-5.13.9.2] — 2026-06-24
+
+### Italiano
+
+**Media WebDAV end-to-end (upload + path raddoppiato + download)** — pyarchinit tag `webdav-media-5.13.9.2-alpha`; fix lato plugin (`modules/storage/webdav_backend.py`, `modules/utility/remote_image_loader.py` + tuple di prefissi remoti in 10 file).
+
+- **Upload.** `webdavclient3` esegue un controllo di esistenza interno (PROPFIND) prima di ogni `list`/`upload`; alcuni server (es. Synology :5006) rispondono "non esiste" anche per risorse esistenti e scrivibili → upload fallito con `RemoteParentNotFound` (`Failed to upload original file, using local path`). `WebDAVBackend.connect()` ora imposta `disable_check=True`; `ensure_directory()` non dipende più dal `check()` rotto; `connect()`/`write()` loggano l'eccezione reale invece di un `return False` muto.
+- **Path raddoppiato.** Le liste di prefissi remoti nei controlli di percorso (`is_remote_url` + rami inline) omettevano `webdav://` (e gdrive/dropbox/s3/r2/sftp): un `path_resize` già completo non veniva riconosciuto → base anteposta due volte. Corrette tutte (30 occorrenze + `is_remote_url`).
+- **Download per la visualizzazione.** `load_pixmap` scaricava i remoti con `requests.get` (che non parla `webdav://`); aggiunto `is_storage_backend_path` + `_download_via_storage` (lettura via `StorageManager`), per miniature e anteprima a tutto schermo.
+
+### English
+
+**WebDAV media end-to-end (upload + doubled path + download)** — pyarchinit tag `webdav-media-5.13.9.2-alpha`; plugin-only fixes (`modules/storage/webdav_backend.py`, `modules/utility/remote_image_loader.py` + remote-prefix tuples in 10 files).
+
+- **Upload.** `webdavclient3` runs an internal existence check (PROPFIND) before every `list`/`upload`; some servers (e.g. Synology :5006) answer "not found" even for existing, writable resources → upload failed with `RemoteParentNotFound` (`Failed to upload original file, using local path`). `WebDAVBackend.connect()` now sets `disable_check=True`; `ensure_directory()` no longer relies on the broken `check()`; `connect()`/`write()` log the real exception instead of a silent `return False`.
+- **Doubled path.** The remote-prefix lists in the path checks (`is_remote_url` + inline branches) omitted `webdav://` (and gdrive/dropbox/s3/r2/sftp): an already-complete `path_resize` was not recognized → base prepended twice. All fixed (30 occurrences + `is_remote_url`).
+- **Download for display.** `load_pixmap` fetched remotes via `requests.get` (which cannot speak `webdav://`); added `is_storage_backend_path` + `_download_via_storage` (read through the `StorageManager`), covering thumbnails and the full-size viewer.
+
+---
+
 ## [pg-onconflict-quote-5.13.9.1] — 2026-06-24
 
 ### Italiano
