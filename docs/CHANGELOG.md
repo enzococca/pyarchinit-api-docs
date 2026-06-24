@@ -7,6 +7,21 @@
 
 ---
 
+## [webdav-ssl-5.13.9] — 2026-06-24
+
+### Italiano
+
+**WebDAV: opzione "Verify SSL" per server con certificato self-signed** — pyarchinit tag `webdav-ssl-5.13.9-alpha`; fix lato plugin (`gui/remote_storage_dialog.py`, `modules/storage/credentials.py`, `modules/storage/webdav_backend.py`) + tutorial config (10 lingue).
+
+- **Connessione ai server self-signed.** Con un server WebDAV su IP nudo o porta HTTPS non standard (certificato auto-firmato) la connessione falliva **in silenzio**: `webdavclient3` usa `requests`, che rifiuta i certificati non validi, e `WebDAVBackend.connect()` cattura l'eccezione restituendo `False`. Il tab **WebDAV** di *Remote Storage Config* ha ora un menu **"Verify SSL"** (Yes = verifica, default; No = certificati self-signed).
+- **Propagazione.** Il valore è salvato in `pyarchinit/storage/webdav/verify_ssl` e arriva al backend tramite `CredentialsManager` (nuova chiave `verify_ssl` in `ENV_NAMES[WEBDAV]`, anche via env `PYARCHINIT_WEBDAV_VERIFY_SSL`). `WebDAVBackend.connect()` imposta `client.verify` di conseguenza e silenzia gli `InsecureRequestWarning` quando la verifica è off. Default invariato (verifica attiva).
+
+### English
+
+**WebDAV: "Verify SSL" option for servers with a self-signed certificate** — pyarchinit tag `webdav-ssl-5.13.9-alpha`; plugin-only fixes (`gui/remote_storage_dialog.py`, `modules/storage/credentials.py`, `modules/storage/webdav_backend.py`) + config tutorial (10 languages). With a WebDAV server on a bare IP or non-standard HTTPS port (self-signed certificate) the connection failed **silently**: `webdavclient3` uses `requests`, which rejects invalid certificates, and `WebDAVBackend.connect()` swallowed the exception and returned `False`. The **WebDAV** tab of *Remote Storage Config* now has a **"Verify SSL"** menu (Yes = verify, default; No = self-signed certificates). The value is stored in `pyarchinit/storage/webdav/verify_ssl` and reaches the backend via `CredentialsManager` (new `verify_ssl` key in `ENV_NAMES[WEBDAV]`, also via the `PYARCHINIT_WEBDAV_VERIFY_SSL` env var); `WebDAVBackend.connect()` sets `client.verify` accordingly and silences urllib3's `InsecureRequestWarning` when verification is off. Default unchanged (verification on).
+
+---
+
 ## [palimpsest-5.13.8] — 2026-06-18
 
 ### Italiano
