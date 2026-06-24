@@ -7,6 +7,18 @@
 
 ---
 
+## [pg-onconflict-quote-5.13.9.1] — 2026-06-24
+
+### Italiano
+
+**Fix: `ON CONFLICT` non quotato rompe l'inserimento media su PostgreSQL** — pyarchinit tag `pg-onconflict-quote-5.13.9.1-alpha`; fix lato plugin (`gui/pyarchinitConfigDialog.py`). Le opzioni di import (ignora/aggiorna/abort duplicati) registrano hook globali `@compiles(Insert)` che accodano `ON CONFLICT (...)` a ogni INSERT. Le varianti **ignore** e **abort** interpolavano i nomi colonna non quotati → per il PK camelCase `media_to_entity_table.id_mediaToEntity` PostgreSQL ripiega in minuscolo (`id_mediatoentity`) → `UndefinedColumn` aggiungendo un'immagine. Ora usano `compiler.preparer.quote(...)` (la variante **replace** era già a posto). NB gli hook sono globali e persistono per l'intera sessione QGIS → riavviare QGIS per scaricare l'hook già registrato.
+
+### English
+
+**Fix: unquoted `ON CONFLICT` breaks media insert on PostgreSQL** — pyarchinit tag `pg-onconflict-quote-5.13.9.1-alpha`; plugin-only fix (`gui/pyarchinitConfigDialog.py`). The import options (ignore/replace/abort duplicates) register global `@compiles(Insert)` hooks that append `ON CONFLICT (...)` to every INSERT. The **ignore** and **abort** variants interpolated column names unquoted → for the camelCase PK `media_to_entity_table.id_mediaToEntity` PostgreSQL folds to lowercase (`id_mediatoentity`) → `UndefinedColumn` when adding an image. Both now use `compiler.preparer.quote(...)` (the **replace** variant was already fixed). Note the hooks are global and persist for the whole QGIS session → restart QGIS to drop an already-registered hook.
+
+---
+
 ## [webdav-ssl-5.13.9] — 2026-06-24
 
 ### Italiano
