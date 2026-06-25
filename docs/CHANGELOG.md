@@ -7,6 +7,18 @@
 
 ---
 
+## [import-hook-scope-5.13.9.3] — 2026-06-25
+
+### Italiano
+
+**Hook `ON CONFLICT` dell'import confinati al solo import** — pyarchinit tag `import-hook-scope-5.13.9.3-alpha`; fix lato plugin (`gui/pyarchinitConfigDialog.py`). Le opzioni di import (ignora/aggiorna/abort duplicati) usano hook globali `@compiles(Insert)` che aggiungono `ON CONFLICT`/`OR IGNORE` a ogni INSERT. Venivano registrati in `check()` (eseguito al cambio checkbox **e all'apertura del dialog**) e **mai rimossi** → aprire la configurazione con un'opzione spuntata "contaminava" tutti gli insert della sessione (causa anche dell'errore `ON CONFLICT` sulle tabelle media). Approccio A: `check()` è ora no-op; gli hook stanno in `_install_import_conflict_hook()` e un wrapper su `on_pushButton_import_pressed` li installa solo per la durata dell'import e li rimuove in `finally` con `sqlalchemy.ext.compiler.deregister(Insert)` (anche su errore/`return`). L'import geometrie gira con INSERT normali.
+
+### English
+
+**Import `ON CONFLICT` hooks scoped to the import only** — pyarchinit tag `import-hook-scope-5.13.9.3-alpha`; plugin-only fix (`gui/pyarchinitConfigDialog.py`). The import dedup options (ignore/replace/abort) use global `@compiles(Insert)` hooks that append `ON CONFLICT`/`OR IGNORE` to every INSERT. They were registered in `check()` (run on checkbox change **and at dialog init**) and **never removed** → opening the config with an option ticked leaked the clause onto every later insert in the session (also the cause of the media-table `ON CONFLICT` error). Approach A: `check()` is now a no-op; the hooks live in `_install_import_conflict_hook()` and a wrapper on `on_pushButton_import_pressed` installs them for the import only and removes them in a `finally` via `sqlalchemy.ext.compiler.deregister(Insert)` (even on error/`return`). Geometry import runs with stock INSERTs.
+
+---
+
 ## [webdav-media-5.13.9.2] — 2026-06-24
 
 ### Italiano
