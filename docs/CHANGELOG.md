@@ -7,6 +7,28 @@
 
 ---
 
+## [home-pyarchinit5-5.13.10] — 2026-06-27
+
+### Italiano
+
+**Cartella dati del ramo pyArchInit 5 → `~/pyarchinit_5`** — pyarchinit tag `home-pyarchinit5-5.13.10-alpha` (ramo `Stratigraph_00001`). Il ramo ora salva tutti i suoi dati (config.cfg, database, export, backup, paradata, `bin/` con gli strumenti AI) in `~/pyarchinit_5/`, lasciando intatto `~/pyarchinit/` usato dal pyArchInit "classico" (master). Il nome della cartella del plugin resta `pyarchinit`.
+
+- **Resolver unico** `modules/utility/pyarchinit_home.py` (dependency-free): `pyarchinit_home()`, `pyarchinit_home_bin()`, `legacy_pyarchinit_home()`, `migrate_db_folder()`, `should_offer_migration()`. Override con la variabile d'ambiente `PYARCHINIT_HOME` (vuota = default). `__init__.py` imposta `os.environ['PYARCHINIT_HOME']` all'import (autorità più precoce). ~50 percorsi home hardcoded (famiglia `bin/`, backup, paradata, llm_providers/pottery/SAM, script di migrazione, stringhe utente, script TMA) instradati tutti sul resolver. `modules/s3dgraphy/sync/_workspace.py` resta import-clean (legge la env var direttamente).
+- **Migrazione al primo avvio.** Se `~/pyarchinit_5/pyarchinit_DB_folder/config.cfg` non esiste ma quello legacy sì, un dialog propone di copiare `pyarchinit_DB_folder` (config + database) dal vecchio `~/pyarchinit`; `bin/` (venv/modelli AI) NON viene copiato (va reinstallato o copiato a mano).
+- **Fix:** `install_dir()` ora viene eseguito incondizionatamente a ogni avvio (idempotente) perché la cartella base può essere pre-creata da altri percorsi (mkdir del workspace paradata, `makedirs(bin)`, refresh dei file di manutenzione) — altrimenti sottocartelle e DB di esempio non venivano creati e il dialog non appariva. Gate della migrazione agganciato alla presenza di `config.cfg`, non all'esistenza della cartella base.
+- Tutorial aggiornati in 10 lingue (`01_config*`); 13 test del resolver.
+
+### English
+
+**pyArchInit 5 branch data folder → `~/pyarchinit_5`** — pyarchinit tag `home-pyarchinit5-5.13.10-alpha` (branch `Stratigraph_00001`). The branch now stores all of its data (config.cfg, databases, exports, backups, paradata, the `bin/` AI tooling) in `~/pyarchinit_5/`, leaving `~/pyarchinit/` — used by the classic pyArchInit (master) — untouched. The plugin folder name stays `pyarchinit`.
+
+- **Single resolver** `modules/utility/pyarchinit_home.py` (dependency-free): `pyarchinit_home()`, `pyarchinit_home_bin()`, `legacy_pyarchinit_home()`, `migrate_db_folder()`, `should_offer_migration()`. Override via the `PYARCHINIT_HOME` env var (empty = default). `__init__.py` sets `os.environ['PYARCHINIT_HOME']` at import (earliest authority). ~50 hardcoded home-path literals (the `bin/` family, backups, paradata, llm_providers/pottery/SAM, migration scripts, user strings, TMA script) all routed through the resolver. `modules/s3dgraphy/sync/_workspace.py` stays import-clean (reads the env var directly).
+- **First-run migration.** If `~/pyarchinit_5/pyarchinit_DB_folder/config.cfg` is missing but the legacy one exists, a dialog offers to copy `pyarchinit_DB_folder` (config + databases) from the old `~/pyarchinit`; `bin/` (AI venvs/models) is NOT copied (reinstall or copy by hand).
+- **Fix:** `install_dir()` now runs unconditionally on every startup (idempotent) because the base folder can be pre-created by other paths (paradata workspace mkdir, `makedirs(bin)`, maintenance-files refresh) — otherwise subfolders and the example DB were not created and the dialog never appeared. The migration gate is keyed on `config.cfg` presence, not base-dir existence.
+- Tutorials updated in 10 languages (`01_config*`); 13 resolver tests.
+
+---
+
 ## [import-hook-scope-5.13.9.3] — 2026-06-25
 
 ### Italiano
