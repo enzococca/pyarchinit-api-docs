@@ -7,6 +7,30 @@
 
 ---
 
+## [rapporti-blank-rows-5.13.11] — 2026-08-21
+
+### Italiano
+
+**Fix righe vuote nei rapporti stratigrafici + riparazione DB** — pyarchinit tag `rapporti-blank-rows-5.13.11-alpha` (ramo `Stratigraph_00001`, commit `4718a092`); stesso fix rilasciato su `master` come **4.9.10** (tag `v4.9.10`, commit `7de23e74`). La tabella **Rapporti stratigrafici** del primo record del DB (US 1) accumulava righe `['', '', '', '']` che si moltiplicavano (~×3 a sessione; un DB utente è arrivato a 78 674 righe vuote) perché `tableInsertData` rimuoveva al massimo 4 righe prima del ricaricamento e `table2dict(preserve_empty=True)` serializzava le righe residue.
+
+- **`tabs/US_USM.py`**: `tableInsertData` ora svuota la griglia con `clearContents()` + `setRowCount(0)`; `table2dict` non emette mai una riga tutta vuota (righe parziali come `['Copre', '2', '', '']` preservate). Stesso loop corretto in `tabs/Schedaind.py`, `tabs/Tomba.py`, `tabs/Tafonomia.py`, `tabs/UT.py`, `tabs/Image_viewer.py`.
+- **Nuovo modulo** `scripts/migrations/_2026_08_rapporti_blank_rows_lib.py`: `is_blank_row(row)`, `strip_blank_rows(value) -> (new_value, removed)`, `repair_blank_rapporti(handle, *, dry_run=True) -> RepairResult` (`rows_scanned`, `rows_changed`, `blank_rows_removed`, `details: list[RowChange]`, `summary()`); cross-backend via `DbHandle`, una transazione, idempotente. CLI `scripts/migrations/2026_08_rapporti_blank_rows.py` (`--dry-run/--apply/--rollback`, backup automatico).
+- **`pyarchinitPlugin.py`**: nuova voce `Migrazioni → Ripara rapporti vuoti` (`actionRapportiBlankRows`, handler `_run_rapporti_blank_rows_repair`: anteprima dry-run, conferma, backup, apply, riepilogo).
+- Su `master` (SQLAlchemy 1.4) la lib è standalone: `modules/utility/rapporti_repair.py` (stesse funzioni + `sqlite_path_of`, `backup_sqlite`), CLI `scripts/repair_rapporti.py`, voce di menu "Ripara rapporti vuoti" (`_init_repair_menu`, `runRapportiRepair`).
+- Test: `tests/utility/test_us_rapporti_table.py` (6) + `tests/migrations/test_rapporti_blank_rows.py` (5); tutorial 03 in 10 lingue; `dev_logs/CHANGELOG.md` bilingue.
+
+### English
+
+**Blank stratigraphic-relationship rows fix + DB repair** — pyarchinit tag `rapporti-blank-rows-5.13.11-alpha` (branch `Stratigraph_00001`, commit `4718a092`); the same fix shipped on `master` as **4.9.10** (tag `v4.9.10`, commit `7de23e74`). The **Rapporti stratigrafici** table of the first DB record (US 1) accumulated `['', '', '', '']` rows that multiplied (~×3 per session; one user DB reached 78 674 blank rows) because `tableInsertData` removed at most 4 rows before reloading and `table2dict(preserve_empty=True)` serialized the leftovers.
+
+- **`tabs/US_USM.py`**: `tableInsertData` now empties the grid with `clearContents()` + `setRowCount(0)`; `table2dict` never emits an all-blank row (partial rows such as `['Copre', '2', '', '']` preserved). Same loop fixed in `tabs/Schedaind.py`, `tabs/Tomba.py`, `tabs/Tafonomia.py`, `tabs/UT.py`, `tabs/Image_viewer.py`.
+- **New module** `scripts/migrations/_2026_08_rapporti_blank_rows_lib.py`: `is_blank_row(row)`, `strip_blank_rows(value) -> (new_value, removed)`, `repair_blank_rapporti(handle, *, dry_run=True) -> RepairResult` (`rows_scanned`, `rows_changed`, `blank_rows_removed`, `details: list[RowChange]`, `summary()`); cross-backend via `DbHandle`, single transaction, idempotent. CLI `scripts/migrations/2026_08_rapporti_blank_rows.py` (`--dry-run/--apply/--rollback`, auto-backup).
+- **`pyarchinitPlugin.py`**: new entry `Migrazioni → Ripara rapporti vuoti` (`actionRapportiBlankRows`, handler `_run_rapporti_blank_rows_repair`: dry-run preview, confirm, backup, apply, summary).
+- On `master` (SQLAlchemy 1.4) the lib is standalone: `modules/utility/rapporti_repair.py` (same functions + `sqlite_path_of`, `backup_sqlite`), CLI `scripts/repair_rapporti.py`, menu entry "Ripara rapporti vuoti" (`_init_repair_menu`, `runRapportiRepair`).
+- Tests: `tests/utility/test_us_rapporti_table.py` (6) + `tests/migrations/test_rapporti_blank_rows.py` (5); tutorial 03 in 10 languages; bilingual `dev_logs/CHANGELOG.md`.
+
+---
+
 ## [home-pyarchinit5-5.13.10] — 2026-06-27
 
 ### Italiano
