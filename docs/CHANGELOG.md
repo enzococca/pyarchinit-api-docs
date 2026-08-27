@@ -7,6 +7,28 @@
 
 ---
 
+## [periodization-check-5.13.14] — 2026-08-27
+
+### Italiano
+
+**Periodizzazione: avviso in export per cronologie con inizio > fine (anni a.C. senza segno)** — pyarchinit tag `periodization-check-5.13.14-alpha` (dev) e `v4.9.13` (master, solo la parte DOT).
+
+- **Nuovo modulo `modules/utility/periodization_checks.py`** (puro): dataclass `SuspiciousChronology(periodo, fase, cron_iniziale, cron_finale, label)`, `suspicious_chronologies(rows)` (tuple `(periodo, fase, cron_iniziale, cron_finale[, label])`, anni coerciti a int, None/non numerici saltati), `format_chronology_warning(bad, lang='it')` (it/en/de, fallback en).
+- **`modules/s3dgraphy/sync/graph_projector.py`** (`_enrich_into`): aggiunge l'avviso a `graph.warnings`; **`modules/s3dgraphy/sync/graphml_writer.py`** (`_filter_by_site`): i `warnings` del grafo non filtrato vengono riportati sul grafo filtrato → `ExportResult.warnings`.
+- **`tabs/Interactive_matrix.py`** (`generate_matrix`, `generate_matrix_3`): `QMessageBox.warning` con l'elenco dei periodi prima dell'export con periodizzazione.
+- Test: `tests/utility/test_periodization_checks.py` (3), `tests/sync/test_export_chronology_warning.py` (2). Tutorial 04/11/36 in 10 lingue.
+
+### English
+
+**Periodization: export warning for chronologies with start > end (BC years without sign)** — pyarchinit tag `periodization-check-5.13.14-alpha` (dev) and `v4.9.13` (master, DOT part only).
+
+- **New module `modules/utility/periodization_checks.py`** (pure): dataclass `SuspiciousChronology(periodo, fase, cron_iniziale, cron_finale, label)`, `suspicious_chronologies(rows)` (`(periodo, fase, cron_iniziale, cron_finale[, label])` tuples, years coerced to int, None/non-numeric skipped), `format_chronology_warning(bad, lang='it')` (it/en/de, en fallback).
+- **`modules/s3dgraphy/sync/graph_projector.py`** (`_enrich_into`): appends the warning to `graph.warnings`; **`modules/s3dgraphy/sync/graphml_writer.py`** (`_filter_by_site`): warnings of the unfiltered graph are carried onto the filtered graph → `ExportResult.warnings`.
+- **`tabs/Interactive_matrix.py`** (`generate_matrix`, `generate_matrix_3`): `QMessageBox.warning` listing the periods before the period export.
+- Tests: `tests/utility/test_periodization_checks.py` (3), `tests/sync/test_export_chronology_warning.py` (2). Tutorials 04/11/36 in 10 languages.
+
+---
+
 ## [matrix-poster-5.13.13] — 2026-08-27
 
 ### Italiano
