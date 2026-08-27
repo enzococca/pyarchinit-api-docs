@@ -7,6 +7,32 @@
 
 ---
 
+## [matrix-poster-5.13.13] — 2026-08-27
+
+### Italiano
+
+**Harris matrix: export con periodizzazione, PDF/SVG entro 200 pollici, poster multi-pagina; GraphML righe epoca da `datazione_estesa`** — pyarchinit tag `matrix-poster-5.13.13-alpha` (dev) e `v4.9.12` (master, solo la parte matrix).
+
+- **`modules/utility/matrix_layout_policy.py`**: `graphviz_stderr_guard(label)` (context manager: redirige `sys.stderr` in un buffer attorno a `render()`/`pipe()` e lo ristampa con `print()`; risolve `'NoneType' object has no attribute 'write'` quando `sys.stderr` è `None`), `MIN_RASTER_DPI` 12 → 1, `_BB_RE` accetta la notazione esponenziale, nuovi `MAX_VECTOR_PT = 14400`, `VECTOR_SIZE_INCHES = 199`, `_set_root_attr()`, `vector_dot_source(dot_text)` (dpi=72 + cap `size` sopra 14 400 pt).
+- **Nuovo modulo `modules/utility/matrix_poster.py`** (puro, PyMuPDF importato lazy): `PAPER_PT`, `POSTER_SCALE_MODES`, `OVERLAP_PT = 57`, `MARGIN_PT = 20`, dataclass `Tile` / `PosterPlan` (`pages`, `describe()`), `plan_poster(content_w, content_h, paper='A0', mode='fit_height', landscape=None)`, `build_poster_pdf(src_pdf, out_pdf, plan, label=True)`.
+- **`modules/utility/pyarchinit_matrix_exp.py`**: `_render(graph, **kw)` e `_pipe(source_text, fmt)` (render protetti), `_poster_settings(dialog)`, `_render_matrix_poster(dot_path, paper, mode)` → `(path, plan)`, `_large_matrix_notice(dpi, poster=None)`, `_poster_notice(poster)`; cluster contemporanei `f'{fase_key}_cont'`; subgraph `main1`/`main2` fuori dai loop.
+- **`gui/ui/Setting_Matrix.ui`**: `checkBox_poster`, `comboBox_poster_paper` (A0..A3), `comboBox_poster_scale` (indice → `POSTER_SCALE_MODES`).
+- **`modules/s3dgraphy/sync/graph_projector.py`** (solo dev): `EpochNode(name=datazione_estesa or descrizione or "Period P Phase F", description=descrizione)`, `attributes['datazione_estesa']` reale, suffisso `" (periodo P, fase F)"` per nomi duplicati (`Counter`), fallback alla query a 5 colonne.
+- Test: `tests/utility/test_matrix_poster.py` (5), `test_matrix_layout_policy.py` (8), `tests/sync/test_graph_projector.py` (9). Docs: `dev_logs/CHANGELOG.md` bilingue; tutorial 11 e 36 in 10 lingue.
+
+### English
+
+**Harris matrix: period export, PDF/SVG within 200 inches, multi-page poster; GraphML epoch rows from `datazione_estesa`** — pyarchinit tag `matrix-poster-5.13.13-alpha` (dev) and `v4.9.12` (master, matrix part only).
+
+- **`modules/utility/matrix_layout_policy.py`**: `graphviz_stderr_guard(label)` (context manager: redirects `sys.stderr` into a buffer around `render()`/`pipe()` and re-emits it with `print()`; fixes `'NoneType' object has no attribute 'write'` when `sys.stderr` is `None`), `MIN_RASTER_DPI` 12 → 1, `_BB_RE` accepts exponent notation, new `MAX_VECTOR_PT = 14400`, `VECTOR_SIZE_INCHES = 199`, `_set_root_attr()`, `vector_dot_source(dot_text)` (dpi=72 + `size` cap above 14 400 pt).
+- **New module `modules/utility/matrix_poster.py`** (pure, PyMuPDF imported lazily): `PAPER_PT`, `POSTER_SCALE_MODES`, `OVERLAP_PT = 57`, `MARGIN_PT = 20`, dataclasses `Tile` / `PosterPlan` (`pages`, `describe()`), `plan_poster(content_w, content_h, paper='A0', mode='fit_height', landscape=None)`, `build_poster_pdf(src_pdf, out_pdf, plan, label=True)`.
+- **`modules/utility/pyarchinit_matrix_exp.py`**: `_render(graph, **kw)` and `_pipe(source_text, fmt)` (guarded renders), `_poster_settings(dialog)`, `_render_matrix_poster(dot_path, paper, mode)` → `(path, plan)`, `_large_matrix_notice(dpi, poster=None)`, `_poster_notice(poster)`; contemporary cluster `f'{fase_key}_cont'`; `main1`/`main2` subgraphs hoisted out of the loops.
+- **`gui/ui/Setting_Matrix.ui`**: `checkBox_poster`, `comboBox_poster_paper` (A0..A3), `comboBox_poster_scale` (index → `POSTER_SCALE_MODES`).
+- **`modules/s3dgraphy/sync/graph_projector.py`** (dev only): `EpochNode(name=datazione_estesa or descrizione or "Period P Phase F", description=descrizione)`, real `attributes['datazione_estesa']`, `" (periodo P, fase F)"` suffix for duplicate names (`Counter`), fallback to the 5-column query.
+- Tests: `tests/utility/test_matrix_poster.py` (5), `test_matrix_layout_policy.py` (8), `tests/sync/test_graph_projector.py` (9). Docs: bilingual `dev_logs/CHANGELOG.md`; tutorials 11 and 36 in 10 languages.
+
+---
+
 ## [large-relations-5.13.12] — 2026-08-27
 
 ### Italiano
