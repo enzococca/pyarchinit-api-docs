@@ -7,6 +7,28 @@
 
 ---
 
+## [spatial-index-repair-5.13.15] — 2026-09-10
+
+### Italiano
+
+**Indici spaziali SpatiaLite: template dei nuovi DB corretto + riparazione automatica alla connessione** — pyarchinit tag `spatial-index-repair-5.13.15-alpha` (dev) e `v4.9.14` (master). Commit dev `5d61d2f3` (template) e `5cd15c5e` (riparazione automatica); master `884c0364` e `779b7a15`.
+
+- **Nuovo modulo `modules/db/spatial_index_repair.py`** (solo `sqlite3` della libreria standard, identico su dev e master): costante `IGNORED_TABLES` (`iso_metadata`); dataclass `IndexStatus(table, column, geometries, indexed, triggers)` con proprietà `ok` (3 trigger `gii_/giu_/gid_` e righe R*Tree = geometrie non nulle); `audit_spatial_indexes(con)` (non richiede SpatiaLite); `repair_spatial_indexes(con, statuses=None)` (una SAVEPOINT per colonna: `DisableSpatialIndex`, drop della tabella `idx_` orfana, `CreateSpatialIndex`, `RecoverSpatialIndex` se serve, `UpdateLayerStatistics`); `ensure_spatial_indexes(db_path, load_spatialite, force=False, backup=True, log=None)` (una volta per sessione per file, backup `<db>.pre_spatial_index_repair_<UTC>` con l'API di backup di sqlite3, non solleva mai eccezioni); `reset_session_cache()`.
+- **`modules/db/pyarchinit_db_manager.py`**: `connection()` chiama `ensure_spatial_indexes(db_path, lambda c: self.load_spatialite(c, None))` per i DB SQLite — su dev dopo `check_and_update_sqlite_db`, su master dopo `DB_update(...).update_table()`.
+- **`resources/dbfiles/pyarchinit.sqlite` e `pyarchinit_db.sqlite`**: indici spaziali ricostruiti (dev: `pyunitastratigrafiche`, `pyunitastratigrafiche_usm`, `pyarchinit_us_negative_doc`; master: `pyarchinit_us_negative_doc`). **`scripts/fixes/final_postgres_alignment.py`** (solo dev): ricostruisce sempre l'indice dopo aver ricreato le tabelle.
+- Test: `tests/migrations/test_spatial_index_repair.py` (9), `tests/utility/test_shipped_sqlite_spatial_index.py` (2). Docs: `dev_logs/CHANGELOG.md` bilingue; tutorial 14 in 10 lingue.
+
+### English
+
+**SpatiaLite spatial indexes: template for new DBs fixed + automatic repair on connection** — pyarchinit tag `spatial-index-repair-5.13.15-alpha` (dev) and `v4.9.14` (master). Dev commits `5d61d2f3` (template) and `5cd15c5e` (automatic repair); master `884c0364` and `779b7a15`.
+
+- **New module `modules/db/spatial_index_repair.py`** (standard-library `sqlite3` only, identical on dev and master): constant `IGNORED_TABLES` (`iso_metadata`); dataclass `IndexStatus(table, column, geometries, indexed, triggers)` with an `ok` property (3 `gii_/giu_/gid_` triggers and R*Tree rows = non-null geometries); `audit_spatial_indexes(con)` (no SpatiaLite needed); `repair_spatial_indexes(con, statuses=None)` (one SAVEPOINT per column: `DisableSpatialIndex`, drop of the orphan `idx_` table, `CreateSpatialIndex`, `RecoverSpatialIndex` when needed, `UpdateLayerStatistics`); `ensure_spatial_indexes(db_path, load_spatialite, force=False, backup=True, log=None)` (once per session per file, backup `<db>.pre_spatial_index_repair_<UTC>` through the sqlite3 backup API, never raises); `reset_session_cache()`.
+- **`modules/db/pyarchinit_db_manager.py`**: `connection()` calls `ensure_spatial_indexes(db_path, lambda c: self.load_spatialite(c, None))` for SQLite DBs — on dev after `check_and_update_sqlite_db`, on master after `DB_update(...).update_table()`.
+- **`resources/dbfiles/pyarchinit.sqlite` and `pyarchinit_db.sqlite`**: spatial indexes rebuilt (dev: `pyunitastratigrafiche`, `pyunitastratigrafiche_usm`, `pyarchinit_us_negative_doc`; master: `pyarchinit_us_negative_doc`). **`scripts/fixes/final_postgres_alignment.py`** (dev only): always rebuilds the index after recreating the tables.
+- Tests: `tests/migrations/test_spatial_index_repair.py` (9), `tests/utility/test_shipped_sqlite_spatial_index.py` (2). Docs: bilingual `dev_logs/CHANGELOG.md`; tutorial 14 in 10 languages.
+
+---
+
 ## [periodization-check-5.13.14] — 2026-08-27
 
 ### Italiano
