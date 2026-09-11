@@ -7,6 +7,24 @@
 
 ---
 
+## [us-style-choice-5.13.18] — 2026-09-11
+
+### Italiano
+
+**GIS SQLite: i layer US/USM mantengono lo stile scelto dall'utente** — pyarchinit tag `us-style-choice-5.13.18-alpha` (solo dev). Commit dev `5f68cc2b`.
+
+- **`modules/gis/pyarchinit_pyqgis.py`**: `Pyarchinit_pyqgis.charge_vector_layers` (ramo SQLite) non chiama più `create_us_nested_symbology()` dopo `USViewStyler.apply_style_to_layer()`, che ne sostituiva il renderer; `Pyarchinit_pyqgis.charge_usm_layers` (ramo SQLite) usa ora `USViewStyler(Connection(), sito=...)` + `apply_style_to_layer()` + `_apply_us_feature_ordering()`, come il ramo PostgreSQL. `create_us_nested_symbology()` resta nei caricamenti senza scelta di stile.
+- Test: `tests/utility/test_us_style_choice_respected.py`. Docs: `dev_logs/CHANGELOG.md` bilingue; tutorial GIS.
+
+### English
+
+**GIS SQLite: US/USM layers keep the style chosen by the user** — pyarchinit tag `us-style-choice-5.13.18-alpha` (dev only). Dev commit `5f68cc2b`.
+
+- **`modules/gis/pyarchinit_pyqgis.py`**: `Pyarchinit_pyqgis.charge_vector_layers` (SQLite branch) no longer calls `create_us_nested_symbology()` after `USViewStyler.apply_style_to_layer()`, which replaced its renderer; `Pyarchinit_pyqgis.charge_usm_layers` (SQLite branch) now uses `USViewStyler(Connection(), sito=...)` + `apply_style_to_layer()` + `_apply_us_feature_ordering()`, like the PostgreSQL branch. `create_us_nested_symbology()` stays in the loaders with no style choice.
+- Tests: `tests/utility/test_us_style_choice_respected.py`. Docs: bilingual `dev_logs/CHANGELOG.md`; GIS tutorial.
+
+---
+
 ## [qgis4-python-env-5.13.17] — 2026-09-11
 
 ### Italiano
