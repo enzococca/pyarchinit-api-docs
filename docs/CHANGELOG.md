@@ -7,6 +7,28 @@
 
 ---
 
+## [us-style-order-5.13.19] — 2026-09-11
+
+### Italiano
+
+**GIS US: stile esistente come modello, categoria `cont_per`, ordine di disegno come il Time Manager** — pyarchinit tag `us-style-order-5.13.19-alpha` (solo dev). Commit dev `311c07ff`.
+
+- **Nuovo modulo `modules/utility/stratigraphic_order.py`** (puro): costante `PERIOD_FIELDS`; `norm(value)` (periodo/fase/cont_per confrontabili: `'2'`, `2`, `2.0` → `'2'`); `period_starts(rows)` (anni di inizio per fase, periodo e codice `cont_per`, per sito, da righe `(sito, periodo, fase, cron_iniziale, cont_per)`); `period_start(starts, sito, periodo, fase, cont_per)`; `period_case(combos)` (espressione QGIS `CASE WHEN … THEN anno END` sui valori esatti del layer); `order_clauses(field_names, period_expression=None)` → `(espressione, ascendente, nulli prima)`.
+- **`modules/utility/create_style.py`**: nuove funzioni di modulo `apply_stratigraphic_order(layer, periodization=None, override=True)` (ordine sul renderer), `_template_symbols(renderer)`, `_template_symbol(renderer)`, `_shipped_us_styles()`, `_value_colour(value)`; `FIELD_LABELS['cont_per']`, `STYLE_SOURCE_LABELS`. `USViewStyler`: `periodization`, `_load_periodization()`, `choose_existing_style(layer)`, `_load_template(layer, template)`, `apply_style_to_layer(layer, choice=None)` (scelta chiesta una volta per styler), `_category_label(field, value)`, `_apply_temp_style(layer, category_field, template=None)`.
+- **`modules/gis/pyarchinit_pyqgis.py`**: `_apply_us_feature_ordering` usa `apply_stratigraphic_order(layer, override=False)`; `charge_vector_layers_all_period` passa `choice` allo styler e riapplica l'ordine dopo aver ricostruito le regole.
+- Test: `tests/utility/test_stratigraphic_order.py`, `tests/utility/test_us_styler.py`, `tests/utility/test_us_style_choice_respected.py`. Docs: `dev_logs/CHANGELOG.md` bilingue; tutorial 14 e 25.
+
+### English
+
+**GIS US: existing style as template, `cont_per` category, drawing order like the Time Manager** — pyarchinit tag `us-style-order-5.13.19-alpha` (dev only). Dev commit `311c07ff`.
+
+- **New module `modules/utility/stratigraphic_order.py`** (pure): constant `PERIOD_FIELDS`; `norm(value)` (comparable periodo/fase/cont_per: `'2'`, `2`, `2.0` → `'2'`); `period_starts(rows)` (start years per phase, period and `cont_per` code, per site, from `(sito, periodo, fase, cron_iniziale, cont_per)` rows); `period_start(starts, sito, periodo, fase, cont_per)`; `period_case(combos)` (QGIS expression `CASE WHEN … THEN year END` on the exact values of the layer); `order_clauses(field_names, period_expression=None)` → `(expression, ascending, nulls first)`.
+- **`modules/utility/create_style.py`**: new module functions `apply_stratigraphic_order(layer, periodization=None, override=True)` (order on the renderer), `_template_symbols(renderer)`, `_template_symbol(renderer)`, `_shipped_us_styles()`, `_value_colour(value)`; `FIELD_LABELS['cont_per']`, `STYLE_SOURCE_LABELS`. `USViewStyler`: `periodization`, `_load_periodization()`, `choose_existing_style(layer)`, `_load_template(layer, template)`, `apply_style_to_layer(layer, choice=None)` (choice asked once per styler), `_category_label(field, value)`, `_apply_temp_style(layer, category_field, template=None)`.
+- **`modules/gis/pyarchinit_pyqgis.py`**: `_apply_us_feature_ordering` uses `apply_stratigraphic_order(layer, override=False)`; `charge_vector_layers_all_period` passes `choice` to the styler and sets the order again after rebuilding the rules.
+- Tests: `tests/utility/test_stratigraphic_order.py`, `tests/utility/test_us_styler.py`, `tests/utility/test_us_style_choice_respected.py`. Docs: bilingual `dev_logs/CHANGELOG.md`; tutorials 14 and 25.
+
+---
+
 ## [us-style-choice-5.13.18] — 2026-09-11
 
 ### Italiano
