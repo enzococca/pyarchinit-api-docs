@@ -7,6 +7,32 @@
 
 ---
 
+## [spatial-views-startup-5.13.16] — 2026-09-11
+
+### Italiano
+
+**Viste spaziali SQLite di nuovo disegnate + primo avvio con finestre in primo piano** — pyarchinit tag `spatial-views-startup-5.13.16-alpha` (dev) e `v4.9.15` (master, solo la parte viste). Commit dev `d0c8b9de` (viste), `8a155dab` (primo avvio); master `8afbcc98`.
+
+- **Nuovo modulo `modules/db/spatial_view_repair.py`** (solo `sqlite3`, identico su dev e master): dataclass `ViewStatus(view, geometry, key, base, base_geometry, state, base_indexed, fix_sql, detail)` con stati `ok`/`bad_key`/`stale`/`missing`/`broken`/`unsafe`/`unregistered`; `rewrite_view_with_base_rowid(sql, base_table, key='rowid')` (sostituisce o inserisce `<base>.ROWID AS rowid`; `None` per `DISTINCT`/`GROUP BY`/`UNION` o tabella di base assente dal `FROM`); `audit_spatial_views(con, canonical=None)` (non scrive nulla; ogni correzione provata prima su una vista `TEMP`); `has_work(statuses)`; `repair_spatial_views(con, statuses=None, canonical=None)` (una `SAVEPOINT` per correzione; `CreateSpatialIndex` sulle tabelle di base senza indice).
+- **Nuovo modulo `modules/db/spatial_view_definitions.py`**: `CANONICAL_VIEWS`, le 13 viste standard del DB di esempio di master.
+- **`modules/db/spatial_index_repair.py`**: nuova `ensure_spatial_layers(db_path, load_spatialite, force=False, backup=True, log=None, canonical_views=None)` (indici **e** viste; `ensure_spatial_indexes` resta come alias); `audit_spatial_indexes` include ora anche le colonne con `spatial_index_enabled = 0`.
+- **Solo dev:** `pyarchinit_db_manager.connection()` chiama `ensure_spatial_layers`; nuovo `_register_ut_views()`; 17 `CREATE VIEW` SQLite con il ROWID della tabella di base; `_recreate_sqlite_views` salta le viste su tabelle inesistenti; rinomina di `tomba_table` con `legacy_alter_table=ON`. **Dev e master:** viste quote del pulsante "aggiorna SQLite" di `gui/pyarchinitConfigDialog.py`; template e DB di esempio riparati.
+- **Nuovo modulo `modules/utility/startup_ui.py`** (solo dev): `italian()`, `bring_to_front(widget)`, `exec_on_top(box, splash=None)`, `ask_yes_no(title, text, splash=None, default_yes=True)`, `no_console_window()`. **`gui/pyarchinit_splash.py`**: `set_progress(value, caption='')` su `FuturisticSplashWidget` e `PyArchInitSplash`. **`__init__.py`**: domanda di migrazione, avviso font e finestra di installazione in primo piano; `Worker` segnala l'avanzamento prima e dopo ogni pacchetto.
+- Test: `tests/migrations/test_spatial_view_repair.py`, `tests/migrations/test_spatial_view_sql_sources.py`, `tests/migrations/test_spatial_index_repair.py`, `tests/utility/test_shipped_sqlite_spatial_index.py`, `tests/utility/test_startup_ui.py`. Docs: `dev_logs/CHANGELOG.md` bilingue; tutorial 01 e 14 in 10 lingue.
+
+### English
+
+**SQLite spatial views drawn again + first start with windows in front** — pyarchinit tag `spatial-views-startup-5.13.16-alpha` (dev) and `v4.9.15` (master, views part only). Dev commits `d0c8b9de` (views), `8a155dab` (first start); master `8afbcc98`.
+
+- **New module `modules/db/spatial_view_repair.py`** (`sqlite3` only, identical on dev and master): dataclass `ViewStatus(view, geometry, key, base, base_geometry, state, base_indexed, fix_sql, detail)` with states `ok`/`bad_key`/`stale`/`missing`/`broken`/`unsafe`/`unregistered`; `rewrite_view_with_base_rowid(sql, base_table, key='rowid')` (replaces or inserts `<base>.ROWID AS rowid`; `None` for `DISTINCT`/`GROUP BY`/`UNION` or a base table missing from `FROM`); `audit_spatial_views(con, canonical=None)` (writes nothing; every fix is first proven on a `TEMP` view); `has_work(statuses)`; `repair_spatial_views(con, statuses=None, canonical=None)` (one `SAVEPOINT` per fix; `CreateSpatialIndex` on unindexed base tables).
+- **New module `modules/db/spatial_view_definitions.py`**: `CANONICAL_VIEWS`, the 13 standard views of master's sample DB.
+- **`modules/db/spatial_index_repair.py`**: new `ensure_spatial_layers(db_path, load_spatialite, force=False, backup=True, log=None, canonical_views=None)` (indexes **and** views; `ensure_spatial_indexes` kept as an alias); `audit_spatial_indexes` now also covers columns with `spatial_index_enabled = 0`.
+- **Dev only:** `pyarchinit_db_manager.connection()` calls `ensure_spatial_layers`; new `_register_ut_views()`; 17 SQLite `CREATE VIEW` statements with the base table's ROWID; `_recreate_sqlite_views` skips views on missing tables; `tomba_table` rename with `legacy_alter_table=ON`. **Dev and master:** quote views of the "update SQLite" button in `gui/pyarchinitConfigDialog.py`; template and sample DB repaired.
+- **New module `modules/utility/startup_ui.py`** (dev only): `italian()`, `bring_to_front(widget)`, `exec_on_top(box, splash=None)`, `ask_yes_no(title, text, splash=None, default_yes=True)`, `no_console_window()`. **`gui/pyarchinit_splash.py`**: `set_progress(value, caption='')` on `FuturisticSplashWidget` and `PyArchInitSplash`. **`__init__.py`**: migration question, font warning and install dialog in front; `Worker` reports progress before and after each package.
+- Tests: `tests/migrations/test_spatial_view_repair.py`, `tests/migrations/test_spatial_view_sql_sources.py`, `tests/migrations/test_spatial_index_repair.py`, `tests/utility/test_shipped_sqlite_spatial_index.py`, `tests/utility/test_startup_ui.py`. Docs: bilingual `dev_logs/CHANGELOG.md`; tutorials 01 and 14 in 10 languages.
+
+---
+
 ## [spatial-index-repair-5.13.15] — 2026-09-10
 
 ### Italiano
