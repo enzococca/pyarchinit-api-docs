@@ -7,6 +7,26 @@
 
 ---
 
+## [qgis4-python-env-5.13.17] — 2026-09-11
+
+### Italiano
+
+**QGIS 4: pacchetti installati per il Python che esegue QGIS (`No module named 'psycopg2._psycopg'`)** — pyarchinit tag `qgis4-python-env-5.13.17-alpha` (solo dev). Commit dev `02f2dda9`.
+
+- **Nuovo modulo `modules/utility/python_env.py`** (solo libreria standard, importato in cima a `__init__.py`): costante `MARKER` (`.pyarchinit_python`); `python_tag(version=None)`, `abi_tag(version=None, machine=None)` (es. `cp312-arm64`); `read_marker(ext_dir)`, `write_marker(ext_dir, tag=None)`; `foreign_extension(ext_dir, version=None)` (primo modulo compilato `.so`/`.pyd` con tag `cpython-XY`/`cpXY` di un altro Python; `abi3` ignorati); `ensure_ext_libs(plugin_dir, version=None, machine=None, log=print)` (sposta un `ext_libs` di un altro Python in `ext_libs_<tag>`, rimette al suo posto quello giusto se esiste, scrive il marker; non solleva eccezioni); `candidates(system=None, executable=None, prefix=None, base_prefix=None, version=None)` (interpreti da provare, con `PYTHONHOME`, quelli della QGIS in esecuzione per primi; mai il binario QGIS); `probe(python, home=None, timeout=20)` → `(major, minor, machine, has_pip)`; `pip_interpreter(extra=(), version=None, machine=None)` → `(python, env)` o `None`; `reset_cache()`.
+- **`__init__.py`**: `_EXT_LIBS_DIR = ensure_ext_libs(...)`; `PackageManager.REQUIREMENT_ALIASES` (`psycopg2-binary` → `psycopg2`); nuovi `PackageManager._python_fallbacks()`, `_pip_install(args, timeout=900)`, `_reinstall_pillow_in_qgis(package)`; `install(package)` unificato per tutti i sistemi; `check_required_packages` usa l'`ext_libs` attivo.
+- Test: `tests/utility/test_python_env.py`. Docs: `dev_logs/CHANGELOG.md` bilingue; tutorial 01 in 10 lingue.
+
+### English
+
+**QGIS 4: packages installed for the Python running QGIS (`No module named 'psycopg2._psycopg'`)** — pyarchinit tag `qgis4-python-env-5.13.17-alpha` (dev only). Dev commit `02f2dda9`.
+
+- **New module `modules/utility/python_env.py`** (standard library only, imported at the top of `__init__.py`): constant `MARKER` (`.pyarchinit_python`); `python_tag(version=None)`, `abi_tag(version=None, machine=None)` (e.g. `cp312-arm64`); `read_marker(ext_dir)`, `write_marker(ext_dir, tag=None)`; `foreign_extension(ext_dir, version=None)` (first compiled `.so`/`.pyd` module tagged `cpython-XY`/`cpXY` for another Python; `abi3` ignored); `ensure_ext_libs(plugin_dir, version=None, machine=None, log=print)` (moves an `ext_libs` of another Python to `ext_libs_<tag>`, puts back the matching one when present, writes the marker; never raises); `candidates(system=None, executable=None, prefix=None, base_prefix=None, version=None)` (interpreters to try, with `PYTHONHOME`, those of the running QGIS first; never the QGIS binary); `probe(python, home=None, timeout=20)` → `(major, minor, machine, has_pip)`; `pip_interpreter(extra=(), version=None, machine=None)` → `(python, env)` or `None`; `reset_cache()`.
+- **`__init__.py`**: `_EXT_LIBS_DIR = ensure_ext_libs(...)`; `PackageManager.REQUIREMENT_ALIASES` (`psycopg2-binary` → `psycopg2`); new `PackageManager._python_fallbacks()`, `_pip_install(args, timeout=900)`, `_reinstall_pillow_in_qgis(package)`; `install(package)` unified for every system; `check_required_packages` uses the active `ext_libs`.
+- Tests: `tests/utility/test_python_env.py`. Docs: bilingual `dev_logs/CHANGELOG.md`; tutorial 01 in 10 languages.
+
+---
+
 ## [spatial-views-startup-5.13.16] — 2026-09-11
 
 ### Italiano
