@@ -7,6 +7,28 @@
 
 ---
 
+## [record-compare-5.13.20] — 2026-09-24
+
+### Italiano
+
+**Schede: le modifiche a un record esistente si salvano di nuovo, e un record che nessuno ha toccato non risulta più modificato** — pyarchinit tag `record-compare-5.13.20-alpha` (dev) e **`v4.9.16`** (master). Commit dev `611fa30c`, commit master `802ec402` (preceduto da `67ef6b95`, scheda US).
+
+- **Nuovo modulo `modules/utility/record_compare.py`** (puro, niente Qt né database; presente su entrambi i rami): `same_value(v)` — `''` per `None` e per la stringa `'None'`, altrimenti `str(v)` — e `records_equal(corr, temp)`, che confronta le due liste valore per valore e ricade sul confronto diretto quando non sono liste (alcune schede vi parcheggiano l'intero record ORM).
+- **`tabs/*.py`**: `records_equal_check()` usa `records_equal(self.DATA_LIST_REC_CORR, self.DATA_LIST_REC_TEMP)` in tutte le schede che tengono le due liste — 21 su dev, 18 su master.
+- **Solo master (residui Python 2):** `set_LIST_REC_CORR()` legge il record con `str(getattr(self.DATA_LIST[self.REC_CORR], i))` invece di `eval("unicode(...)")` in 13 schede (US_USM, Site, Inv_Materiali, Tomba, Struttura, Tafonomia, Campioni, Documentazione, Periodizzazione, Thesaurus, Schedaind, Inv_Lapidei, Pdf_administrator): il `NameError` veniva catturato e ogni modifica risultava «nessuna modifica», quindi l'UPDATE non partiva mai. Inoltre `gui/ui/US_USM.ui` rende editabile `comboBox_unita_tipo` (altrimenti `setEditText()` non fa nulla e la voce «Unità tipo» non mostra il valore del record), `tabs/Site.py` usa `str()` nelle 6 chiamate del geocoding e `tabs/Pdf_administrator.py` perde il `from pyarchinit_conn_strings import *` interno a `connect()`, che era un `SyntaxError` e impediva l'import della scheda.
+- Test: **`tests/utility/test_record_compare.py`** (7 test, dev) — valori equivalenti, modifica reale riconosciuta, lunghezze diverse, oggetti non-lista, più due guardie sul sorgente (nessuna scheda confronta le liste da sé, nessuna legge un record con `eval("unicode(...)")`). Delta suite: `tests/utility` + `tests/migrations` 205 → 212 passati, stesso errore preesistente. Docs: `dev_logs/CHANGELOG.md` bilingue.
+
+### English
+
+**Sheets: changes to an existing record are saved again, and a record nobody touched is no longer reported as modified** — pyarchinit tags `record-compare-5.13.20-alpha` (dev) and **`v4.9.16`** (master). Dev commit `611fa30c`, master commit `802ec402` (preceded by `67ef6b95`, US sheet).
+
+- **New module `modules/utility/record_compare.py`** (pure, no Qt, no database; on both branches): `same_value(v)` — `''` for `None` and for the string `'None'`, else `str(v)` — and `records_equal(corr, temp)`, which compares the two lists value by value and falls back to a plain comparison when they are not lists (some sheets park the whole ORM record there).
+- **`tabs/*.py`**: `records_equal_check()` uses `records_equal(self.DATA_LIST_REC_CORR, self.DATA_LIST_REC_TEMP)` in every sheet that keeps the two lists — 21 on dev, 18 on master.
+- **Master only (Python 2 leftovers):** `set_LIST_REC_CORR()` reads the record with `str(getattr(self.DATA_LIST[self.REC_CORR], i))` instead of `eval("unicode(...)")` in 13 sheets (US_USM, Site, Inv_Materiali, Tomba, Struttura, Tafonomia, Campioni, Documentazione, Periodizzazione, Thesaurus, Schedaind, Inv_Lapidei, Pdf_administrator): the `NameError` was caught and every change was reported as "no changes", so the UPDATE never ran. Also `gui/ui/US_USM.ui` makes `comboBox_unita_tipo` editable (otherwise `setEditText()` does nothing and "Unità tipo" never shows the value held in the record), `tabs/Site.py` uses `str()` in the 6 geocoding calls, and `tabs/Pdf_administrator.py` drops the `from pyarchinit_conn_strings import *` inside `connect()`, a `SyntaxError` that kept the sheet from being imported at all.
+- Tests: **`tests/utility/test_record_compare.py`** (7 tests, dev) — equivalent values, a real change recognised, different lengths, non-list objects, plus two source guards (no sheet compares the lists by itself, none reads a record with `eval("unicode(...)")`). Suite delta: `tests/utility` + `tests/migrations` 205 → 212 passed, same pre-existing error. Docs: bilingual `dev_logs/CHANGELOG.md`.
+
+---
+
 ## [us-style-order-5.13.19] — 2026-09-11
 
 ### Italiano
