@@ -7,6 +7,28 @@
 
 ---
 
+## [periodo-fase-choose-5.13.21] — 2026-09-24
+
+### Italiano
+
+**Scheda US: periodo e fase si scelgono dall'elenco, non si scrivono** — pyarchinit tag `periodo-fase-choose-5.13.21-alpha` (dev) e **`v4.9.17`** (master). Commit dev `ee9e0eb1`, commit master `efbd942f`.
+
+- **Nuovo modulo `modules/utility/combo_value.py`** (puro, duck-typed sul widget; entrambi i rami): `show_value(combo, value)` — sceglie il valore nell'elenco (`findText` + `setCurrentIndex`), lo **aggiunge all'elenco** se non c'è (record con periodi che la Periodizzazione non conosce: rinominati, cancellati, o Periodizzazione mai compilata), lascia la casella vuota per valore vuoto o `None`, e lavora con i segnali della casella zittiti (`blockSignals`). Restituisce `True` quando mostra un valore.
+- **`tabs/US_USM.py`** (entrambi i rami): `customize_GUI()` non chiama più `setComboBoxEditable` per `comboBox_per_iniz`, `comboBox_fas_iniz`, `comboBox_per_fin`, `comboBox_fas_fin`; i 20 punti che le riempivano (`fill_fields`, `empty_fields`, `empty_fields_nosite`, `charge_periodo_list`, `charge_periodo_fin_list`, `charge_fase_iniz_list`, `charge_fase_fin_list`) usano `show_value`; `fill_fields()` chiama `self.check_v()` perché i segnali non lo fanno più.
+- Perché i segnali sono zittiti: `charge_datazione_list()` è agganciata a `currentIndexChanged` delle caselle e riscrive `lineEdit_datazione` (colonna `datazione`), quindi un record appena aperto sarebbe risultato modificato.
+- Test: **`tests/utility/test_combo_value.py`** (7, dev, `QgsApplication` + `QComboBox` reale) — valore dell'elenco, intero, valore fuori elenco conservato, valore vuoto, nessun segnale emesso, più due guardie sul sorgente. Delta suite: `tests/utility` + `tests/migrations` 212 → 219 passati. Docs: `dev_logs/CHANGELOG.md` bilingue; tutorial invariati (il 03 descrive già il vincolo).
+
+### English
+
+**US sheet: period and phase are chosen from the list, not typed** — pyarchinit tags `periodo-fase-choose-5.13.21-alpha` (dev) and **`v4.9.17`** (master). Dev commit `ee9e0eb1`, master commit `efbd942f`.
+
+- **New module `modules/utility/combo_value.py`** (pure, duck-typed on the widget; both branches): `show_value(combo, value)` — selects the value in the list (`findText` + `setCurrentIndex`), **adds it to the list** when it is not there (records holding periods Periodizzazione does not know: renamed, removed, or a Periodizzazione never filled in), leaves the box empty for an empty value or `None`, and works with the signals of the box silenced (`blockSignals`). Returns `True` when a value is shown.
+- **`tabs/US_USM.py`** (both branches): `customize_GUI()` no longer calls `setComboBoxEditable` for `comboBox_per_iniz`, `comboBox_fas_iniz`, `comboBox_per_fin`, `comboBox_fas_fin`; the 20 places that filled them (`fill_fields`, `empty_fields`, `empty_fields_nosite`, `charge_periodo_list`, `charge_periodo_fin_list`, `charge_fase_iniz_list`, `charge_fase_fin_list`) use `show_value`; `fill_fields()` calls `self.check_v()` since the signals no longer do.
+- Why the signals are silenced: `charge_datazione_list()` is connected to `currentIndexChanged` of those boxes and rewrites `lineEdit_datazione` (the `datazione` column), so a record just opened would have looked modified.
+- Tests: **`tests/utility/test_combo_value.py`** (7, dev, real `QgsApplication` + `QComboBox`) — a value of the list, an integer, a value outside the list kept, an empty value, no signal emitted, plus two source guards. Suite delta: `tests/utility` + `tests/migrations` 212 → 219 passed. Docs: bilingual `dev_logs/CHANGELOG.md`; tutorials unchanged (03 already states the constraint).
+
+---
+
 ## [record-compare-5.13.20] — 2026-09-24
 
 ### Italiano
