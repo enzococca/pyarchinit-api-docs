@@ -7,6 +7,30 @@
 
 ---
 
+## [db-migrator-5.13.22] — 2026-09-24
+
+### Italiano
+
+**Importazione: tutto il database in un colpo solo, dati e geometrie** — pyarchinit tag `db-migrator-5.13.22-alpha` (solo dev). Commit dev `3c051828`.
+
+- **Nuovo modulo `modules/db/db_migrator.py`** (puro, senza Qt): costanti `ALPHANUMERIC_TABLES` (25), `GEOMETRY_TABLES` (16), `MEDIA_TABLES` (3), `ALL_TABLES` (44), `NOT_MIGRATED` (utenti, ruoli, permessi, log, viste e tabelle di appoggio), `HANDLED_BY_MIGRATOR` (le 12 schede che il vecchio codice non sapeva scrivere), `COMMIT_EVERY`; classe `TableOutcome` (`read`, `written`, `skipped`, `existing`, `error`, `srid_aligned`, `ok`); `copy_table(read_manager, write_manager, name, on_row=None, search_dict=None)`; `migrate(read_manager, write_manager, tables=None, on_table=None, on_row=None, search_dict=None)`; `already_filled(write_manager, tables=None)`; `summary(outcomes)`; `align_geometry_srid(manager, table, srid)`; `geometry_column(mapper)`; interni `_empty_to_null`, `_advance_sequence`, `_sqlite_registration`, `_row_count`, `_mapper_of`, `_short`.
+- **`gui/pyarchinitConfigDialog.py`**: nuovi `_import_connection(side)` (stringa di connessione della metà 'rd'/'wt' della tab), `_migration_search_dict()` (filtro campo=valore), `_run_migration(selection)` (avvisi, barra di avanzamento, riepilogo unico); `on_pushButton_import_pressed` manda al motore la voce `ALL` e le schede in `HANDLED_BY_MIGRATOR`.
+- **`gui/ui/pyarchinitConfigDialog.ui`**: `comboBox_mapper_read` guadagna 8 voci (INVENTARIO_LAPIDEI, PDF_ADMINISTRATOR, FAUNA, PERSONALE, PRESENZE, ATTREZZATURE, BUDGET, COMPUTO_METRICO) prima di `ALL`, che resta ultima.
+- **`modules/db/pyarchinit_db_manager.py`**: `ARCHEOZOOLOGY` aggiunta all'import e ai due dizionari nome→classe (`query_bool`, `group_by`): senza, quella scheda non era leggibile.
+- Test: **`tests/migrations/test_db_migrator.py`** (11). Delta suite: `tests/utility` + `tests/migrations` 219 → 230 passati.
+
+### English
+
+**Import: a whole database in one go, data and geometries** — pyarchinit tag `db-migrator-5.13.22-alpha` (dev only). Dev commit `3c051828`.
+
+- **New module `modules/db/db_migrator.py`** (pure, no Qt): constants `ALPHANUMERIC_TABLES` (25), `GEOMETRY_TABLES` (16), `MEDIA_TABLES` (3), `ALL_TABLES` (44), `NOT_MIGRATED` (users, roles, permissions, logs, views and staging tables), `HANDLED_BY_MIGRATOR` (the 12 sheets the old code could not write), `COMMIT_EVERY`; class `TableOutcome` (`read`, `written`, `skipped`, `existing`, `error`, `srid_aligned`, `ok`); `copy_table(read_manager, write_manager, name, on_row=None, search_dict=None)`; `migrate(read_manager, write_manager, tables=None, on_table=None, on_row=None, search_dict=None)`; `already_filled(write_manager, tables=None)`; `summary(outcomes)`; `align_geometry_srid(manager, table, srid)`; `geometry_column(mapper)`; internals `_empty_to_null`, `_advance_sequence`, `_sqlite_registration`, `_row_count`, `_mapper_of`, `_short`.
+- **`gui/pyarchinitConfigDialog.py`**: new `_import_connection(side)` (connection string of the 'rd'/'wt' half of the tab), `_migration_search_dict()` (the field=value filter), `_run_migration(selection)` (warnings, progress bar, single summary); `on_pushButton_import_pressed` sends the `ALL` entry and the sheets in `HANDLED_BY_MIGRATOR` to the engine.
+- **`gui/ui/pyarchinitConfigDialog.ui`**: `comboBox_mapper_read` gains 8 entries (INVENTARIO_LAPIDEI, PDF_ADMINISTRATOR, FAUNA, PERSONALE, PRESENZE, ATTREZZATURE, BUDGET, COMPUTO_METRICO) before `ALL`, which stays last.
+- **`modules/db/pyarchinit_db_manager.py`**: `ARCHEOZOOLOGY` added to the import and to the two name→class dictionaries (`query_bool`, `group_by`): without it that sheet could not be read.
+- Tests: **`tests/migrations/test_db_migrator.py`** (11). Suite delta: `tests/utility` + `tests/migrations` 219 → 230 passed.
+
+---
+
 ## [periodo-fase-choose-5.13.21] — 2026-09-24
 
 ### Italiano
