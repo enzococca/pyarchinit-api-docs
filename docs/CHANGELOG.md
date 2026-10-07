@@ -7,6 +7,23 @@
 
 ---
 
+## [em-export-polish-5.13.29] — 2026-10-07
+
+### Italiano
+
+**em.json: i 5 minor della review chiusi** — pyarchinit tag `em-export-polish-5.13.29-alpha` (solo dev).
+
+- **`modules/s3dgraphy/em_export.py`**: nuovo `_find_emstudio_executable()` (PATH + percorsi installer); `open_in_emstudio` su Windows/Linux lancia SOLO un EMStudio trovato (mai più `os.startfile`/`xdg-open` → editor associato con esito True); nuovo `_claim_path(path, site)` — un file per sito (`active_graph_id` come proprietario, suffisso sha1[:8] per il sito diverso).
+- **`pyarchinitPlugin.py`**: `unload()` rimuove `actionEmExport` e tutte le voci del menu Migrazioni (duplicazione al reload).
+- **`scripts/s3dgraphy_sync.py`, `scripts/import_yed_graphml.py`**: specchio `PYARCHINIT_WORKSPACE_DIR` ← data home.
+- Tutorial `el/01_configurazione.md`: sezione em.json. Test: +3 em_export, +1 workspace guard. Suite sync: 465/0/1 xfail.
+
+### English
+
+**em.json: the review's 5 deferred minors closed** — tag `em-export-polish-5.13.29-alpha` (dev only). Honest opener on Windows/Linux (found EMStudio executable or False), one file per site (`_claim_path`), clean plugin reload (menu entries removed in `unload()`), standalone CLIs mirror the data home, Greek tutorial section.
+
+---
+
 ## [one-bridge-fixes-5.13.28] — 2026-10-07
 
 ### Italiano
