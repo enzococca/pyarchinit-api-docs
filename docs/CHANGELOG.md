@@ -7,6 +7,23 @@
 
 ---
 
+## [room-polish-5.13.31] — 2026-10-07
+
+### Italiano
+
+**Stanza: i 7 minor della review chiusi** — pyarchinit tag `room-polish-5.13.31-alpha` (solo dev).
+
+- **`modules/s3dgraphy/room/room_client.py`**: `_do_http(…, timeout)` con `TIMEOUT=30` (pagine ops) e `PROBE_TIMEOUT=5` (`_probe_http`, default di `preflight`/`rooms_door`); `_deliver_ops` ri-pagina sul **413** alla taglia nel detail del server (la pagina respinta non era applicata) e, su un HTTPError a metà lotto, riporta quante op erano già arrivate; nuovo `token_in_the_clear(settings) -> bool`.
+- **`modules/s3dgraphy/room/us_ops.py`**: `_sid_part` — `|` e `\` scappati nelle parti di `stable_id` (niente collisioni «S|1»/«2» vs «S»/«1|2»).
+- **`pyarchinitPlugin.py`** (`_run_room_delivery`): consegna in **`QgsTask.fromFunction`** (esito al completamento, GUI mai bloccata); campi nodo/stanza in sola lettura quando `STRATIGRAPH_SERVER_URL`/`STRATIGRAPH_ROOM_ID` sono impostate (tooltip con la variabile); conferma prima di mandare un token su `http://` non locale.
+- Test: +8 (`test_room_client.py` 17, `test_room_us_ops.py` 18). Suite `tests/sync`: 474 passati, 0 falliti, 1 xfail, 7 errori ambientali preesistenti.
+
+### English
+
+**Room: the review's 7 deferred minors closed** — tag `room-polish-5.13.31-alpha` (dev only). Delivery in a `QgsTask`; probes at 5 s; adaptive re-paging on 413; landed-count on mid-delivery refusals; `token_in_the_clear` confirmation; env-locked read-only fields; pipe-safe `stable_id` parts; HTTPError branch pinned by tests.
+
+---
+
 ## [room-delivery-5.13.30] — 2026-10-07
 
 ### Italiano
