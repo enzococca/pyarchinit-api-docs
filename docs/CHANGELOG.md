@@ -7,6 +7,26 @@
 
 ---
 
+## [em-export-5.13.25] — 2026-10-07
+
+### Italiano
+
+**Extended Matrix: esporta il sito in em.json e aprilo in EMStudio** — pyarchinit tag `em-export-5.13.25-alpha` (solo dev). Commit dev `e9b0b510`, `e41a14e6`, `47fecbb4`.
+
+- **`modules/s3dgraphy/em_export.py`** (nuovo, puro Python, niente Qt): `export_site(connection_url, site, out_dir) -> (path, n_nodes, n_edges, warnings)` — grafo via `PyArchInitImporter(connection_url=…, mapping_name="pyarchinit_us_mapping", filters={"sito": site})`, scrittura `export_emjson`, **rilettura di verifica** `import_emjson` (nodi/archi devono tornare uguali); `emjson_available() -> bool`; `site_filename(site) -> str` (qualunque scrittura Unicode, fallback `sito`); `open_in_emstudio(path, runner=subprocess.run) -> bool` (mai un'eccezione; macOS `open -a`, Windows `os.startfile`, Linux `xdg-open`); `EmExportError(RuntimeError)` con messaggi per l'utente.
+- **`pyarchinitPlugin.py`**: azione `actionEmExport` («Extended Matrix → Esporta sito in em.json…») registrata in `_init_migrations_menu`; handler `_run_em_export` (lista SITE da `query_bool`, `QInputDialog.getItem`, export in `<home>/pyarchinit_EM_folder`, domanda EMStudio, link releases se assente).
+- Test: `tests/sync/test_em_export.py` (7). Tutorial `01_configurazione.md` it/en/pt/ro.
+
+### English
+
+**Extended Matrix: export the site to em.json and open it in EMStudio** — pyarchinit tag `em-export-5.13.25-alpha` (dev only).
+
+- **`modules/s3dgraphy/em_export.py`** (new, pure Python, no Qt): `export_site(connection_url, site, out_dir) -> (path, n_nodes, n_edges, warnings)` — graph via `PyArchInitImporter`, written with `export_emjson`, **verification re-read** with `import_emjson`; `emjson_available()`; `site_filename()` (any Unicode script); `open_in_emstudio(path, runner=…)` (never raises); `EmExportError(RuntimeError)` with user-worded messages.
+- **`pyarchinitPlugin.py`**: `actionEmExport` action registered in `_init_migrations_menu`; `_run_em_export` handler (SITE list, site picker, export into `<home>/pyarchinit_EM_folder`, EMStudio question, releases link when missing).
+- Tests: `tests/sync/test_em_export.py` (7). Tutorials `01_configurazione.md` it/en/pt/ro.
+
+---
+
 ## [one-bridge-5.13.24] — 2026-10-07
 
 ### Italiano
