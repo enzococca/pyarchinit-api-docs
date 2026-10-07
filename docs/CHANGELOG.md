@@ -7,6 +7,30 @@
 
 ---
 
+## [one-bridge-closing-5.13.27] — 2026-10-07
+
+### Italiano
+
+**Ponte unico, chiusura (A5)** — pyarchinit tag `one-bridge-closing-5.13.27-alpha` (solo dev). Commit dev `56556232`.
+
+- **75 file ricablati**: `modules.s3dgraphy.sync.<modulo migrato>` → `s3dgraphy.sync.<modulo>` (e `rapporti` → `s3dgraphy.rapporti`) in tabs/, modules/, gui/, scripts/, `pyarchinitPlugin.py` e tests/.
+- **`modules/s3dgraphy/sync/__init__.py`**: rimosso lo shim `sys.modules`; re-export (`DbHandle`, `ConflictResolver`, `IngestResult`, `VocabProviderCore`, vocab types…) ora dalla libreria; vocabolario continuità innestato con import diretti. Il pacchetto contiene solo: `graph_projector` (wrapper), `graph_ingestor`, `continuity_generator`, `paradata_edge_resolver`, `vocab_provider`.
+- Guardie: `test_no_plugin_file_imports_the_vendored_path_for_migrated_modules`, `test_the_old_import_path_is_dead`, `test_the_library_modules_come_from_ext_libs`.
+- Spec `2026-10-07-one-bridge-s3dgraphy-design.md`: Status → **Shipped (A+B1)**.
+- Suite `tests/sync`: 456 passati, 0 falliti, 1 xfail, 7 errori ambientali preesistenti.
+
+### English
+
+**One bridge, closing (A5)** — pyarchinit tag `one-bridge-closing-5.13.27-alpha` (dev only).
+
+- **75 files rewired**: `modules.s3dgraphy.sync.<migrated>` → `s3dgraphy.sync.<module>` (`rapporti` → `s3dgraphy.rapporti`) across the plugin and tests.
+- **`modules/s3dgraphy/sync/__init__.py`**: `sys.modules` shim removed; re-exports now come from the library; continuity vocabulary grafted with direct imports. The package holds only the pyArchInit layer.
+- Guards: no plugin file imports the vendored path for migrated modules; the old path is dead; library modules come from `ext_libs`.
+- Spec status → **Shipped (A+B1)**.
+- `tests/sync` suite: 456 passed, 0 failed, 1 xfailed, 7 pre-existing environmental errors.
+
+---
+
 ## [graphml-retire-5.13.26] — 2026-10-07
 
 ### Italiano
