@@ -7,6 +7,30 @@
 
 ---
 
+## [one-bridge-fixes-5.13.28] — 2026-10-07
+
+### Italiano
+
+**Review finale del ponte: matrix nell'em.json, pin dev40 agli utenti** — pyarchinit tag `one-bridge-fixes-5.13.28-alpha` (solo dev). Commit dev `ce6314a8`.
+
+- **`modules/s3dgraphy/em_export.py`**: `export_site` costruisce il grafo con `GraphProjector` del plugin (prima: importer grezzo → zero archi stratigrafici nel file); specchia `kind` dei gruppi in attributes (l'exporter em.json non serializza `LocationNodeGroup.kind`); ogni guasto interno → `EmExportError`; avvisi projector+rilettura nel valore di ritorno.
+- **`modules/utility/version_pins.py`** (nuovo): `pin_satisfied(spec, installed)` — uguaglianza `packaging` per `==`, floor per `>=`; `check_required_packages` (`__init__.py`) delega il ramo `==` (prima: tolleranza di sola major → dev9 passava per dev40).
+- **`modules/s3dgraphy/sync/graph_projector.py`**: nuovo passo `_prune_foreign_site_nodes` (su SQLite l'importer legge tutta us_table; via i nodi non reclamati + decorazione orfana).
+- **`modules/s3dgraphy/s3dgraphy_dot_bridge.py`**: rimossi il checkbox GraphML e il blocco «Group US by»/«Primary dimension» dal dialogo d'export; import relativi morti → assoluti (anche `pyarchinitPlugin.py` ×6, `qfield_importer.py`).
+- Test nuovi: `tests/sync/test_graph_projector_multisite.py`, `tests/utility/test_version_pins.py`, +5 in `test_em_export.py`, +3 guardie in `test_one_bridge_shim.py`. Suite `tests/sync`: 462 passati, 0 falliti, 1 xfail.
+
+### English
+
+**Final review of the bridge: the matrix travels in em.json, the dev40 pin reaches users** — pyarchinit tag `one-bridge-fixes-5.13.28-alpha` (dev only).
+
+- **`em_export.export_site`** builds the graph with the plugin's `GraphProjector` (was: raw importer → zero stratigraphic edges in the file); mirrors group `kind` into attributes; wraps every internal failure as `EmExportError`; returns projector+read-back warnings.
+- **`modules/utility/version_pins.py`** (new): exact-pin equality; `check_required_packages` delegates its `==` branch (was: major-only tolerance).
+- **`graph_projector._prune_foreign_site_nodes`**: one site per projection on SQLite.
+- **`s3dgraphy_dot_bridge`**: GraphML checkbox and the group-by UI removed from the export dialog; dead relative imports → absolute.
+- New tests: multisite projection, version pins, +5 em_export, +3 shim guards. `tests/sync`: 462 passed, 0 failed, 1 xfailed.
+
+---
+
 ## [one-bridge-closing-5.13.27] — 2026-10-07
 
 ### Italiano
