@@ -7,6 +7,22 @@
 
 ---
 
+## [room-delivery-5.13.30] — 2026-10-07
+
+### Italiano
+
+**Consegna di un sito a una stanza StratiGraph (C) + porta del nodo (B2 minimo)** — pyarchinit tag `room-delivery-5.13.30-alpha` (solo dev).
+
+- **`modules/s3dgraphy/room/`** (nuovo pacchetto): `us_ops.py` — adapter puro riga→op: `unit_id = stable_id("pyarchinit","us",sito,area,us)`, `edge_id = source__edge_type__target` (convenzione EMStudio), `UNIT_TYPES` + `KIND_OF_CODE` (USM/WSU → US+`stratigraphic_kind`) + `canonical_unita_tipo` (SU/SE/UE/ΣΜ → US), `INVERSE_TO_FORWARD` (gli inversi si piegano nel tipo diretto: una relazione = un arco), ops via `crdt.make_op` con `data.lang`; `site_rows.py` — `load(conn_str, sito) -> (units, relationships, problems)`, rapporti dalla colonna testuale una voce per volta; `room_client.py` — `NodeSettings` (env > QSettings, token SOLO env), `preflight`/`_require_identity` (base `/em` auto-risolta), `_deliver_ops` (pagine ≤1000, refused-in-200), `deliver_site(conn_str, sito, settings, http, lang) -> Outcome` (`a_repeat`, `summary()`), `rooms_door`.
+- **`pyarchinitPlugin.py`**: azioni `actionRoomDelivery` («Consegna sito alla stanza…», dialogo nodo/stanza/token mai persistito) e `actionRoomOpen` («Apri il nodo (stanze)…»); rimozione in `unload()`.
+- Test: `test_room_us_ops.py` (17), `test_room_client.py` (10, nodo finto iniettabile), `test_room_delivery_live.py` (2, skip senza nodo). Collaudo misurato: 129/129 poi 44 fuse + 85 «già presenti»; EN = IT (36 SU canonicalizzate). Review indipendente pre-tag: 2 Critical + 4 Important corretti nella stessa release. Tutorial it/en/pt/ro/el; spec aggiornata (addendum C).
+
+### English
+
+**Delivering a site to a StratiGraph room (C) + the node's door (minimal B2)** — tag `room-delivery-5.13.30-alpha` (dev only). New `modules/s3dgraphy/room/` package (pure adapter with stable ids, EMStudio edge-id convention, inverse folding, localized-code canonicalization, `crdt.make_op` + `data.lang`; textual-rapporti reader returning problems; REST client with `/em` auto-resolution, ≤1000-op pages, refused-in-200, token only from env), two menu actions, live tests that skip without a node. Measured: 129/129 then 44 merged + 85 already-there; English DB = Italian DB. Independent pre-tag review: 2 Critical + 4 Important fixed in the same release.
+
+---
+
 ## [em-export-polish-5.13.29] — 2026-10-07
 
 ### Italiano
