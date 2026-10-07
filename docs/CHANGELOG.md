@@ -7,6 +7,32 @@
 
 ---
 
+## [one-bridge-5.13.24] — 2026-10-07
+
+### Italiano
+
+**Ponte unico: `s3dgraphy.sync` dalla libreria (tappe A1–A3)** — pyarchinit tag `one-bridge-5.13.24-alpha` (solo dev). Commit dev `844ee81f`, `250fac26`, `915387a4`, `319009b7`, `95629db1`, `bb104d34`, `700480ce`.
+
+- **Pin**: `s3dgraphy==1.6.0.dev9` → `1.6.0.dev40`, nuova dipendenza `dtcstamp>=0.1.4` (`requirements.txt`). `ext_libs/` resta un passo d'installazione.
+- **20 moduli di `modules/s3dgraphy/sync/` eliminati**: ora vengono dalla libreria; il vecchio percorso d'import (`modules.s3dgraphy.sync.<nome>`) vive in un alias `sys.modules` dentro `__init__.py` fino alla tappa A5. Identici (10): `yed_group_walker`, `yed_detector`, `vocab_types`, `vocab_provider_core`, `uuid7`, `ingest_result`, `group_store`, `conflict_resolver`, `_legacy_paradata_svgs`, `_db_handle`. Deriva riconciliata (7): `yed_rapporti_policy`, `yed_classifier`, `yed_import_pipeline`, `paradata_store`, `edge_registry`, `group_projector`, `yed_table_parser`. Contratto nuovo (3): `pyarchinit_pg_importer` (`apply_legacy_kind`), `rapporti` (grafie canoniche `equals`/`bonded_to`), `_workspace` (il plugin specchia `PYARCHINIT_HOME` in `PYARCHINIT_WORKSPACE_DIR`).
+- **`graph_projector.py` riscritto come wrapper** (1489 → ~460 righe): `GraphProjector(_LibGraphProjector)` con passi host `_apply_pyarchinit_attributes`, `_fix_epochs` (fusione doppione epoche), `_build_rapporti_edges`, refine paradata, `_warn_suspicious_chronologies`. `ProjectionError` riesportata dalla libreria.
+- **`graph_ingestor.py` resta vendorizzato** con API invariata; nuove adozioni dev40: way-back `unit_code` in `_resolve_unita_tipo` (US masonry → riga USM/WSU), `invalidate_indices` in `_promote_legacy_activitynodegroup`, `ContinuityNode`/`GraphNode` in `_NON_STRAT_TYPES`.
+- **`__init__.py`**: vocabolario continuità (`CONTINUITY_LABELS`, `continuity_label`) reinnestato sul modulo `rapporti` della libreria + registrazione in `RAPPORTI_SHORTHAND`.
+- Test: `tests/sync` **467 passati, 0 falliti**, 14 xfail (writer GraphML in ritiro ad A4), 10 errori ambientali preesistenti. Nuovi: `test_one_bridge_shim.py`; estesi: `test_usm_kind_dev40.py`, `test_legacy_autopromote.py`.
+
+### English
+
+**One bridge: `s3dgraphy.sync` from the library (stages A1–A3)** — pyarchinit tag `one-bridge-5.13.24-alpha` (dev only).
+
+- **Pin**: `s3dgraphy==1.6.0.dev9` → `1.6.0.dev40`, new dependency `dtcstamp>=0.1.4`. `ext_libs/` stays an install step.
+- **20 modules of `modules/s3dgraphy/sync/` deleted**: they now come from the library; the old import path survives via a `sys.modules` alias in `__init__.py` until stage A5 (10 identical, 7 small-drift reconciled, 3 adopted with a new contract: `pyarchinit_pg_importer`, `rapporti` on canonical `equals`/`bonded_to`, `_workspace` with the `PYARCHINIT_HOME` → `PYARCHINIT_WORKSPACE_DIR` mirror).
+- **`graph_projector.py` rewritten as a wrapper** (1489 → ~460 lines): `GraphProjector(_LibGraphProjector)` with host passes `_apply_pyarchinit_attributes`, `_fix_epochs` (epoch-twin merge), `_build_rapporti_edges`, paradata refine, `_warn_suspicious_chronologies`.
+- **`graph_ingestor.py` stays vendored**, API unchanged; dev40 adoptions: the `unit_code` way-back in `_resolve_unita_tipo` (masonry US → USM/WSU row), `invalidate_indices` in `_promote_legacy_activitynodegroup`, `ContinuityNode`/`GraphNode` in `_NON_STRAT_TYPES`.
+- **`__init__.py`**: continuity vocabulary (`CONTINUITY_LABELS`, `continuity_label`) regrafted onto the library's `rapporti` module + registration into `RAPPORTI_SHORTHAND`.
+- Tests: `tests/sync` **467 passed, 0 failed**, 14 xfailed (GraphML writer retiring at A4), 10 pre-existing environmental errors. New: `test_one_bridge_shim.py`; extended: `test_usm_kind_dev40.py`, `test_legacy_autopromote.py`.
+
+---
+
 ## [vocab-fallback-5.13.23] — 2026-10-07
 
 ### Italiano
