@@ -7,6 +7,18 @@
 
 ---
 
+## [forward-edges-5.13.34] — 2026-10-07
+
+### Italiano
+
+**Projector: una relazione = un arco diretto** — pyarchinit tag `forward-edges-5.13.34-alpha` (solo dev). `_build_rapporti_edges` piega i tipi inversi di `parse_rapporti` (`is_overlain_by`→`overlies`, `is_cut_by`→`cuts`, `is_filled_by`→`fills`, `is_abutted_by`→`abuts`, `is_leaned_on_by`→`leans_on`, `is_before`→`is_after`) nel tipo diretto con gli estremi scambiati; le simmetriche (`equals`, `bonded_to`, `has_same_time` + grafie vecchie) viaggiano in orientamento canonico, così la dichiarazione dai due lati collassa su un id. Demo: 764→683 archi; em.json senza tipi inversi (avviso datamodel di EMStudio risolto). Test: +2 projector, +1 rilettura file; suite sync 518 passati.
+
+### English
+
+**Projector: one relationship = one forward edge** — tag `forward-edges-5.13.34-alpha` (dev only). Inverse parse types fold into forward with swapped endpoints; symmetric types travel in canonical orientation so two-sided declarations collapse. Demo: 764→683 edges; datamodel-clean em.json. 518 passed.
+
+---
+
 ## [site-epochs-5.13.33] — 2026-10-07
 
 ### Italiano
