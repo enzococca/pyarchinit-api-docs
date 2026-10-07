@@ -7,6 +7,28 @@
 
 ---
 
+## [vocab-fallback-5.13.23] — 2026-10-07
+
+### Italiano
+
+**Vocabolario delle unità: anche le liste di riserva nominano `USVs` / `USVn`** — pyarchinit tag `vocab-fallback-5.13.23-alpha` (solo dev). Commit dev `b874661c`.
+
+- **`modules/utility/pyarchinit_i18n_stratigraphic.py`**: `_LEGACY_COMMON_ITEMS` passa da `('USVA', 'USVB', 'USVC', 'USD', …)` a `('USVs', 'USVn', 'USD', …)`. È la lista usata da `_build_common_items()` quando `modules.s3dgraphy.sync.vocab_provider.get_default_provider()` non è importabile; l'elenco normale resta quello di `VocabProvider.get_unit_types()` (dalla 5.1.0-alpha), che `get_unit_type_items(lang)` espone alla scheda US.
+- **`gui/ui/US_USM.ui`**: le voci di `comboBox_unita_tipo` scritte nella maschera (riserva usata solo se `customize_GUI()` non riesce a ricostruire la combo) diventano `USVs` / `USVn` al posto di `USVA` / `USVB` / `USVC`.
+- Nessuna API nuova; nessun cambio di firma. La conversione dei dati resta `scripts/migrations/2026_05_us_vocabulary_alignment.py` (`REPLACEMENTS`: `USVA`→`USVs`, `USVB`→`USVs`, `USVC`→`USVn`) con `plan_changes()` / `apply_changes()` e il wrapper di menu `_run_vocab_alignment_migration()` in `pyarchinitPlugin.py`.
+- Test: `tests/sync/test_i18n_compat.py`, `tests/migrations/test_us_vocabulary_alignment.py`, `tests/utility/test_combo_value.py` (17 passati). Suite `tests/utility` + `tests/migrations`: 230 passati, stesso errore preesistente.
+
+### English
+
+**Unit-type vocabulary: the fallback lists name `USVs` / `USVn` too** — pyarchinit tag `vocab-fallback-5.13.23-alpha` (dev only). Dev commit `b874661c`.
+
+- **`modules/utility/pyarchinit_i18n_stratigraphic.py`**: `_LEGACY_COMMON_ITEMS` goes from `('USVA', 'USVB', 'USVC', 'USD', …)` to `('USVs', 'USVn', 'USD', …)`. It is the list `_build_common_items()` falls back to when `modules.s3dgraphy.sync.vocab_provider.get_default_provider()` cannot be imported; the normal list stays the one from `VocabProvider.get_unit_types()` (since 5.1.0-alpha), which `get_unit_type_items(lang)` hands to the US sheet.
+- **`gui/ui/US_USM.ui`**: the `comboBox_unita_tipo` items written in the form (the fallback used only if `customize_GUI()` cannot rebuild the combo) become `USVs` / `USVn` instead of `USVA` / `USVB` / `USVC`.
+- No new API, no signature change. Converting the data stays `scripts/migrations/2026_05_us_vocabulary_alignment.py` (`REPLACEMENTS`: `USVA`→`USVs`, `USVB`→`USVs`, `USVC`→`USVn`) with `plan_changes()` / `apply_changes()` and the menu wrapper `_run_vocab_alignment_migration()` in `pyarchinitPlugin.py`.
+- Tests: `tests/sync/test_i18n_compat.py`, `tests/migrations/test_us_vocabulary_alignment.py`, `tests/utility/test_combo_value.py` (17 passed). Suite `tests/utility` + `tests/migrations`: 230 passed, same pre-existing error.
+
+---
+
 ## [db-migrator-5.13.22] — 2026-09-24
 
 ### Italiano
