@@ -7,6 +7,21 @@
 
 ---
 
+## [site-epochs-5.13.33] — 2026-10-07
+
+### Italiano
+
+**Projector: viaggiano solo le epoche del sito** — pyarchinit tag `site-epochs-5.13.33-alpha` (solo dev). Scoperto da Enzo aprendo il demo in EMStudio (57 epoche in 10 lingue, 483 sovrapposizioni segnalate).
+
+- **`modules/s3dgraphy/sync/graph_projector.py`** (`_prune_foreign_site_nodes`): le EpochNode con firma dell'importer `epoch::<altro sito>::p::f` entrano nel drop; la spazzata degli orfani (PropertyNode/EpochNode/…) itera **fino al punto fisso** così le date orfanate cadono in cascata. Demo: 507→462 nodi, 950→764 archi.
+- Test nuovi: `test_only_the_sites_epochs_travel` (multisite), `test_the_file_carries_only_the_sites_epochs` (rilettura em.json). Suite sync: 515 passati, 0 falliti.
+
+### English
+
+**Projector: only the site's epochs travel** — tag `site-epochs-5.13.33-alpha` (dev only). Found by eye in EMStudio on the demo DB. Foreign-signed epochs (`epoch::<other site>::p::f`) now pruned by name; the orphan sweep runs to a fixpoint so trailing dates cascade. Demo: 507→462 nodes, 950→764 edges. 515 passed.
+
+---
+
 ## [room-panel-5.13.32] — 2026-10-07
 
 ### Italiano
