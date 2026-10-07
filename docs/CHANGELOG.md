@@ -7,6 +7,23 @@
 
 ---
 
+## [room-panel-5.13.32] — 2026-10-07
+
+### Italiano
+
+**B2: la stanza dentro pyArchInit (pannello web del nodo)** — pyarchinit tag `room-panel-5.13.32-alpha` (solo dev).
+
+- **`modules/s3dgraphy/room/room_panel.py`** (nuovo): `open_in_panel(iface, url, title) -> bool` (QDockWidget + QWebEngineView via `tabs/DemPlotDialogs._import_qt_webengine`, Qt5/Qt6; un pannello per sessione con `PANEL_OBJECT_NAME` fisso e `findChild`; False = WebEngine assente/non avviabile, mai un raise); `close_panel(iface)` per `unload()`.
+- **`room_client.room_work_url(server, room)`**: l'indirizzo stabile per-stanza — `/em/work/?room=` dietro Caddy, **`/work/?room=` sul nodo nudo** (le pagine-verbo sono montate in cima: `/rooms/work/` risponde 200 ma è una shell senza asset — colto dalla review pre-tag, il test vivo ora verifica anche `../rooms/rooms.js` → 200); id quotato, mai eccezioni su nodo muto.
+- **`pyarchinitPlugin._open_rooms_door`**: stanza configurata → pannello sulla stanza; senza → porta del nodo; ripiego browser + avviso neutro in messageBar; dock chiuso in `unload()`.
+- Test: +2 client, +5 guardie pannello (mai istanze WebEngine), +1 vivo con verifica asset. Tutorial it/en/pt/ro/el. Suite `tests/sync`: 513 passati, 0 falliti.
+
+### English
+
+**B2: the room inside pyArchInit (the node's web panel)** — tag `room-panel-5.13.32-alpha` (dev only). New `room_panel.py` (reusable WebEngine dock, False when absent), `room_work_url` (per-room stable address, `/work/` on a bare node — the pre-tag review caught `/rooms/work/` answering 200 as an asset-less shell; the live test now checks assets too), menu rewired with browser fallback, dock closed on unload. 513 passed.
+
+---
+
 ## [room-polish-5.13.31] — 2026-10-07
 
 ### Italiano
