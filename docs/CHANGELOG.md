@@ -7,6 +7,32 @@
 
 ---
 
+## [graphml-retire-5.13.26] — 2026-10-07
+
+### Italiano
+
+**L'export GraphML va in pensione (A4)** — pyarchinit tag `graphml-retire-5.13.26-alpha` (solo dev). Commit dev `56804d58`.
+
+- **CANCELLATO `modules/s3dgraphy/sync/graphml_writer.py`** (`export_graphml`, `ExportResult`, `EmptyGraphError`, `GraphMLExportError`, `_embed_pyarchinit_data_keys`, `_apply_yef_fan_out`, `_inject_group_folders`…): il formato di lavoro è em.json (`modules/s3dgraphy/em_export.py`, 5.13.25), il visualizzatore EMStudio.
+- **`scripts/s3dgraphy_sync.py`**: rimosso il sottocomando `export` e `cmd_export`; `import` e `paradata` invariati.
+- **`modules/s3dgraphy/s3dgraphy_dot_bridge.py`**: `export_integrated_matrix` non accetta più `'graphml'` nei `formats` (default ora `['dot', 'json']`); DOT e json invariati.
+- **`tests/sync/_projected_graphml.py`** (nuovo): fabbrica dei file proiettati per i test d'import (`export_projected`, `_embed_pyarchinit_data_keys` trasferito dal writer).
+- Import una tantum da yEd: INTATTO (`populate_list`, `sql_apply_groups`, walker cartelle). Guardia: `test_the_graphml_writer_is_gone`.
+- Test: 10 file cancellati, 7 ripuntati/potati; suite `tests/sync` 453 passati, 0 falliti, 1 xfail (serializzatore rapporti ≠ identità: materiale s3Dgraphy#25).
+
+### English
+
+**The GraphML export retires (A4)** — pyarchinit tag `graphml-retire-5.13.26-alpha` (dev only).
+
+- **DELETED `modules/s3dgraphy/sync/graphml_writer.py`**: the working format is em.json (`modules/s3dgraphy/em_export.py`, 5.13.25), the viewer EMStudio.
+- **`scripts/s3dgraphy_sync.py`**: `export` subcommand and `cmd_export` removed; `import` and `paradata` unchanged.
+- **`modules/s3dgraphy/s3dgraphy_dot_bridge.py`**: `export_integrated_matrix` no longer accepts `'graphml'` (default now `['dot', 'json']`); DOT and json unchanged.
+- **`tests/sync/_projected_graphml.py`** (new): projected-file fabric for import tests (`export_projected`, `_embed_pyarchinit_data_keys` moved from the writer).
+- One-time yEd import: UNTOUCHED (`populate_list`, `sql_apply_groups`, folder walker). Guard: `test_the_graphml_writer_is_gone`.
+- Tests: 10 files deleted, 7 repointed/trimmed; `tests/sync` suite 453 passed, 0 failed, 1 xfailed (rapporti serializer ≠ identity: s3Dgraphy#25 material).
+
+---
+
 ## [em-export-5.13.25] — 2026-10-07
 
 ### Italiano
