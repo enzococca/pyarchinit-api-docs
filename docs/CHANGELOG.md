@@ -7,6 +7,28 @@
 
 ---
 
+## [em-fidelity-5.13.35] — 2026-10-08
+
+### Italiano
+
+**em.json fedele: un sito, la classe dichiarata, la stratigrafia leggibile** — pyarchinit tag `em-fidelity-5.13.35-alpha` (solo dev). Nata da quello che Enzo ha visto nella matrice del demo in EMStudio.
+
+- **`modules/s3dgraphy/sync/graph_projector.py`** — `_site_filtered_importer` passa `filters={'sito': …}` all'importer SQLite della libreria, che non lo riceveva mai: un export di un sito leggeva tutta `us_table` e, siccome l'etichetta del nodo non contiene il sito, due siti con la stessa numerazione si fondevano su un nodo solo (210 unità / 342 documenti / 132 epoche → **51 / 87 / 24**). La via PostgreSQL il sito lo passava già.
+- `_retype_nodes_from_unita_tipo` + `_become`: ogni riga prende la classe che il suo `unita_tipo` dichiara (`USVs`, `USVn`, `SF`, `BR`, e le classi paradato per `property`/`DOC`/`Extractor`/`Combinar`), riassegnando `__class__` senza toccare archi né indici. Si canonicalizza **prima** di scegliere, così `SE` (tedesco di US) non diventa `StratigraphicEventNode`. `LEGACY_UNITA_TIPO` (USVA→USVs, USVB/USVC→USVn) è la terza copia della stessa mappa, ora sotto test con le altre due.
+- `_drop_column_property_nodes` (nuovo, attivo di default; `column_properties=True` per riaverli), `_merge_checklist_documents`, `_drop_empty_property_nodes`, `_drop_paradata_of_paradata`, `_downgrade_edges_towards_paradata`: il file del demo passa da **462 nodi / 683 archi a 76 / 377**, zero avvisi, 45 unità su 12 epoche.
+- **`modules/utility/rapporti_entries.py`** (nuovo): `rapporto_target` / `rapporto2_target` leggono le voci dei rapporti nei formati corto e lungo, che convivono nello stesso database. Chiude il crash «list index out of range» di `tabs/Interactive_matrix.py`.
+- **`scripts/migrations/_2026_05_us_vocabulary_alignment_lib.py`**: la migrazione riscrive i codici USV anche in `rapporti`/`rapporti2`, solo dove un codice può stare (riferimento all'unità e colonna del tipo), mai nel testo libero; celle illeggibili intatte e contate a parte.
+- **`modules/s3dgraphy/em_studio_installer.py`** (nuovo): release GitHub (solo pre-release, `/releases/latest` dà 404), artefatto per piattaforma, sha256 dichiarato verificato, quarantena macOS tolta, installazione in `<home pyArchInit>/tools/EMStudio`.
+- `modules/s3dgraphy/s3dgraphy_dot_bridge.py`: formato JSON = em.json dalla stessa funzione del menu; `read_graph_for_import` sceglie il lettore dall'estensione; via le opzioni yEd morte.
+- `modules/s3dgraphy/room/room_panel.py`: `web_view_class()` — WebEngine → WebKit → browser.
+- Review indipendente prima del tag: 1 Critical (import mancante di `rapporto2_target`) e 5 Important, tutti chiusi con test. Suite: **819 passati, 0 falliti** (chiusa la fixture che lasciava `PYARCHINIT_HOME` sporca e faceva cadere dieci prove dei PDF).
+
+### English
+
+**Faithful em.json: one site, the declared class, readable stratigraphy** — tag `em-fidelity-5.13.35-alpha` (dev only). The site filter now reaches the library's SQLite importer (210/342/132 → 51/87/24 units/documents/epochs); every row gets the class its `unita_tipo` declares, canonicalised first so the German `SE` is not a stratigraphic event; the per-column property cloud, duplicate checklist documents and paradata-of-paradata are gone (462 nodes/683 edges → 76/377, zero warnings). New `modules/utility/rapporti_entries.py` fixes the "list index out of range" matrix crash by reading both live relationship formats. The USV migration now rewrites the record columns too, only where a code can sit. New `em_studio_installer.py` installs EMStudio per platform with sha256 verification. The export window speaks em.json both ways; the room panel falls back to Qt WebKit. Pre-tag review: 1 Critical + 5 Important, all closed with tests. 819 passed, 0 failed.
+
+---
+
 ## [forward-edges-5.13.34] — 2026-10-07
 
 ### Italiano
