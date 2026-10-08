@@ -7,6 +7,25 @@
 
 ---
 
+## [em-matrix-panel-5.13.37] — 2026-10-08
+
+### Italiano
+
+**«Vedi la matrice»: l'Extended Matrix disegnata dentro QGIS, dall'em.json** — pyarchinit tag `em-matrix-panel-5.13.37-alpha` (solo dev). Chiesto da Enzo dopo aver misurato che la pagina per-stanza del nodo chiede di accedere e quindi non può fare da visualizzatore.
+
+- **`modules/utility/em_matrix_model.py`** (nuovo): legge un em.json (percorso o dizionario) in unità, epoche e rapporti stratigrafici. Forma e colori vengono da `em_visual_rules.json` della libreria vendorizzata, la simbologia canonica dell'EM, con una tabella di alias perché i nostri `node_type` sono `document`/`extractor`/`combiner`/`property` mentre le regole li chiamano DOC/EXT/COMB/PROP. Si disegna chi è una riga di `us_table` o chi partecipa a un rapporto. Il contratto d'errore è uno solo, `ValueError` con una frase: le forme strutturalmente illeggibili rifiutano, un campo scritto male si tollera e finisce negli avvisi.
+- **`modules/utility/em_matrix_layout.py`** (nuovo, puro): ogni unità nella fascia dell'epoca in cui è nata, la più recente in cima; il livello dentro la fascia dalla stratigrafia; le simmetriche non spingono giù nessuno; un ciclo non blocca l'incolonnamento. **Riduzione transitiva** come il `tred` di Graphviz sul solo disegno (93 rapporti → 59 sul sito di esempio), **mai dentro un gruppo fortemente connesso** — Tarjan iterativo: in un anello ogni arco ha una strada alternativa e toglierlo cancellerebbe un rapporto vero (Critical della review). I livelli affollati vanno a capo: 2456 × 6258 invece di 103892 × 186 sul caso Ventena (1311 US).
+- **`modules/utility/em_matrix_svg.py`** (nuovo, puro): writer SVG senza dipendenze, usato dall'utente e dai test — un disegno si prova solo se è testo. Frecce sui rapporti, legame di continuità distinto, caratteri di controllo tolti.
+- **`modules/utility/em_matrix_view.py`** (nuovo): `QGraphicsView` sullo stesso impaginato; rotella, doppio clic, clic che emette l'id; SVG dal writer puro; PNG che abbassa da sé la scala sotto i 40 milioni di pixel.
+- **`modules/s3dgraphy/em_matrix_panel.py`** (nuovo) + voce di menu + bottone nella finestra di export: un pannello per sessione, chiuso in `unload()`; le unità del sito corrente vivono nel modulo e non nella chiusura, che si aggancia una volta sola.
+- Review indipendente prima del tag: 1 Critical + 5 Important, tutti chiusi con prova. Suite **902 passati, 0 falliti**. Tutorial in dieci lingue.
+
+### English
+
+**"See the matrix": the Extended Matrix drawn inside QGIS, from the em.json** — tag `em-matrix-panel-5.13.37-alpha` (dev only). Four new modules (the first three pure and tested headless): a reader that turns an em.json into units/epochs/relations with the canonical EM symbology from the vendored library's rules; a pure layout putting each unit in the band of the epoch it was created in, with transitive reduction on the drawing only and never inside a strongly connected component (the review's Critical: a four-unit loop lost all four edges); a dependency-free SVG writer with arrowheads and a distinct continuity link; a QGraphicsView on the same layout. No EMStudio, no node, no web engine, no Graphviz, no network. 1 Critical + 5 Important from the pre-tag review, all closed with tests. 902 passed, 0 failed.
+
+---
+
 ## [em-fidelity-5.13.35] — 2026-10-08
 
 ### Italiano
