@@ -7,6 +7,85 @@
 
 ---
 
+## [em-matrix-media-zoom-5.13.42] — 2026-10-08
+
+### Italiano
+
+**La scheda della matrice mostra i media dell'unità e porta sulla sua geometria** — pyarchinit tag `em-matrix-media-zoom-5.13.42-alpha` (solo dev), commit `1e952df5`+`6faa6ed1`.
+
+- **`modules/utility/em_matrix_links.py`** (nuovo, senza Qt e senza QGIS): `unit_identity` (le chiavi con cui si ritrova la riga, vuote per ciò che non è una riga della scheda), `resolve_id_us` (per `node_uuid`, poi per il vincolo unico `(sito, area, us, unita_tipo)`, infine senza il tipo), `media_for_unit` → `MediaRef(id_media, name, thumb_file, original_file)` con `LEFT JOIN media_thumb_table` e filtro su `entity_type`/`table_name`, `pick_feature_expression` / `candidate_layers` (i layer dal più preciso: `id_us` → `sito`/`area`/`us` → `scavo_s`/`area_s`/`us_s`), `merge_boxes` / `padded_box` / `find_unit_extent`. Costanti: `MAX_MEDIA = 24`, `FIELD_SETS`.
+- **`modules/utility/em_matrix_map.py`** (nuovo): `project_layers` (dall'albero della legenda, non da `mapLayers()`), `zoom_to_unit(iface, unit, connection=None, *, layers=None, margin=MARGIN) -> (bool, str)`, con riproiezione via `QgsCoordinateTransform` e allargamento dove la geometria è piatta. Il progetto si legge e non si cambia. Costanti `MARGIN = 0.15`, `MINIMUM_SPAN = 5.0`.
+- **`modules/s3dgraphy/em_matrix_panel.py`**: `open_in_panel(..., conn_str=None)`, più `remember_connection`, `media_for`, `can_zoom`, `zoom_to`, `thumb_base`, `thumbs_are_remote`; striscia delle anteprime e pulsante «Zoom sulla geometria» nella colonna di destra.
+- Il database del progetto si apre con SQLAlchemy e si chiude subito: nessuna dipendenza da `s3dgraphy.sync._db_handle._resolve_db_handle` (dove la libreria non è importabile, media e zoom tacevano senza dirlo).
+- Suite **978 passati, 0 falliti**. Tutorial 01 e 11 in dieci lingue. 35 test nuovi (`tests/sync/test_em_matrix_links.py`, `tests/sync/test_em_matrix_map.py`) più 8 nel pannello.
+
+### English
+
+**The matrix record shows the unit's media and leads to its geometry** — tag `em-matrix-media-zoom-5.13.42-alpha` (dev only). Two new Qt-free, QGIS-free modules: `em_matrix_links` (resolve the `us_table` row by `node_uuid` then by the unique constraint, list its media with thumbnails, build the layer expression, rank candidate layers, merge and pad extents) and `em_matrix_map` (`project_layers`, `zoom_to_unit` with reprojection; reads the project, never changes it). `em_matrix_panel.open_in_panel` takes `conn_str`; the right-hand column gains a thumbnail strip and a zoom button enabled only for SU records. Nothing new enters the em.json. 978 passed, 0 failed.
+
+---
+
+## [room-epochs-5.13.41] — 2026-10-08
+
+### Italiano
+
+**La consegna alla stanza porta anche la cronologia** — tag `room-epochs-5.13.41-alpha`, commit `b658932d`. Le statistiche di una stanza appena consegnata dicevano `by_epoch: []`.
+
+- **`modules/s3dgraphy/room/site_rows.py`**: `load()` restituisce ora **quattro** valori — `(units, relationships, periods, problems)` — e legge `periodizzazione_table`; una tabella assente finisce fra i problemi e non blocca la consegna.
+- **`modules/s3dgraphy/room/us_ops.py`**: `epoch_id(sito, periodo, fase)` = `stable_id(ORIGIN, "epoch", …)`, `ops_for_epochs(periods, …)` (`add_node` di tipo `EpochNode` con `start_time`/`end_time`), `ops_for_unit_epochs(units, known, epochs_known, …)` (`has_first_epoch` + `survive_in_epoch`), `deliver(units, relationships=(), lang=None, periods=())`. Corretto `UNIT_TYPES["USVB"]` → `USVn`.
+- Misura sul sito di esempio: 129 operazioni → **229** (12 epoche, 44 + 44 archi).
+
+### English
+
+Room delivery now carries the chronology: `site_rows.load()` returns four values and reads `periodizzazione_table`; `us_ops` gains `epoch_id`, `ops_for_epochs`, `ops_for_unit_epochs`, and `deliver` takes `periods`. Sample site: 129 ops → 229, twelve epochs. `UNIT_TYPES["USVB"]` corrected to `USVn`.
+
+---
+
+## [em-epoch-span-5.13.40] — 2026-10-08
+
+### Italiano
+
+**Ogni unità dice fino a dove sopravvive** — tag `em-epoch-span-5.13.40-alpha`, commit `b7ccc3e6`.
+
+- **`modules/s3dgraphy/sync/graph_projector.py`**: `_close_epoch_spans(graph)` aggiunge `survive_in_epoch` verso la **propria** prima epoca quando la scheda non dichiara il periodo finale — solo per le unità fisiche (`isinstance(n, StratigraphicNode)`: il datamodel lo rifiuta da un estrattore). La SELECT di `_apply_pyarchinit_attributes` legge anche `periodo_finale`, `fase_finale`. Sito di esempio: 51 `has_first_epoch`, **45** `survive_in_epoch` (erano 2).
+- Tolto l'avviso della 5.13.36 sul periodo finale: il consiglio che dava era sbagliato.
+
+### English
+
+`graph_projector._close_epoch_spans` adds `survive_in_epoch` to the unit's own first epoch when the sheet declares no final period, physical units only. Sample site: 45 such edges instead of 2. The 5.13.36 warning is gone — its advice was wrong.
+
+---
+
+## [em-matrix-harris-5.13.39] — 2026-10-08
+
+### Italiano
+
+**La matrice si apre come una matrice di Harris** — tag `em-matrix-harris-5.13.39-alpha`, commit `11defc81`.
+
+- **`modules/utility/em_matrix_layout.py`**: ascisse dal metodo mediano di `dot` (`_assign_x`), riduzione dell'incrocio per baricentro (`_order_within_ranks`), gruppi di uguaglianza con union-find sulle relazioni simmetriche (`_equality_groups`) che contano come una unità sola nell'incolonnamento, instradamento con `_STACCO = 14` e quattro punti per le simmetriche.
+- **`modules/utility/em_matrix_svg.py`** / **`em_matrix_view.py`**: l'uguaglianza come due linee orizzontali senza punta (`<g class="edge equality">`), il legame di continuità più marcato e scuro.
+
+### English
+
+Layout rewritten to read like a Harris matrix: `dot`'s median x assignment, barycentre crossing reduction, equality groups (union-find over symmetric relations) ranking as a single unit, and a four-point route drawn as two horizontal lines without arrowheads. The continuity link is drawn heavier and darker.
+
+---
+
+## [em-matrix-room-5.13.38] — 2026-10-08
+
+### Italiano
+
+**Il pannello dà lo spazio alla matrice** — tag `em-matrix-room-5.13.38-alpha`, commit `44fcc0a8`.
+
+- **`modules/s3dgraphy/em_matrix_panel.py`**: `setSizes([1000, 300])` e `setMaximumWidth(380)` sulla scheda — il divisore le dava due terzi e la matrice restava una colonnina; `remember_units` / `details_for` a livello di modulo, perché la chiusura che mostra la scheda si aggancia una volta sola e riusando il pannello su un secondo sito mostrava per sempre i dati del primo.
+- **`modules/utility/em_matrix_layout.py`** / **`em_matrix_model.py`** / **`em_matrix_svg.py`** / **`em_matrix_view.py`**: avvolgimento dei livelli affollati, tolleranza sui campi scritti male, caratteri di controllo tolti dall'SVG, tetto di 40 Mpx sul PNG.
+
+### English
+
+The splitter gave the record pane two thirds of the width and squeezed the matrix into a column: fixed with explicit sizes. The current site's units moved to module level, since the closure that fills the record is connected once and reusing the panel on a second site kept showing the first one's data.
+
+---
+
 ## [em-matrix-panel-5.13.37] — 2026-10-08
 
 ### Italiano
