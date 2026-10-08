@@ -7,6 +7,24 @@
 
 ---
 
+## [em-location-edges-5.13.43] — 2026-10-08
+
+### Italiano
+
+**Gli archi `is_in_location` non viaggiano più nell'em.json** — pyarchinit tag `em-location-edges-5.13.43-alpha` (solo dev), commit `c575f44a`+`36690cac`. Chiude il problema della vista Matrix di EMStudio che ammucchiava ogni unità nella prima fascia.
+
+- **`modules/s3dgraphy/sync/graph_projector.py`** — nuova `_drop_location_memberships(graph) -> int`: toglie dal grafo esportato ogni arco `is_in_location` e, dopo, ogni nodo `*NodeGroup` rimasto senza alcun arco. Chiamata da `populate_graph` **fuori** dal blocco igiene, con un proprio `logging.warning`: la passata è portante, non cosmetica.
+- **`populate_graph(self, db_path, sito, *, column_properties=False, location_groups=False, **kwargs)`** — nuovo parametro `location_groups`, che rispecchia `column_properties`: a `True` i gruppi di luogo e i loro archi restano nel grafo.
+- Diagnosi per bisezione su cinque em.json dello stesso sito in EMStudio 1.6.0-dev.26: con 106, 103 o 52 archi `is_in_location` la matrice collassa; con 0 archi — che i nodi gruppo ci siano o no — le dodici fasce si popolano. Non è l'annidamento dei toponimi, che il datamodel della libreria dichiara lecito (`nodes/group_node.py:131`: `is_in_location (location → location, recursive)`), e non sono i nodi.
+- Nessuna perdita: `sito`, `area`, `settore` restano in `data` di ogni unità. Sito di esempio 76 nodi / 420 archi → 70 / 314.
+- Test: `tests/sync/test_graph_projector_multisite.py` fissa il nuovo default (4 prove nuove); `test_toponym_chain.py`, `test_locationnodegroup_projection.py` e `test_graph_projector_groups.py` chiedono ora `location_groups=True`. Suite **982 passati, 0 falliti**.
+
+### English
+
+**`is_in_location` edges no longer travel in the em.json** — tag `em-location-edges-5.13.43-alpha` (dev only). New `_drop_location_memberships(graph)` strips every `is_in_location` edge from the exported graph and then any `*NodeGroup` node left with no edge; `populate_graph` gains `location_groups=False`, mirroring `column_properties`, and calls the pass outside the silent hygiene block with its own warning. Bisection over five em.json files of the same site in EMStudio 1.6.0-dev.26: 106, 103 or 52 such edges all collapse the Matrix view into the first band; zero edges — with or without the group nodes — populates all twelve. Not the nested toponym chain (which the library datamodel declares legal) and not the nodes: the edges. Nothing is lost, since `sito`, `area` and `settore` already live in each unit's `data`. Sample site 76/420 → 70/314. 982 passed, 0 failed.
+
+---
+
 ## [em-matrix-media-zoom-5.13.42] — 2026-10-08
 
 ### Italiano
