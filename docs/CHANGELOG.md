@@ -7,6 +7,23 @@
 
 ---
 
+## [atlas-template-prepare-5.13.47] — 2026-10-09
+
+### Italiano
+
+**I modelli generici si preparano per l'atlante del Time Manager** — pyarchinit tag `atlas-template-prepare-5.13.47-alpha` (solo dev), commit `287f219e`.
+
+- **`modules/utility/atlas_template.py`** — nuove `what_to_add(caps) -> list`, `add_items(layout, mancanti) -> int`, `prepare_file(path, out_dir=None) -> str|None`, `prepared_name(path) -> Path`; costante `PREPARED_SUFFIX = " + Time Manager"`. Gli elementi mancanti si aggiungono su una pagina nuova (`QgsLayoutItemPage` + `pageCollection().addPage`), il titolo come `QgsLayoutItemHtml` + `QgsLayoutFrame` con `id="123"`, la matrice come `QgsLayoutItemPicture` con `id="matrix"` e `ZoomResizeFrame`.
+- **`scripts/prepare_atlas_templates.py`** (nuovo): giro di una cartella, `--prova` per il giro a vuoto, nessuna sovrascrittura.
+- Eseguito sulla cartella dei modelli: 23 preparati, 2 già completi, 0 falliti; tutti riconosciuti completi da `capabilities`.
+- Test: `tests/utility/test_atlas_template_prepare.py` (10). Suite **1054 passati, 0 falliti**.
+
+### English
+
+New `what_to_add` / `add_items` / `prepare_file` / `prepared_name` in `atlas_template`, plus `scripts/prepare_atlas_templates.py`, write a prepared copy of a print template beside the original (suffix « + Time Manager», never an overwrite) carrying the «Tavola N» HTML title and the matrix picture on a **new page**, so nothing already in the layout is covered; the picture frame uses `ZoomResizeFrame`. A template without a map is skipped. Run over the templates folder: 23 prepared, 2 already complete, 0 failed, all recognised as complete by `capabilities`. 1054 passed, 0 failed.
+
+---
+
 ## [atlas-template-guard-5.13.46] — 2026-10-09
 
 ### Italiano
