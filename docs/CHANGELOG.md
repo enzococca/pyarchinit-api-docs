@@ -7,6 +7,26 @@
 
 ---
 
+## [matrix-no-graphviz-5.13.44] — 2026-10-09
+
+### Italiano
+
+**Il Time Manager disegna la matrice senza Graphviz; le frecce in salita sono rosse** — pyarchinit tag `matrix-no-graphviz-5.13.44-alpha` (solo dev), commit `251255e1`+`60b00e0b`+`e92cfa8e`.
+
+- **`modules/utility/em_matrix_records.py`** (nuovo, puro): `model_from_records(records, periods=(), visible=None, title="") -> MatrixModel`, `write_matrix_svg(records, periods, path, visible=None, title="") -> (percorso, modello)`, più `unit_type`, `node_id`, `kind_of` e le costanti `REL_INDEX_KIND` (indice del vocabolario → `(tipo, da girare)`) e `LEGACY_UNITA_TIPO`. Costruisce lo stesso `MatrixModel` del pannello dalle righe di `us_table` invece che da un em.json.
+- **`modules/utility/em_matrix_layout.py`** — `Edge.upward: bool`, vero quando la freccia risale le fasce (partenza più in basso dell'arrivo); mai per le simmetriche.
+- **`modules/utility/em_matrix_svg.py`** — costante `ROSSO_SALITA = "#C0392B"`, marcatore `freccia-salita`, classe CSS `edge salita`.
+- **`modules/utility/em_matrix_view.py`** — importa `ROSSO_SALITA` dal writer: una sorgente sola per il colore.
+- **`tabs/Gis_Time_controller.py`** — `_periodi_del_sito(sito)` con `_PERIODI_CACHE`, `_disegna_matrice(data_list, visible_us_list, destinazione)`; la vista usa `MatrixView`, l'atlante `setPicturePath(<svg>)` + `FormatSVG`. Spariti `generate_matrix_3` e il JPEG di `dot` da questa strada.
+- Misura sul sito di esempio (51 US, 81 rapporti): `tred`+`dot -Tjpg` ~300 ms e 2,6 MB, contro ~5 ms e 29 KB in processo. Il costo maggiore era però la query US per ogni area × periodo dentro due cicli annidati, a ogni rigenerazione.
+- Test: `tests/utility/test_em_matrix_records.py` (19, due dei quali incrociano `REL_INDEX_KIND` con `s3dgraphy.rapporti._REL_INDEX_EDGE_TYPE` e `LEGACY_UNITA_TIPO` con `REPLACEMENTS` della migrazione USV), `tests/utility/test_time_manager_matrix.py` (5), più 3 nell'impaginatore e 2 nel writer. Suite **1012 passati, 0 falliti**.
+
+### English
+
+**The Time Manager draws the matrix without Graphviz; climbing arrows are red** — tag `matrix-no-graphviz-5.13.44-alpha` (dev only). New pure module `em_matrix_records` builds the panel's `MatrixModel` from `us_table` rows instead of an em.json (`model_from_records`, `write_matrix_svg`), reading the relationship vocabulary by index and turning the inverse forms around; two tests cross-check its tables against the library's `_REL_INDEX_EDGE_TYPE` and the USV migration's `REPLACEMENTS`. `Edge.upward` plus `ROSSO_SALITA` give the Extended Matrix convention for arrows that contradict the chronology, from one constant shared by the SVG writer and the Qt view. `Gis_Time_controller` gains `_periodi_del_sito`/`_PERIODI_CACHE` and `_disegna_matrice`; the on-screen view is `MatrixView` and the atlas picture is an SVG. Measured: ~300 ms and 2.6 MB from `tred`+`dot` against ~5 ms and 29 KB in process — though the bigger cost was one US query per area × period, nested, on every regeneration. 1012 passed, 0 failed.
+
+---
+
 ## [em-location-edges-5.13.43] — 2026-10-08
 
 ### Italiano
