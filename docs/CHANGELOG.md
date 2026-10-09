@@ -7,6 +7,23 @@
 
 ---
 
+## [atlas-template-guard-5.13.46] — 2026-10-09
+
+### Italiano
+
+**Il generatore dell'atlante controlla il modello e non torna più indietro in silenzio** — pyarchinit tag `atlas-template-guard-5.13.46-alpha` (solo dev), commit `bfa6c52d`.
+
+- **`modules/utility/atlas_template.py`** (nuovo, puro): `capabilities(xml) -> {"map","title","matrix"}` letto dal testo del `.qpt` senza caricare il layout; `is_usable(caps)` (basta la mappa); `describe_missing(caps, lang="it")`. Costanti `MAP_TYPE = "65639"`, `TITLE_ID = "123"`, `MATRIX_ID = "matrix"`.
+- **`tabs/Gis_Time_controller.py`** — `generate_images` controlla il modello prima di partire; titolo e immagine mancanti non abortiscono più (una riga di log invece di `return`); guardia sull'`IndexError` del primo `QgsLayoutItemMap` e su `max_num_id() is None`; `progress.close()` su ogni uscita; esito di `exportToImage` raccolto in `non_scritte` e riportato nel riepilogo; `choose_template` marca ogni modello (✓ / • / ✗) e preseleziona uno completo; `_atlante_in_corso` tiene il timer di debounce fuori dal ciclo.
+- Misura: 0 su 25 dei modelli generici distribuiti porta gli id che il generatore pretendeva.
+- Test: `tests/utility/test_atlas_template.py` (7, sui `.qpt` veri) e `tests/utility/test_atlas_generator.py` (9, sulle promesse del sorgente). Suite **1044 passati, 0 falliti**. Verificato anche con QGIS avviato: entrambi i modelli esportano una tavola non vuota.
+
+### English
+
+**The atlas generator now checks the template instead of returning silently** — tag `atlas-template-guard-5.13.46-alpha` (dev only). The chooser lists every `.qpt` on disk, but the generator required two items only the Time Manager template carries (`id="123"`, `id="matrix"`); picking another printed one console line and returned, leaving the progress bar open and no sheets — 0 of the 25 shipped generic templates have those ids. New pure module `atlas_template` reports a template's capabilities from its file; the template is validated up front, missing title/picture are skipped rather than fatal, the map item and a `None` max order_layer are guarded, the progress bar closes on every exit, failed exports are collected and reported, the chooser marks each template, and the debounce timer stands aside during generation. Verified against real QGIS: both templates export a non-empty sheet.
+
+---
+
 ## [matrix-atlas-fixes-5.13.45] — 2026-10-09
 
 ### Italiano
