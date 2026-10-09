@@ -7,6 +7,25 @@
 
 ---
 
+## [matrix-atlas-fixes-5.13.45] — 2026-10-09
+
+### Italiano
+
+**Punte come poligoni, datazioni dal database, matrice agganciata alla manopola, unità ponte sbiadite** — pyarchinit tag `matrix-atlas-fixes-5.13.45-alpha` (solo dev), commit `fb7a5ed3`.
+
+- **`modules/utility/em_matrix_svg.py`** — nuova `arrow_points(da, a)` e `_punta_svg`; spariti `_MARKERS` e ogni `marker-end`. QGIS rende gli SVG con `QSvgRenderer` (SVG Tiny 1.2), che non conosce `<marker>`: nella tavola dell'atlante le punte sparivano. Nuova costante `OPACITA_FUORI = 0.4`; `_box_svg` emette `class="unit fuori"` e `opacity` per le unità fuori vista.
+- **`modules/utility/em_matrix_model.py`** — `Unit.dimmed: bool = False`.
+- **`modules/utility/em_matrix_records.py`** — `_bridges(records, visible)`: le posizioni `(area, us)` citate da una unità visibile o che la citano, un salto solo; `model_from_records` le include con `dimmed=True`.
+- **`modules/utility/em_matrix_view.py`** — importa `OPACITA_FUORI` dal writer e la applica a forma ed etichetta.
+- **`tabs/Gis_Time_controller.py`** — nuove `_record_del_sito(sito)` (+`_RECORD_CACHE`), `_datazioni_del_sito()` (+`_DATAZIONI_CACHE`) e `_modello_matrice(data_list, visible_us_list)`, usata sia dalla vista sia dall'atlante; `set_max_num` non ricollega più `update_datazione` a ogni giro; `_on_debounce_timeout` rifà la matrice dopo aver applicato il filtro. Le tre tabelle in memoria si azzerano all'apertura della finestra.
+- Suite **1028 passati, 0 falliti**.
+
+### English
+
+Arrowheads are now explicit polygons rather than SVG `<marker>` elements, because QGIS renders SVG through `QSvgRenderer` (SVG Tiny 1.2) and dropped them in the atlas sheet. `Unit.dimmed` plus `OPACITA_FUORI` draw the one-hop bridge units faded instead of omitting them. In the Time Manager, datings and rows now come from the database (cached per site) instead of from the filtered layer — the filter is applied by a debounce timer, so turning the dial forward left the dating box blank — a `valueChanged` connection remade on every turn is gone, and the matrix redraws when the dial settles, after the filter. View and atlas share `_modello_matrice`. 1028 passed, 0 failed.
+
+---
+
 ## [matrix-no-graphviz-5.13.44] — 2026-10-09
 
 ### Italiano
