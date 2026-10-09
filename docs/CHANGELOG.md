@@ -7,6 +7,38 @@
 
 ---
 
+## [atlas-map-extent-5.13.49] — 2026-10-09
+
+### Italiano
+
+**La tavola non esce più bianca; la cartella template si ripopola; le finestre non bloccano il Layout Designer** — pyarchinit tag `atlas-map-extent-5.13.49-alpha` (solo dev), commit `95894d51`.
+
+- **`tabs/Gis_Time_controller.py`** — `generate_images` inquadra ora **tutte** le `QgsLayoutItemMap` del layout (`setFollowVisibilityPreset(False)`, `setKeepLayerSet(False)`, `zoomToExtent(canvas.extent())`): `layoutItemMap` si calcolava e non si usava mai, e la mappa restava sull'inquadratura salvata nel template. Inchiostro sul foglio: 2,74% → 20,98%. Nuovi `_chiedi(titolo, testo, bottoni=None)` e `_informa(titolo, testo)`, modali alla sola finestra (`Qt.WindowModality.WindowModal`), al posto delle statiche `QMessageBox.question`/`information`, che sono modali all'applicazione e toglievano i clic al designer.
+- **`modules/utility/pyarchinit_folder_installation.py`** — nuova `restore_missing_from_zip(zip_path, extract_to, prefix) -> int`: rimette solo i membri mancanti sotto il prefisso, senza mai sovrascrivere. `installConfigFile` crea `profile/template` se manca e la ripopola; prima la copia del modello stava dentro `if os.path.exists(template_dir)`.
+- Test: `tests/utility/test_atlas_map_and_folder.py` (9). Suite **1072 passati, 0 falliti**.
+
+### English
+
+`generate_images` now frames every `QgsLayoutItemMap` on the canvas extent and stops the layout keeping the template's own layer set — `layoutItemMap` was computed and never used, so sheets drew the extent the template had been saved with. Measured ink on the sheet: 2.74% → 20.98%. New `_chiedi`/`_informa` helpers are window-modal, so the Layout Designer stays usable. New `restore_missing_from_zip` puts back only the missing members of `profile.zip` under a prefix, never overwriting a hand-edited file, and the template folder is created when absent. 1072 passed, 0 failed.
+
+---
+
+## [atlas-prepare-persist-5.13.48] — 2026-10-09
+
+### Italiano
+
+**Le copie preparate si rifanno da sole; il segnaposto del titolo si riempie** — pyarchinit tag `atlas-prepare-persist-5.13.48-alpha`, commit `21b1a425`.
+
+- **`modules/utility/atlas_template.py`** — `to_prepare(folder)`, `ensure_prepared(folder, limit=None)`, `qgis_is_running()`. Quest'ultima evita un **segmentation fault**: `install_dir()` chiama la preparazione e i test lo chiamano senza `QgsApplication`, dove costruire un `QgsPrintLayout` non solleva ma uccide il processo.
+- **`modules/utility/pyarchinit_folder_installation.py`** — chiama `ensure_prepared` dopo l'estrazione di `profile.zip`.
+- **`tabs/Gis_Time_controller.py`** — sostituisce `{{title}}` nelle etichette (tipo 65641), come già fa `PRINTMAP.py:252`.
+
+### English
+
+`to_prepare` / `ensure_prepared` restore the prepared template copies at startup after the zip extraction, preparing only what is missing; `qgis_is_running()` guards a segfault when no `QgsApplication` exists. The generator now substitutes the `{{title}}` placeholder the generic templates carry.
+
+---
+
 ## [atlas-template-prepare-5.13.47] — 2026-10-09
 
 ### Italiano
