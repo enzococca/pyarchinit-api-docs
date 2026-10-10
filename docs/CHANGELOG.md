@@ -7,6 +7,24 @@
 
 ---
 
+## [location-groups-back-5.13.55] — 2026-10-10
+
+### Italiano
+
+**I luoghi tornano nell'em.json: EMStudio dev.27 regge gli archi** — pyarchinit tag `location-groups-back-5.13.55-alpha` (solo dev), commit `780721cf`.
+
+- **`modules/s3dgraphy/sync/graph_projector.py`** — `GraphProjector.populate_graph(..., location_groups=...)` passa da `False` a **`True`**. Il default era spento dal 2026-10-08 per un motivo solo, bisezionato su quattro file: finché nell'em.json c'era anche un solo arco `is_in_location`, la vista Matrix di EMStudio ammucchiava tutte le unità nella prima fascia (6 gruppi con 0 archi → funziona; 2 gruppi con 52 archi → no). EMStudio **v1.6.0-dev.27** corregge quello, quindi il motivo è scaduto. `_drop_location_memberships` resta e serve chi passa `False`.
+- Nessun simbolo nuovo o rimosso: cambia solo il valore di default di un parametro già pubblico.
+- Export del sito di esempio, misurato: 70 nodi / 314 archi → **76 / 420**, con 6 gruppi (2 `study`, 4 `toponym`), **106 `is_in_location`** di cui 3 la catena toponimica, 0 gruppi senza `data.kind`, rilettura con 6 `LocationNodeGroup`, 0 degradati, 0 avvisi.
+- Test: i tre che fissavano il default a spento in `tests/sync/test_graph_projector_multisite.py` ora lo fissano ad acceso, con la motivazione scaduta scritta accanto, più uno che tiene aperta la via del `False`. Suite: **1125 passati, 1 skip, 1 xfail, 8 errori d'ambiente, 0 falliti**.
+- **Non verificato**: la resa della Matrix in EMStudio sul file nostro — controllo visivo dentro l'applicazione.
+
+### English
+
+`location_groups` defaults to `True` again. It had been off since 2026-10-08 for one reason, bisected over four files: as long as the em.json carried even a single `is_in_location` edge, EMStudio's Matrix piled every unit into the first band. EMStudio v1.6.0-dev.27 fixes that, so the reason has expired; `_drop_location_memberships` stays for callers passing `False`. No symbol added or removed — only a public parameter's default. The demo site's export goes from 70 nodes / 314 edges to **76 / 420**, with 6 place groups, 106 `is_in_location` (3 of them the toponym chain), no group missing `data.kind`, and a clean read-back. 1125 passed, 0 failed. The Matrix rendering itself is a visual check inside the app and is not verified here.
+
+---
+
 ## [s3dgraphy-dev42-5.13.54] — 2026-10-10
 
 ### Italiano
