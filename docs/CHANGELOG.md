@@ -7,6 +7,24 @@
 
 ---
 
+## [rapporti-reciprocity-5.13.62] — 2026-10-10
+
+### Italiano
+
+**«Verifica rapporti»: 81 problemi su 81 erano falsi** — pyarchinit tag `rapporti-reciprocity-5.13.62-alpha` (solo dev), commit `fbb6bff6`.
+
+Il projector fonde una coppia reciproca in **un** arco canonico (`is_overlain_by` è la lettura inversa di `overlies`, non un arco a parte), e il controllo cercava il verso inverso fra gli archi: ogni rapporto scritto bene risultava mancante. Sul sito di esempio 86 problemi, 81 «manca il reciproco», tutti con il rapporto già scritto in forma corta; il fix ne appendeva un doppione a quattro elementi su 38 righe a ogni clic.
+
+- **`modules/utility/rapporti_check.py`** — la scansione `MISSING_RECIPROCITY` legge ora `attributes['rapporti']` delle due US e confronta su `(tipo di arco, us)`, non sulla parola né sull'arità; resta solo fra US vere (il fix scrive in `us_table`). `apply_edits` riconosce un rapporto da `rapporto + US` invece che dalla tupla intera.
+- Misurato: 86 → **5** problemi (i 5 restanti sono i `temporal_unevaluable`, non automatici), reciproci mancanti 81 → **0**, righe toccate da un clic 38 → **0**; togliendo un reciproco davvero, 1 problema trovato, corretto e sparito alla riverifica.
+- Test: +5 in `tests/sync/test_rapporti_check.py` (20) e `test_rapporti_check_live.py` riscritto (diceva che sul sito di esempio i reciproci mancanti ci devono essere: era il baco scritto come contratto). Suite: **1152 passati, 1 skip, 1 xfail, 8 errori d'ambiente, 0 falliti**.
+
+### English
+
+The projector folds a reciprocal pair into **one** canonical edge, and the check looked for the reverse direction among the edges, where it never is — so every correctly written relation was reported missing: 86 issues on the sample site, 81 of them «missing reciprocal», all already written in the two-element short form, with the fix appending a four-element duplicate across 38 rows on every click. The scan now reads `attributes['rapporti']` of both units and compares on `(edge type, us)`, ignoring the word and the arity; `apply_edits` recognises a relation by relation + unit. Sample site 86 → **5** issues, missing reciprocals 81 → **0**, rows touched per click 38 → **0**; remove one for real and it is found, fixed and gone. The live test, which asserted the sample site *has* missing reciprocals, is rewritten — that was the bug written as the contract. 1152 passed, 0 failed.
+
+---
+
 ## [atlas-stale-basemap-5.13.61] — 2026-10-10
 
 ### Italiano
