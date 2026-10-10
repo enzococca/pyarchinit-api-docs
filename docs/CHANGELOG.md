@@ -7,6 +7,26 @@
 
 ---
 
+## [atlas-inset-5.13.56] — 2026-10-10
+
+### Italiano
+
+**«osm no»: non era OSM, era che l'inserto non c'era** — pyarchinit tag `atlas-inset-5.13.56-alpha` (solo dev), commit `fbad76f9`.
+
+Escluso misurando: layer XYZ valido (osm e satellite), rete che porta la tessera con HTTP 200 e 34 948 byte (`curl` e `QgsNetworkAccessManager.blockingGet`), URI corretto, strati aggiunti al progetto. Il PAC di sistema **è** rotto (`ProxyAutoConfigURLString: %0A`) ma **non** è la causa: disattivandolo la resa è identica. La causa: `overview_indexes` chiama inserto «ogni mappa tranne la grande», e dei 23 modelli preparati solo 8 hanno due mappe — sui 15 restanti l'inserto non esisteva.
+
+- **`modules/utility/atlas_template.py`** — `capabilities` guadagna la chiave `overview` (`len(_MAPPA.findall(xml)) >= 2`); `what_to_add` include `"overview"`. Nuove `inset_rect(main_rect) -> (x, y, w, h) | None` e `_add_overview(layout) -> int`, più `_main_map(layout)`; costanti `INSET_FRACTION = 0.20`, `INSET_MARGIN_MM = 3.0`, `INSET_MIN_MM = 18.0`, `INSET_MAX_MM = 45.0`. L'inserto va dentro il rettangolo della mappa grande, in basso a destra, `id="overview"`, cornice e fondo bianco, `zValue` sopra la mappa. `add_items` crea la pagina nuova **solo** se mancano titolo o matrice. `to_prepare` legge anche la copia `+ Time Manager` e la rifà quando è stantia (le copie sono del plugin; l'originale non si sovrascrive mai).
+- **`tabs/Gis_Time_controller.py`** — `_prepara_panoramica` scrive nel log quando il modello ha una sola mappa, invece di uscire in silenzio.
+- Misure: A4 → inserto 37 mm su mappa 185 mm; A0 → 45 mm (tetto) su mappa 949 mm; nessuna pagina aggiunta quando manca solo l'inserto. Cartella dei modelli: **15 copie rifatte, 23 su 23 con inserto**, 0 rimaste.
+- Test: +9 in `tests/utility/test_atlas_template_prepare.py` (24), 7 vecchi allineati alla chiave nuova in due file. Suite: **1132 passati, 1 skip, 1 xfail, 8 errori d'ambiente, 0 falliti**.
+- **Non verificato**: la resa delle tessere nell'export della tavola. Headless la tela resta vuota anche con layer valido, rete buona e PAC escluso.
+
+### English
+
+Not OSM. Ruled out by measurement: the XYZ layer is valid, the network delivers the tile (HTTP 200, 34 948 bytes, via `curl` and via `QgsNetworkAccessManager.blockingGet`), the URI is right, the layers reach the project, and the machine's broken proxy auto-config is **not** the cause — disabling it changes nothing. The cause: `overview_indexes` treats «every map but the big one» as the inset, and only 8 of the 23 prepared templates have two maps, so on the other 15 there was no inset to fill. `capabilities` gains `overview`; `inset_rect` / `_add_overview` place a framed white square — 20% of the main map's short side, capped at 45 mm (A4 → 37, A0 → 45) — inside the main map, bottom right, with `id="overview"`. The new page is created only when the title or the matrix is missing. `to_prepare` now refreshes a stale `+ Time Manager` copy; 15 refreshed, 23 of 23 carry the inset. The generator logs a single-map template instead of passing in silence. 1132 passed, 0 failed. Tile rendering in the sheet export is still unverified.
+
+---
+
 ## [location-groups-back-5.13.55] — 2026-10-10
 
 ### Italiano
