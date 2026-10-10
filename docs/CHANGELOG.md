@@ -7,6 +7,24 @@
 
 ---
 
+## [paradata-graph-resolver-5.13.60] — 2026-10-10
+
+### Italiano
+
+**Estrattore ↔ proprietà: la decide il grafo, non l'ordine** — pyarchinit tag `paradata-graph-resolver-5.13.60-alpha` (solo dev), commit `997cdff3`. Risposta di E.D. su s3Dgraphy#25.
+
+La correzione della 5.13.54 (`has_data_provenance` davanti a `extracted_from`) era un'euristica: scegliendo sempre la provenienza, una lettura vera non sarebbe stata riconosciuta mai. La regola vera sta in `s3dgraphy.property_source.reads_as_source(graph, extractor, prop)` — lettura se l'estrattore alimenta già un'**altra** proprietà — e `connection_resolver.candidate_edge_types(src, tgt, graph=graph)` la applica, offrendo `extracted_from` verso una proprietà solo allora.
+
+- **`modules/s3dgraphy/sync/paradata_edge_resolver.py`** — nuova `resolve_edge_type_for_nodes(src, tgt, graph) -> (str, bool) | None`: `candidate_edge_types` nei due versi col grafo, poi il più specifico secondo `_CANDIDATE_ORDER`, che torna all'ordine del datamodel (`extracted_from` primo). Nuovo `_solo_col_grafo(edge_type, target_names)`: la via per classi non offre `extracted_from` verso una `PropertyNode`, come fa la libreria senza grafo. `refine_generic_connections` usa il risolutore col grafo; ricaduta sulla via per classi se la libreria non ha `connection_resolver`.
+- Misurato su due grafi minimi con la catena EM: alimenta un'altra proprietà → `('extracted_from', False)`; alimenta quella proprietà → `('has_data_provenance', True)`; senza grafo → provenienza. Prima i tre casi collassavano in uno.
+- Test: +4 in `tests/sync/test_paradata_edge_resolver.py` (20). Suite: **1143 passati, 1 skip, 1 xfail, 8 errori d'ambiente, 0 falliti**.
+
+### English
+
+The 5.13.54 fix (`has_data_provenance` ahead of `extracted_from`) was a heuristic: always choosing provenance, a genuine reading would never be recognised. The real rule is `property_source.reads_as_source` — a reading is an extractor that already feeds *another* property — and `connection_resolver.candidate_edge_types(src, tgt, graph=graph)` applies it, naming `extracted_from` towards a property only then. New `resolve_edge_type_for_nodes(src, tgt, graph)` asks the library in both directions with the graph and picks the most specific; `_CANDIDATE_ORDER` returns to the datamodel's order; the class-based path mirrors the library and never reads a property as a source, so what pyArchInit writes today is unchanged. Measured on two minimal graphs: another property → `extracted_from` forward; that property → `has_data_provenance` reversed; no graph → provenance. 1143 passed, 0 failed.
+
+---
+
 ## [atlas-dot-on-top-5.13.59] — 2026-10-10
 
 ### Italiano
