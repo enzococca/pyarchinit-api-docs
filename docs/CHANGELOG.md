@@ -7,6 +7,26 @@
 
 ---
 
+## [atlas-inset-theme-5.13.57] — 2026-10-10
+
+### Italiano
+
+**L'inserto passa dalla TOC e da un tema mappa** — pyarchinit tag `atlas-inset-theme-5.13.57-alpha` (solo dev), commit `01ec5730`. Disegno di E. Cocca.
+
+Escluso misurando: la rete porta la tessera (HTTP 200, 34 948 byte, thread principale e di lavoro, PAC di sistema acceso e spento), un **server di tessere locale** dà lo stesso bianco, `&crs=EPSG:3857` non cambia niente, il layer è valido con l'estensione giusta. **Al server locale non è arrivata nemmeno una richiesta**: non è il render che perde le tessere, non le chiede.
+
+- **`modules/utility/atlas_overview.py`** — nuovi `GROUP_NAME`, `THEME_NAME`, `PUNTO_NAME`, `theme_layers(sfondo, punto) -> list`, `is_base_map(source, kind) -> bool`.
+- **`tabs/Gis_Time_controller.py`** — `_sfondo_e_puntino` **rimosso**, sostituito da `_gruppo_dell_inserto()`, `_strati_nella_toc(centro_3857)` e `_tema_dell_inserto(sfondo, punto)`. Il gruppo sta in fondo all'albero e spento; lo sfondo si riconosce dalla sorgente, non dal nome; il tema si costruisce con `QgsMapThemeCollection.MapThemeRecord` + `MapThemeLayerRecord` e non da `createThemeFromCurrentState`, così il canvas non si tocca. La mappa dell'inserto usa `setFollowVisibilityPreset(True)` + `setFollowVisibilityPresetName`, non più `setKeepLayerSet(True)` + `setLayers`. `_butta_via_la_panoramica` non rimuove più nulla.
+- Misurato su un progetto vero, due giri: un gruppo, dentro `OpenStreetMap` e `Localizzazione`, gruppo spento, tema con 2 layer, 1 feature nel puntino, 2 layer nel progetto; `layersToRender()` dell'inserto dà quei due, risolti dal tema.
+- Test: +4 in `tests/utility/test_atlas_overview.py` (20), 5 vecchi ripuntati. Suite: **1135 passati, 1 skip, 1 xfail, 8 errori d'ambiente, 0 falliti**.
+- **Non verificato**: la resa delle tessere. Offscreen il provider XYZ non ne chiede nessuna, nemmeno a un server locale.
+
+### English
+
+The inset now goes through the layer tree and a map theme, E. Cocca's design. Ruled out by measurement: the network delivers the tile (main thread and worker, system PAC on and off), a **local** tile server gives the same white, `crs` in the URI changes nothing, the layer is valid with the right extent — and **not one request reached the local server**: the render never asks. So the off-tree `setLayers()` is gone. New `GROUP_NAME` / `THEME_NAME` / `PUNTO_NAME`, `theme_layers`, `is_base_map`; the controller gains `_gruppo_dell_inserto`, `_strati_nella_toc`, `_tema_dell_inserto` and loses `_sfondo_e_puntino`. The group sits at the bottom of the tree, unchecked; the basemap is matched by source, not name; the theme is built from `MapThemeRecord` rather than the current state, so the canvas is never touched; the map follows the preset. Nothing is removed at the end. Over two consecutive runs nothing multiplies, and the inset's `layersToRender()` resolves to exactly the basemap and the dot. 1135 passed, 0 failed. Tile rendering remains unverified offscreen.
+
+---
+
 ## [atlas-inset-5.13.56] — 2026-10-10
 
 ### Italiano
