@@ -7,6 +7,30 @@
 
 ---
 
+## [atlas-basemap-url-5.13.58] — 2026-10-10
+
+### Italiano
+
+**Lo sfondo dell'inserto: l'URL era codificato due volte** — pyarchinit tag `atlas-basemap-url-5.13.58-alpha` (solo dev), commit `5a952df1`.
+
+```
+mio:          url=https%3A%2F%2Ftile.openstreetmap.org%2F%7Bz%7D%2F...
+QGIS (buono): url=https://tile.openstreetmap.org/%7Bz%7D/%7Bx%7D/%7By%7D.png
+```
+
+`quote(url, safe="")` codificava anche `:` e `/`: QGIS decodifica una volta e trova una stringa ancora codificata, non un indirizzo. Nel pannello del layer: **29 700 errori di cache, zero tessere trovate**, con layer valido, estensione giusta e matrice dei tasselli completa.
+
+- **`modules/utility/atlas_overview.py`** — nuova `quote_tile_url(url) -> str`, che codifica **solo** `{`, `}`, `&`, `=` (costante `_DA_CODIFICARE`); `base_map_uri` scrive ora l'uri parola per parola come QGIS, `tilePixelRatio=1` compreso.
+- Prova con un server di tessere locale che registra le richieste, stessa mappa e stesso export: vecchia codifica **0 richieste / 0,0%** dei pixel, nuova **6 richieste / 5,7%** dei pixel con la tessera — e il 5,7% è la quota di pagina della cornice della mappa (60×60 mm su A4 orizzontale).
+- Test: +3 in `tests/utility/test_atlas_overview.py` (23), uno dei quali confronta l'uri parola per parola con quella letta nel pannello di QGIS, più un vecchio allineato. Suite: **1138 passati, 1 skip, 1 xfail, 8 errori d'ambiente, 0 falliti**.
+- Nota di migrazione: un layer `OpenStreetMap` già messo nella TOC da una versione precedente porta la sorgente sbagliata e va cancellato; `is_base_map` non lo riusa, ma resta in mezzo.
+
+### English
+
+`quote(url, safe="")` encoded `:` and `/` as well, so QGIS decoded once and got a still-encoded string — not an address. The layer panel showed **29 700 cache errors and zero tiles found**, with a valid layer, the right extent and a complete tile matrix. New `quote_tile_url(url)` encodes only `{`, `}`, `&` and `=`, and `base_map_uri` now writes the uri exactly as QGIS writes it, `tilePixelRatio=1` included. Proven against a local tile server that logs requests: old encoding 0 requests and 0.0% of the sheet, new encoding 6 requests and 5.7% — the map frame's exact share of an A4 landscape page. 1138 passed, 0 failed. A basemap layer added to the TOC by an earlier version carries the broken source and should be deleted.
+
+---
+
 ## [atlas-inset-theme-5.13.57] — 2026-10-10
 
 ### Italiano
