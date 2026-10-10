@@ -7,6 +7,91 @@
 
 ---
 
+## [s3dgraphy-dev42-5.13.54] — 2026-10-10
+
+### Italiano
+
+**s3dgraphy a dev42: cadono due pezze, e una coppia di nodi cambiava significato** — pyarchinit tag `s3dgraphy-dev42-5.13.54-alpha` (solo dev), commit `d06112c8`.
+
+- **`requirements.txt`** — pin `s3dgraphy==1.6.0.dev40` → `==1.6.0.dev42`; `ext_libs/s3dgraphy` rivendorizzato (`pip --no-deps --target`, git-ignored). dev42 porta i due fix di E.D. su s3Dgraphy#25 (gruppi che tengono il `kind` in em.json; proiezione SQLite filtrata per sito) e le PR #29 e #30 aperte da qui e mergiate.
+- **`modules/s3dgraphy/sync/graph_projector.py`** — **rimossi** `_site_filtered_importer` (context manager) e `_IMPORTER_PATCH_LOCK`, più gli `import contextlib` / `import threading` rimasti senza uso: la libreria passa ora `filters={"sito": …}` da sé. Misurato sul demo a dieci siti: **70 nodi e 314 archi identici** con e senza la pezza. `_prune_foreign_site_nodes` resta come guardia per yEd/em.json ma pota **0** nodi.
+- **`modules/s3dgraphy/em_export.py`** — **rimosso** lo shim che rispecchiava `node.kind` in `attributes['kind']` prima di serializzare. Verificato: l'em.json del demo coi gruppi esce con `data.kind` su tutti e 6 e la rilettura li ridà come `LocationNodeGroup` (0 degradati a `Node`, 0 avvisi).
+- **`modules/s3dgraphy/sync/paradata_edge_resolver.py`** — in `_CANDIDATE_ORDER`, `has_data_provenance` passa **davanti** a `extracted_from`. La `connections 1.6.34` ha allargato `extracted_from` ad accettare una `PropertyNode` come bersaglio, quindi la coppia Extractor ↔ property combaciava con due regole e vinceva quella in avanti: «l'estrattore ha letto la proprietà» invece di «la proprietà ha preso il valore dall'estrattore». Le due regole si sovrappongono solo lì.
+- Test: nessun file nuovo; `tests/sync/test_paradata_edge_resolver.py` (16) copriva già il caso e lo ha intercettato. Suite: **1126 passati, 1 skip, 1 xfail, 8 errori d'ambiente, 0 falliti**.
+
+### English
+
+The pin moves to `s3dgraphy==1.6.0.dev42` (re-vendored), which carries E.D.'s two fixes for s3Dgraphy#25 and the #29/#30 PRs from here. `_site_filtered_importer` and its lock are **gone** — the library now passes `filters={"sito": …}` itself, and the ten-site demo gives the same 70 nodes / 314 edges either way — as is the `kind` mirror in `em_export`: the demo's em.json with groups keeps `data.kind` on all six and reads back as six `LocationNodeGroup`s, none degraded, no warnings. `_prune_foreign_site_nodes` stays as a guard for the non-filtering paths but prunes 0. In `_CANDIDATE_ORDER`, `has_data_provenance` moves ahead of `extracted_from`: `connections 1.6.34` widened `extracted_from` to accept a `PropertyNode` target, so the Extractor ↔ property pair matched two rules and the forward one won, reversing what a pyArchInit sheet means. 1126 passed, 0 failed.
+
+---
+
+## [atlas-labels-perslide-5.13.53] — 2026-10-09
+
+### Italiano
+
+**I numeri delle US si ricalcolano per ogni tavola** — pyarchinit tag `atlas-labels-perslide-5.13.53-alpha` (solo dev), commit `12541c12`.
+
+- **`tabs/Gis_Time_controller.py`** — nuovo `_aggiorna_etichette_us(layer, campi)`, chiamato **dentro** il ciclo delle tavole, subito dopo che il filtro del livello è stato applicato. L'elenco si calcolava una volta sola, prima del ciclo: quali US siano coperte dipende dal livello (1 su tutto il sito, 19 al livello 12) e **gli id delle feature cambiano quando cambia la `subsetString`** — misurato sullo stesso layer, fra i due elenchi di id non ce n'era nemmeno uno in comune, quindi `$id IN (…)` non corrispondeva a nulla e nessun numero compariva.
+- Test: +2 in `tests/utility/test_atlas_labels.py` (ora 20), uno dei quali tiene l'ordine fra filtro ed elenco, perché invertirlo rimette il baco.
+
+### English
+
+New `_aggiorna_etichette_us`, called **inside** the per-sheet loop right after the level filter is applied. The id list was computed once before the loop, but which units are covered depends on the level and **feature ids change with the subset string** — the two id lists had nothing in common, so `$id IN (…)` matched nothing and no unit number was drawn, while the elevations, which carry no such filter, were fine.
+
+---
+
+## [atlas-labels-5.13.52] — 2026-10-09
+
+### Italiano
+
+**Numero dell'unità in un cerchio, quota sopra la linea, niente sovrapposizioni, solo le US che si vedono** — pyarchinit tag `atlas-labels-5.13.52-alpha` (solo dev), commits `f6eb2fac` + `205c88b7`.
+
+- **`modules/utility/atlas_labels.py`** (nuovo) — `US_FIELDS`, `QUOTA_FIELDS`, `US_GROUP_FIELDS`, `US_GROUP_FIELDS_ALT`, `STACK_FIELD`; costanti misurate `QUOTA_LINE_MM = -2.7`, `QUOTA_OFFSET_MM = -4.2`, `US_TEXT_MM = 2.2`, `QUOTA_TEXT_MM = 2.0`, `CALLOUT_MIN_MM = 2.0`; funzioni `label_field(fields, candidates)`, `quota_expression(field)`, `largest_per_group(rows)`, `ids_expression(ids)`, `us_labeling(fields, ids=None)`, `quota_labeling(fields)`, `labelled_ids(layer, group_fields=None)`, `_niente_sovrapposizioni(impostazioni)`, `_richiamo()`, `_testo(dimensione_mm, grassetto, colore)`.
+- Dove va la quota **non è stato dedotto ma misurato**: simbolo di `quote_us_view.qml` reso a 300 dpi e contati i pixel — il simbolo sta sopra l'ancora (da −2,7 a −0,8 mm) e la linea orizzontale è la riga più larga, a −2,7 mm. L'offset delle etichette ha il verso **opposto** a quello dei marcatori, quindi il testo va a −4,2 mm.
+- Non sovrapposizione via `QgsLabelThinningSettings` + `QgsSimpleLineCallout` (la linea di richiamo quando l'etichetta si sposta); le US coperte si escludono con `labelled_ids`, che usa un `QgsSpatialIndex` in Python — `overlay_within` ci metteva oltre 2 minuti su 482 poligoni, l'indice 0,08 s.
+- **`tabs/Gis_Time_controller.py`** — `_metti_le_etichette`, `_togli_le_etichette`.
+- Test: `tests/utility/test_atlas_labels.py` (20). Misurato sul sito di esempio: 482 poligoni → 38 etichette al livello 24, 19 al livello 12.
+
+### English
+
+New `atlas_labels` module: the unit number bold in a white circle, the elevation **above** the horizontal line of the point symbol, no label ever overlapping (thinning plus a leader line when one has to move), and only the units that are actually visible — a covered unit gets no label. Where the elevation goes was measured, not guessed: the symbol renders above its anchor and its widest row is the horizontal line at −2.7 mm, and label offsets run opposite in sign to marker offsets, so the text sits at −4.2 mm. Visibility uses a `QgsSpatialIndex` in Python: `overlay_within` took over 2 minutes on 482 polygons, the index 0.08 s.
+
+---
+
+## [atlas-overview-5.13.51] — 2026-10-09
+
+### Italiano
+
+**L'inserto della tavola dice dove si è nel mondo** — pyarchinit tag `atlas-overview-5.13.51-alpha` (solo dev), commit `3c6d8e66`.
+
+- **`modules/utility/atlas_overview.py`** (nuovo) — `BASE_MAPS` (`osm`, `satellite`), `DEFAULT_BASE_MAP = "osm"`, `OVERVIEW_HALF_WIDTH = 100_000.0`, `overview_indexes(misure, principale)`, `base_map_uri(kind)`, `base_map_name(kind)`, `overview_window(punto, half_width)`. Le tessere XYZ passano dal provider `wms`.
+- **`tabs/Gis_Time_controller.py`** — `_sfondo_e_puntino`, `_prepara_panoramica`, `_butta_via_la_panoramica`. L'inserto più piccolo del layout diventa la panoramica: sfondo OSM o satellite e il **solo puntino** del sito, non il disegno dello scavo.
+- Test: `tests/utility/test_atlas_overview.py` (17).
+- **Non verificato in questa release**: headless il provider XYZ rende la tessera bianca anche pompando il ciclo di eventi, quindi la resa effettiva delle tessele va guardata in QGIS vero.
+
+### English
+
+New `atlas_overview` module and three controller helpers turn the layout's smallest map frame into a locator inset: an OSM or satellite basemap (XYZ through the `wms` provider) with **only** the site's dot, not the excavation drawing. Headless the XYZ provider renders blank even with the event loop pumped, so the tiles themselves are still to be checked in a real QGIS.
+
+---
+
+## [atlas-scale-5.13.50] — 2026-10-09
+
+### Italiano
+
+**La tavola si riempie e la scala è una scala vera** — pyarchinit tag `atlas-scale-5.13.50-alpha` (solo dev), commit `9ad5c08e`.
+
+- **`modules/utility/atlas_scale.py`** (nuovo) — `NICE_SCALES` (1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, …), `nice_scale(denominatore)`, `main_map_index(misure)`, `fitting_extent(box, margin=0.06, …)`.
+- **`tabs/Gis_Time_controller.py`** — `_inquadra_tavola`, `_estensione_dei_dati`, `_riquadro_del_sito`. La mappa più grande del layout è quella principale; l'estensione si adatta al foglio e la scala si arrotonda **in su** al valore di scala successivo, così la barra di scala legge un numero vero.
+- Le barre di scala avevano `linkedMap() is None` e mostravano «1:1»: ora sono collegate alla mappa principale. Il margine del 6% è stato **togliato** perché spingeva 18,6 oltre 20 e faceva salire la scala a 1:25: inchiostro sul foglio 13,26% → 19,88%.
+- Test: `tests/utility/test_atlas_scale.py` (14), +alcuni in `test_atlas_map_and_folder.py`.
+
+### English
+
+New `atlas_scale` module plus three controller helpers: the layout's largest map is the main one, its extent is fitted to the sheet, and the scale is rounded **up** to the next nice value so the scale bar reads a real number. The bars had `linkedMap() is None` and showed «1:1»; they are linked now. The 6% margin was removed because it pushed 18.6 past 20 and raised the scale to 1:25 — ink on the sheet 13.26% → 19.88%.
+
+---
+
 ## [atlas-map-extent-5.13.49] — 2026-10-09
 
 ### Italiano
