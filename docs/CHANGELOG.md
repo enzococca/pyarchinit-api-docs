@@ -7,6 +7,25 @@
 
 ---
 
+## [atlas-dot-on-top-5.13.59] — 2026-10-10
+
+### Italiano
+
+**Il pallino rosso sopra le tessere, non sotto** — pyarchinit tag `atlas-dot-on-top-5.13.59-alpha` (solo dev), commit `3f0ecd05`. Regressione della 5.13.57, segnalata da E. Cocca.
+
+Nell'albero dei layer il primo figlio sta in cima e si disegna per ultimo, cioè sopra: `addLayer` accoda, quindi il puntino finiva sotto OSM. Stesso sbaglio in `theme_layers`, dove `setLayers` disegna sopra il primo della lista.
+
+- **`modules/utility/atlas_overview.py`** — `theme_layers(sfondo, punto)` restituisce `[punto, sfondo]` (prima `[sfondo, punto]`), documentato «dal sopra al sotto».
+- **`tabs/Gis_Time_controller.py`** — `_strati_nella_toc` usa `gruppo.insertLayer(0, punto)` e, quando il nodo c'è già ma non è il primo, `removeLayer` + `insertLayer(0, …)`: un progetto che ha girato l'atlante con la 5.13.57/58 si ripara da sé.
+- Misurato: l'albero dà `['Localizzazione', 'OpenStreetMap']` a ogni giro e si ricompone dallo stato vecchio; `layersToRender()` dell'inserto dà lo stesso ordine. Prova a pixel con un server locale che serve una tessera verde: **250 984 pixel di tessera + 428 pixel rossi del pallino** sul foglio esportato (col vecchio ordine, 0 rossi).
+- Test: +1 in `tests/utility/test_atlas_overview.py` (24), uno riscritto. Suite: **1139 passati, 1 skip, 1 xfail, 8 errori d'ambiente, 0 falliti**.
+
+### English
+
+A 5.13.57 regression: in the layer tree the first child is on top and drawn last, and `addLayer` appends, so the dot ended up under OSM; `theme_layers` had the same mistake, since `setLayers` draws the first entry on top. `theme_layers` now returns `[punto, sfondo]`, and the dot is inserted at index 0 of the group — and moved back there when it is present but not first, so a project that ran the atlas under 5.13.57/58 heals itself. Measured: the tree reads `['Localizzazione', 'OpenStreetMap']` every run and recovers from the old state. Pixel proof with a local server serving a green tile: **250 984 tile pixels and 428 red dot pixels** on the exported sheet, against 0 red with the old order. 1139 passed, 0 failed.
+
+---
+
 ## [atlas-basemap-url-5.13.58] — 2026-10-10
 
 ### Italiano
