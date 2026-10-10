@@ -7,6 +7,25 @@
 
 ---
 
+## [atlas-stale-basemap-5.13.61] — 2026-10-10
+
+### Italiano
+
+**Lo sfondo rotto di prima si sostituisce, non si riusa** — pyarchinit tag `atlas-stale-basemap-5.13.61-alpha` (solo dev), commit `29e942ff`.
+
+La correzione dell'URL della 5.13.58 non arrivava a chi aveva già girato l'atlante: `is_base_map` confrontava in modo indulgente (decodifica + ricerca dell'indirizzo) e riconosceva anche il layer a doppia codifica, che l'atlante riusava. Misurato: `is_base_map(sorgente_rotta, "osm")` → `True`.
+
+- **`modules/utility/atlas_overview.py`** — `is_base_map(source, kind)` confronta ora `"url=" + quote_tile_url(url)`, cioè l'indirizzo come deve stare scritto; nuova `is_stale_base_map(source, kind) -> bool`, che scioglie la codifica fino a due giri e riconosce una sorgente **nostra** di una versione precedente (un layer OSM aggiunto dall'utente ha la sorgente giusta e non casca qui).
+- **`tabs/Gis_Time_controller.py`** — `_strati_nella_toc` raccoglie gli sfondi stantii, chiama `removeMapLayer` e ne costruisce uno buono, con una riga nel log.
+- Misurato su un progetto con lo sfondo rotto già nel gruppo: dopo un giro il gruppo è `['Localizzazione', 'OpenStreetMap']`, lo sfondo usato ha la sorgente buona, il rotto non è più nel progetto.
+- Test: +3 in `tests/utility/test_atlas_overview.py` (27). Suite: **1146 passati, 1 skip, 1 xfail, 8 errori d'ambiente, 0 falliti**.
+
+### English
+
+The 5.13.58 URL fix never reached anyone who had already run the atlas: `is_base_map` compared leniently and also matched the double-encoded layer, which the atlas then reused. `is_base_map` now compares the address as it must be written in the uri, and the new `is_stale_base_map` recognises one of ours from an earlier version — unwinding the encoding up to twice — while a user-added OSM layer keeps the right source and is left alone. The controller removes the stale ones and builds a good one, logging it. Measured on a project carrying the broken layer: afterwards the group is `['Localizzazione', 'OpenStreetMap']`, the basemap in use has the right source and the broken one is gone. 1146 passed, 0 failed.
+
+---
+
 ## [paradata-graph-resolver-5.13.60] — 2026-10-10
 
 ### Italiano
