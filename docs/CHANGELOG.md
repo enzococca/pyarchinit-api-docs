@@ -7,6 +7,25 @@
 
 ---
 
+## [s3dgraphy-dev57-5.13.123] — 2026-10-17
+
+### Italiano
+
+**s3dgraphy 1.6.0.dev45 → dev57 e dtcstamp 0.1.5: niente si rompe, cose nuove da usare** — pyarchinit tag `s3dgraphy-dev57-5.13.123-alpha` (solo dev), commit `16c5f8ee`.
+
+- **`requirements.txt`** — `s3dgraphy==1.6.0.dev57`, `dtcstamp>=0.1.5` (l'unica dipendenza che cambia). Python puro, Python ≥3.9.
+- **Cosa tocca il plugin** — il proiettore della libreria scrive ogni `has_first_epoch` una sola volta, con id `<unità>_has_first_epoch_<epoca>` (la correzione a monte del doppione tolto lato plugin nella 5.13.122); per saggi ogni grafo porta solo i paradati raggiunti dalle sue unità; `resources.locate.resolve` prova anche gli indirizzi alternativi di una risorsa; le regole visive 1.6.36 aggiungono `threed_instances`; in `crdt` l'orologio delle operazioni va al millisecondo, `make_op` non cambia.
+- **Nuovo e usabile** — `container.merge_graphs`, `api.threed_instances` / `units_without_3d`, `api.entity_epoch`, `resources.storage_rows` / `find_moved` / `object_store` / `alignment`, `room_import`.
+- Suite: **2239 passati, 2 skip, 1 xfail, 0 falliti**, identica con dev45 e dev57; andata e ritorno di TempluMare_v3.2 (1946 nodi) identica.
+
+> Nota: le voci dalla 5.13.63 alla 5.13.122 non sono ancora riportate qui; il registro completo è in `dev_logs/CHANGELOG.md` del plugin.
+
+### English
+
+s3dgraphy pinned to 1.6.0.dev57 and dtcstamp to >=0.1.5. The library projector now writes each `has_first_epoch` once (id `<unit>_has_first_epoch_<epoch>`), the upstream fix of the duplicate the plugin removed in 5.13.122; per-saggio graphs carry only the paradata their units reach; the resolver tries a resource's alternative addresses; visual rules 1.6.36 add `threed_instances`; `crdt` operation clocks go to the millisecond while `make_op` is unchanged. New and usable: `merge_graphs`, `threed_instances` / `units_without_3d`, `entity_epoch`, S3-compatible storage helpers, `room_import`. 2239 passed, 0 failed; the TempluMare round trip is identical. Entries 5.13.63–5.13.122 are not yet back-filled here; see the plugin's `dev_logs/CHANGELOG.md`.
+
+---
+
 ## [rapporti-reciprocity-5.13.62] — 2026-10-10
 
 ### Italiano
