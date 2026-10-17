@@ -7,6 +7,44 @@
 
 ---
 
+## [narrativa-3d-5.13.132] — 2026-10-17
+
+### Italiano
+
+**La scena 3D dei proxy nella narrativa: tutti i proxy delle unità nel pannello della mappa, il clic su un'unità che evidenzia il suo e rende trasparenti gli altri** — pyarchinit tag `narrativa-3d-5.13.132-alpha` (solo dev), commit `2f6d8619`.
+
+- **`modules/s3dgraphy/em_narrative_views.py`** (nuovo) — `View(key, label, panel, css="", script="")`; `link_units(html, chapters, meta) -> str` (menzioni → `a.em-mention.pya-u[data-u][data-e]`, titoli → `h2.pya-cap[data-e][data-units]`, anche senza mappa); `inject_views(html, views, chapters, meta, lang=None) -> str` (pannello `aside#pya-map` a schede, selezione comune `PYA_SEL.select(epoca, unità, gruppo)` / `PYA_SEL.add(fn)`, evento `pya:tab`); `html_with_views(html, graph, conn_str, site, chapters, lang=None, *, resize_base="") -> str` (mappa e scena 3D, ognuna se il sito ce l'ha; sul telefono il pannello fermo ha lo sfondo pieno).
+- **`modules/s3dgraphy/em_narrative_3d.py`** (nuovo) — `MAX_PROXY_FILE` (15 MB), `MAX_PROXY_FILES` (40 MB), `BUNDLE`; `SceneProxy(key, unit, locator, path="", size=0)`, `Scene(proxies, unit_proxies, names, epochs, missing, skipped)`; `scene_proxies(graph) -> Scene` (da `s3dgraphy.paradata_view.proxy_instances`; chi eredita la geometria punta al proxy del proprietario); `build_scene(graph, connection_url, resize_base="", *, max_file, budget) -> Scene`; `three_bundle() -> str`; `scene_view(scene, epoch_names_map, lang=None) -> Optional[View]` (id `pya-scena-3d*`, proxy in base64, disegno quando qualcosa cambia, messaggio senza WebGL, i proxy rimasti fuori nel suggerimento, un GLB illeggibile contato fra i «non caricati»).
+- **`modules/s3dgraphy/em_narrative_map.py`** — nuovo `map_view(svg, boxes, meta, epoch_names_map, lang=None) -> View`; `inject_map` e `html_with_map` restano e passano da `inject_views`; lo script della mappa si registra in `PYA_SEL`.
+- **`modules/s3dgraphy/em_project.py`** — `media_index(connection_url, resize_base="")` e `media_file_for(locator, index)` pubbliche.
+- **`modules/s3dgraphy/em_narrative.py`** — `export_file` passa da `html_with_views` (`resize_base` da `media_base`).
+- **`resources/js/pya_three_scene.min.js`** — three.js 0.186.1 (MIT, con la riga `@license`) con GLTFLoader e OrbitControls, `window.PYA_THREE`; rifatto da `scripts/build_three_bundle.sh`.
+- Correzione: il CSS `.pya-u` delle «Unità del capitolo» (5.13.130) vale solo dentro `.pya-unita`.
+- Suite: **2422 passati, 2 skip, 1 xfail, 0 falliti** (+28 test).
+
+### English
+
+The narrative HTML gets a 3D tab next to the map with all the units' proxies (from the library's `proxy_instances`, files from the database), three.js 0.186.1 embedded in the page. New `em_narrative_views` (tabbed panel, mention links without the map, shared `PYA_SEL` selection with epoch, unit and group) and `em_narrative_3d` (`scene_proxies`, `build_scene`, `scene_view`); `em_narrative_map.map_view`; `em_project.media_index`/`media_file_for` public. Tests: 2422 passed (+28).
+
+---
+
+## [progetto-em-5.13.131] — 2026-10-17
+
+### Italiano
+
+**«Esporta progetto EM per EMStudio…»: l'em.json in `EM/` con i media del database dove EMStudio li cerca** — pyarchinit tag `progetto-em-5.13.131-alpha` (solo dev), commit `cc4246ec` (tutorial `383855f9`).
+
+- **`modules/s3dgraphy/em_project.py`** (nuovo) — `ProjectResult(path, copied, unchanged, kept, missing, outside, mismatched, bytes, backup, found, resources, warnings)` con `summary()`; `project_locators(doc) -> List[str]`; `project_path(locator) -> str` (un nome nudo va in `DosCo/`); `project_root_for(chosen, site) -> str`; `export_project(connection_url, site, dest_dir, *, work_dir=None, resize_base="", progress=None) -> ProjectResult` (l'albero standard di `s3dgraphy.project_tree`, copie con lo sha256 controllato, mai sovrascrivere un file diverso, l'em.json di prima in `.bak`, risorse contate con `s3dgraphy.resources.locate.resolve`).
+- **`pyarchinitPlugin.py`** — voce di menu **Extended Matrix → Esporta progetto EM per EMStudio…** (`_run_em_project`).
+- TempluMare: 106 media copiati con il disco attaccato (96 col disco staccato), sha256 tutti giusti, 107 delle 536 risorse trovate dal progetto.
+- Suite: **2394 passati, 2 skip, 1 xfail, 0 falliti** (+8 test).
+
+### English
+
+New `em_project` module and the "Export EM project for EMStudio" menu entry: the site's em.json in `EM/` with every cited file the database knows copied into the library's standard EM project tree, never overwriting a different file, checked against the resource sha256 and counted with the library's resolver. Tests: 2394 passed (+8).
+
+---
+
 ## [narrativa-media-5.13.130] — 2026-10-17
 
 ### Italiano
