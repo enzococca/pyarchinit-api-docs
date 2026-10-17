@@ -7,6 +7,25 @@
 
 ---
 
+## [narrativa-3d-rifiniture-5.13.133] — 2026-10-17
+
+### Italiano
+
+**Le rifiniture della scena 3D e il visore del singolo modello senza internet** — pyarchinit tag `narrativa-3d-rifiniture-5.13.133-alpha` (solo dev), commit `317fb79f` (tutorial `72508874`).
+
+- **`modules/s3dgraphy/em_narrative_3d.py`** — nella pagina due blocchi: `script#pya-scena-3d-data` (metadati, `proxies: [{k, u}]`) e `script#pya-scena-3d-glb` (`{chiave: base64}`, letto solo quando la scena si apre e poi liberato); `build_scene` mette una volta sola lo stesso file citato da due risorse; `scene_view` conta fra i mancanti un file che non si apre (None se non resta niente); nello script: chi eredita la geometria entra nel periodo e nel capitolo, `distanza(raggio, fov, aspetto)` col campo più stretto, clic solo col tasto principale e un dito, «proxy non caricato», un raggio per fotogramma solo sulle mesh, tastiera (Tab, frecce, + e −, Esc) e `role="application"`.
+- **`modules/s3dgraphy/em_narrative_views.py`** — schede con `role="tablist"`/`"tab"`/`aria-selected`/`aria-controls`, viste `role="tabpanel"` con `id="pya-vista-<chiave>"`; con più viste `aside#pya-map[data-pya-schede]` e mappa e scena alla stessa altezza.
+- **`modules/s3dgraphy/em_narrative_html.py`** — nuovo `with_three_viewer(pagina, registro) -> str` (il pacchetto three.js nelle pagine con un modello GLB fra le fonti, una volta sola); il visore del pannello usa three.js (`visore3`, `chiudiVisore`: un contesto WebGL alla volta, liberato) e model-viewer da internet solo senza three.js; nuova parola `model_error`; `_voci_dei_titoli` dà ancore `pya-cap-N` uniche; `_json_script` scappa ogni «<».
+- **`modules/s3dgraphy/em_narrative_map.py`** — `map_view` non mette più `firstEpoch` nei dati.
+- **`modules/s3dgraphy/em_narrative.py`** — `_html_per_chi_legge` chiama `with_three_viewer`.
+- Suite: **2439 passati, 2 skip, 1 xfail, 0 falliti** (+17 test).
+
+### English
+
+Follow-ups of the narrative 3D scene: heirs of a geometry in their period and chapter, framing with the narrower field of view, clicks only with the primary button and one pointer, "proxy not loaded" caption note, GLBs in a separate block parsed only when the scene opens, rAF-throttled mesh-only hover raycasts, unreadable files counted as missing, duplicate files embedded once, keyboard and ARIA roles, equal tab heights. The single-model viewer in the sources panel now uses the embedded three.js (`em_narrative_html.with_three_viewer`), so it works offline and frees its WebGL context. Unique chapter anchors; `_json_script` escapes every "<". Tests: 2439 passed (+17).
+
+---
+
 ## [narrativa-3d-5.13.132] — 2026-10-17
 
 ### Italiano
