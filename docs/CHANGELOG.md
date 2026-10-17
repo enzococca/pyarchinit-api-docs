@@ -7,6 +7,23 @@
 
 ---
 
+## [matrix-paradata-groups-5.13.126] — 2026-10-17
+
+### Italiano
+
+**Matrice: i paradati nel gruppo della loro unità, come EMStudio** — pyarchinit tag `matrix-paradata-groups-5.13.126-alpha` (solo dev), commit `25efd8e0`.
+
+- **`modules/utility/em_matrix_layout.py`** — `LayoutConfig.paradata_groups` (vero di norma) e i parametri del gruppo (`paradata_h`, `paradata_gap`, `paradata_row_gap`, `group_pad`, `group_gap`); nuova `Group` e `Layout.groups`; `_gruppi_dei_paradati` (catena has_property → has_data_provenance → combines → extracted_from, istanze per ogni unità) e `_impagina_gruppo`; i paradati escono dal calcolo dei livelli, le righe della fascia si alzano col gruppo più alto, i paradati senza unità hanno una fascia loro.
+- **`modules/utility/em_matrix_model.py`** — nuovo `summary_text(model)`: «114 unità · 739 paradati · 3 epoche · 90 rapporti».
+- **`em_matrix_svg.py` / `em_matrix_view.py`** — la cornice tratteggiata di ogni gruppo; **`em_matrix_panel.py`** usa `summary_text`.
+- TempluMare: impaginazione 0,06 s invece di 2,46 s, 111 gruppi. Suite: **2308 passati, 0 falliti** (+10 test).
+
+### English
+
+The matrix panel lays out stratigraphic units only; each unit carries its paradata group under its box (one row per chain step, shared paradata re-instanced per group as in EMStudio, lines kept inside the group, dashed frame in view and SVG). New `Group`, `Layout.groups`, `summary_text(model)`. 2308 passed, 0 failed.
+
+---
+
 ## [em-import-5.13.125] — 2026-10-17
 
 ### Italiano
