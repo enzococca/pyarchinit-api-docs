@@ -7,6 +7,25 @@
 
 ---
 
+## [em-import-5.13.125] — 2026-10-17
+
+### Italiano
+
+**Importare TempluMare in un database nuovo come lo vuole pyArchInit** — pyarchinit tag `em-import-5.13.125-alpha` (solo dev), commit `f43420bc` (codice) e `f1905371` (tutorial).
+
+- **`modules/s3dgraphy/sync/em_native_import.py`** — `build_rapporti` scrive ogni rapporto anche sulla scheda collegata con `inverse_rapporto(segno)` (tabella a coppie della libreria, dieci lingue, anche minuscolo); nuovi `plan_period_codes(periodi)`, `us_period_code(codici, ...)`, `site_definition(graph)` (HC1 o nome del grafo), `site_toponyms(graph)` (catena `LocationNodeGroup`), `site_thesaurus_entries`, `thesaurus_lingua(locale)`, `unique_sigla(estesa, prese)`.
+- **`modules/s3dgraphy/sync/graph_ingestor.py`** — `rapporti` mai NULL (`[]`), datazione e `cont_per` dalla periodizzazione, codici periodo 1…n, scheda sito con definizione e toponimi e voci del thesaurus (`_completa_scheda_sito`, `_aggiungi_al_thesaurus`); anteprima e scrittura completano la scheda con la stessa funzione (`_completa`); `_values_equal` confronta i rapporti senza ordine né maiuscole.
+- **`modules/s3dgraphy/sync/paradata_edge_resolver.py`** — `refine_generic_connections` indipendente dall'ordine degli archi: il verso scritto vince, le linee estrattore → proprietà si tipizzano per ultime.
+- **`modules/utility/site_toponyms.py`** (nuovo, puro) — `SITE_DEFINITION_CODE`, `TOPONYM_CODES` (1.2–1.5), `NAZIONI_IT`, `REGIONI_IT`, `PROVINCE_IT`, `toponym_choices(dal_thesaurus, lingua)`; la scheda sito legge i toponimi dal thesaurus.
+- **`modules/utility/combo_value.py`** — nuovo `add_items_keeping_text(combo, items)`: la scheda Periodizzazione non sostituisce più la datazione del primo record con la prima epoca del CSV.
+- Suite: **2298 passati, 2 skip, 1 xfail, 0 falliti** (+24 test).
+
+### English
+
+em.json import: relations written on both records (library pair table), never-NULL `rapporti`, dating and period codes from the periodization, site definition from the declared heritage or graph name, toponyms from the location chain, all added to the thesaurus (new codes 1.2–1.5, read by the site form via the new `site_toponyms` module). The preview counts what the write changes. The Periodizzazione sheet keeps the record's dating (`add_items_keeping_text`). Paradata edge typing is order-independent. 2298 passed, 0 failed.
+
+---
+
 ## [incongruenze-5.13.124] — 2026-10-17
 
 ### Italiano
