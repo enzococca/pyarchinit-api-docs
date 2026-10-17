@@ -7,6 +7,28 @@
 
 ---
 
+## [incongruenze-5.13.124] — 2026-10-17
+
+### Italiano
+
+**Le incongruenze vere, sistemate; dalla s3dgraphy dev57 proprietario originale, indirizzi alternativi e conto dei proxy 3D** — pyarchinit tag `incongruenze-5.13.124-alpha` (solo dev), commit `e3372b6c`.
+
+- **`tabs/Thesaurus.py`** — `lang_files` con dieci lingue: le pagine `codici_el/pt/ro.html` si aprono (prima la pagina inglese).
+- **`tabs/codici_*.html`** (10 lingue) e **`scripts/generate_thesaurus_html.py`** — 15 codici corretti (3.1, 3.2, 3.3, 3.11, 7.2, 7.7, 7.8, 9.2, 10.2–10.6, 10.12, 10.15) e 30 aggiunti (2.20–2.43, 11.12–11.16, 12.7), letti dal codice delle schede; via il refuso dopo `<html lang="it">`.
+- **`scripts/fill_thesaurus.py`** e database di esempio — `tomba_table` 7.2 è lo stato di conservazione.
+- **`modules/utility/textTosql.py`** — nuovi `MakeSQL.make_local_request(prompt, db_type, parent=None)` ed `explain_local_request(sql_query, parent=None)`: GGUF `<home>/bin/phi3_text2sql.gguf` con llama-cpp-python, poi Ollama, altrimenti un messaggio (prima `AttributeError` dalla scheda US).
+- **`modules/utility/pyarchinit_home.py`** — nuovi `default_workspace_dir()` e `mirror_workspace(override)`; `gui/pyarchinitConfigDialog.py` li usa, così «Reset» non toglie più `PYARCHINIT_WORKSPACE_DIR` (la libreria tornava a `~/pyarchinit`).
+- **`modules/s3dgraphy/sync/em_media_import.py`** — `owners_of_properties` col proprietario originale (`s3dgraphy.ownership.original_owner`); `collect_files` porta `addresses`, e un file nel bucket con copia sul disco si importa.
+- **`modules/s3dgraphy/sync/em_native_import.py`** — nuovo `proxy_text(graph)` (`api.units_without_3d`), mostrato nel riepilogo dell'importazione (`s3dgraphy_dot_bridge._import_breakdown`).
+- **Documenti** — README e docstring di `modules/s3dgraphy/sync`; GeoArchaeo ricopiato (documenti allineati al motore 1.3.1); tutorial 01, 03, 13, 36 in dieci lingue.
+- Suite: **2274 passati, 2 skip, 1 xfail, 0 falliti** (+35 test).
+
+### English
+
+Thesaurus code pages open in all ten languages and list the codes the forms really read (15 corrected, 30 added); tomb code 7.2 is the state of preservation. New `MakeSQL.make_local_request` / `explain_local_request` (local GGUF via llama-cpp-python, then Ollama). New `default_workspace_dir()` / `mirror_workspace()`: the settings «Reset» no longer drops the workspace env var. em.json media import: original owner of a shared property, alternative addresses; new `proxy_text(graph)` in the import summary. Sync README, GeoArchaeo docs and tutorials 01, 03, 13, 36 aligned with the code. 2274 passed, 0 failed.
+
+---
+
 ## [s3dgraphy-dev57-5.13.123] — 2026-10-17
 
 ### Italiano
