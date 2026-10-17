@@ -7,6 +7,24 @@
 
 ---
 
+## [narrativa-del-file-5.13.128] — 2026-10-17
+
+### Italiano
+
+**La narrativa che il file porta di suo resta sua** — pyarchinit tag `narrativa-del-file-5.13.128-alpha` (solo dev), commit `744f148b`.
+
+- **`modules/s3dgraphy/em_narrative.py`** — nuovi `ensure_narrative(graph, lang=None, *, write_lang=None)` (crea dal template se manca, fa crescere solo una narrativa con `template_id`; quella del file resta com'è) e `needs_template_choice(graph) -> bool`; `scaffold(graph, lang=None, *, write_lang=None)` scrive i capitoli nuovi nella lingua scelta, traduce i titoli fissi (`_TITOLI_FISSI`, dieci lingue) e li allinea a quelli esistenti in un'altra lingua (niente doppioni nella fusione per titolo della libreria); `generate(..., write_lang=None)` passa da `ensure_narrative` e scrive nella lingua scelta (istruzioni it/en, le altre chieste per nome: `_scrivi_in`); `is_presentation` solo nelle narrative del template (titolo fisso in qualunque lingua, altrimenti il primo capitolo se non è di una persona), `chapter_by_key` di conseguenza; `carry_over(..., *, replace=False)` può sostituire la narrativa che il grafo nuovo ha già; nuovo messaggio `narrative_import_newer`.
+- **`modules/s3dgraphy/em_export.py`** — `_keep_narrative(path, contenitore, graph, site, imported_at=None)`: vince la più recente fra file di lavoro (mtime) e importazione; `export_site` passa `source_imported_at(connection_url, site)`.
+- **`modules/s3dgraphy/sync/em_sources.py`** — nuovo `source_imported_at(db, sito) -> Optional[float]`.
+- **`modules/s3dgraphy/em_narrative_tab.py`** — tendina «Lingua della prosa» (`_LINGUE`), `_chiedi_capitoli(parent, quanti)` per «Prepara i capitoli» su una narrativa del file, `NarrativeThread(..., write_lang=None)`.
+- Suite: **2340 passati, 2 skip, 1 xfail, 0 falliti** (+24 test).
+
+### English
+
+A file's own narrative (TempluMare: 13 canonical chapters by E. Demetrescu, English, no `template_id`) no longer receives the `site_story` chapters by itself: new `ensure_narrative` / `needs_template_choice`, "Prepare the chapters" asks each time. `is_presentation` recognises the template's Presentation only. The prose language is chosen in the panel (`write_lang` on `scaffold`, `generate`, `NarrativeThread`), fixed titles translated and aligned across languages. Re-exporting a site imported from an em.json keeps the newer narrative (`_keep_narrative(imported_at=)`, `carry_over(replace=)`, `source_imported_at`). Tests: 2340 passed (+24).
+
+---
+
 ## [media-3d-process-5.13.127] — 2026-10-17
 
 ### Italiano
