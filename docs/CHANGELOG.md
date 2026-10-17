@@ -7,6 +7,23 @@
 
 ---
 
+## [media-3d-process-5.13.127] — 2026-10-17
+
+### Italiano
+
+**QGIS si chiudeva chiudendo il riepilogo dell'importazione di un em.json con i media: le viste 3D fuori da QGIS** — pyarchinit tag `media-3d-process-5.13.127-alpha` (solo dev), commit `55cca558`.
+
+- **`modules/utility/media_preview.py`** — nuovo `render_models_png(jobs, size=(400, 400), *, progress=None, timeout=180.0) -> Dict[str, Optional[str]]`: disegna le coppie (modello, png) in **un processo Python a parte** (lo stesso Python di QGIS, da `python_env.pip_interpreter()`), una riga di esito per modello; un modello che fa cadere il processo o che supera il tempo resta senza vista e gli altri continuano in un processo nuovo; oltre 300 MB non si apre. `render_model_png(src, out, size)` passa di lì (alza `RuntimeError` col perché). `make_previews(..., model_png=None, model_error=None)`: il disegno già fatto, o il suo errore, senza riprovare. Interni: `_disegna` (pyvista, solo nel processo figlio), `_servi`, `_un_processo`, `_avvia`, `_interprete`, `_AVVIO`, `_SEGNO`, `_TEMPO_PER_MODELLO`.
+- **`modules/s3dgraphy/sync/em_media_import.py`** — `import_emjson_media` disegna tutti i modelli 3D dell'em.json in un lotto prima delle miniature.
+- Causa: su macOS ogni `pv.Plotter(off_screen=True)` lasciava viva una `vtkCocoaGLView` dopo `close()`; alla prima notifica della finestra VTK chiamava un oggetto già distrutto (`-[vtkCocoaGLView modifyDPIForBackingScaleFactorOfWindow:]`).
+- Suite: **2316 passati, 2 skip, 1 xfail, 0 falliti** (+8 test).
+
+### English
+
+On macOS every pyvista off-screen render left a VTK Cocoa view alive after `plotter.close()`, and the next window notification (closing the em.json import summary) crashed QGIS. New `render_models_png(jobs, size, *, progress, timeout)` renders 3D model views in one separate Python process (the QGIS Python found by `pip_interpreter()`), with a per-model timeout and recovery when a model kills the child; `render_model_png` goes through it; `make_previews` gains `model_png` / `model_error`; the em.json media import renders all models in one batch. Tests: 2316 passed (+8).
+
+---
+
 ## [matrix-paradata-groups-5.13.126] — 2026-10-17
 
 ### Italiano
