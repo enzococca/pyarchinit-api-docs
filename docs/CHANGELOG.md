@@ -7,6 +7,41 @@
 
 ---
 
+## [narrativa-media-5.13.130] — 2026-10-17
+
+### Italiano
+
+**I media della narrativa scelti dall'AI dopo il paragrafo che ne parla, con il visore 3D; le unità del capitolo raggruppate con i loro paradati; il «viene dopo» fra due US che non diventa più «copre»** — pyarchinit tag `narrativa-media-5.13.130-alpha` (solo dev), commit `e4781202` (tutorial `c664b24e`).
+
+- **`modules/s3dgraphy/em_narrative_media.py`** (nuovo) — `MediaCandidate`, `MediaReport`; `media_kind(filename) -> Optional[str]` (3D, immagine, video; i PDF no, sono fonti); `chapter_key(chapter)` (àncora **e** titolo: due capitoli di TempluMare hanno la stessa àncora); `stored_choices(narrative, chapter)` / `store_choices(narrative, chapter, choices)` nei dati della narrativa (`DATA_KEY = "pyarchinit_media"`); `chapter_paragraphs(chapter, graph=None)`; `chapter_media_candidates(graph, chapter, connection, thumb_base="", resize_base="")` (i media delle unità del capitolo e della loro catena di prova, al massimo `MAX_CANDIDATES = 40`); `media_messages(...)`, `parse_choices(text, candidates, n_paragrafi, massimo=MAX_PER_CHAPTER)` (JSON controllato: solo chiavi dei candidati, niente doppioni, paragrafo dentro il capitolo, didascalia fino a `MAX_CAPTION = 200`), `auto_choices(paragraphs, candidates, massimo=3)`; `choose_media(graph, narrative, *, chat, model="", lang=None, connection=None, media_base=("", ""), progress=None, cancelled=None) -> MediaReport` (al massimo `MAX_PER_CHAPTER = 4`, temperatura zero); `media_registry(graph, narrative, connection, media_base=("", ""), *, max_file, budget, render_3d=True)` (viste dei modelli 960×720 con `render_models_png`, GLB e video nella pagina fino a `MAX_MEDIA_FILE` 15 MB e `MAX_MEDIA_FILES` 60 MB) e `add_media(pagina, per_capitolo, registro, lang)`.
+- **`modules/s3dgraphy/em_narrative_html.py`** — nuovo `group_units(pagina, graph, narrative, ordine, registro, lang)`: al posto delle schede in fila della libreria, il blocco «Unità del capitolo» con una riga per unità che si apre sulla tabella dei paradati (proprietà, valore, provenienza per documento con i suoi estrattori); il pannello delle fonti apre anche immagini, video e il visore `<model-viewer>`.
+- **`modules/s3dgraphy/em_narrative_tab.py`** — pulsante «Scegli i media», `MediaThread(path, cfg, conn, bases, write_lang=None, parent=None)` (chat a temperatura 0).
+- **`modules/s3dgraphy/sync/em_native_import.py`** — `build_rapporti`: `is_after` fra due US si scrive `>` / `<` come fra gli altri tipi (diventava «Copre» e tornava `overlies`); l'andata e ritorno di TempluMare non perde più archi dell'originale.
+- Suite: **2386 passati, 2 skip, 1 xfail, 0 falliti** (+20 test).
+
+### English
+
+New `em_narrative_media`: per-chapter media candidates from the database, an AI choice at temperature zero (validated JSON) or an automatic one, stored in the narrative data (`pyarchinit_media`, keyed by anchor and title); the HTML gets figures after the chosen paragraph, hotspots whose panel shows the image, the video or a 3D viewer (Google model-viewer, loaded on demand). `em_narrative_html.group_units` replaces the flat list of cards with a "Units of the chapter" block (one collapsible row per unit with its paradata table). `is_after` between two US is now kept as `>`/`<` and exported back as `is_after`. New "Choose the media" button (`MediaThread`). Tests: 2386 passed (+20).
+
+---
+
+## [narrativa-indice-fonti-5.13.129] — 2026-10-17
+
+### Italiano
+
+**La narrativa esportata con l'indice, i sottotitoli e le fonti di ogni capitolo, che nell'HTML sono hotspot; e la causa vera degli arresti della suite** — pyarchinit tag `narrativa-indice-fonti-5.13.129-alpha` (solo dev), commit `70598dab` (tutorial `3065f74a`).
+
+- **`modules/s3dgraphy/em_narrative_html.py`** (nuovo, sopra gli export della libreria senza toccarla) — `add_index(pagina, lang=None)` (indice dell'HTML, capitoli raggruppati per parte, sottotitoli «###» come titoli); `Source` (doc_id, name, description, url, uses); `unit_sources(graph, unit_ids)` (unità → proprietà → estrattore o combinatore → documento); `chapter_units(graph, chapter)`; `sources_for_chapters(graph, narrative)`; `sources_registry(graph, fonti, connection, thumb_base, resize_base, *, max_file, budget)` (file dai media della riga del documento, nella pagina fino a `MAX_FILE_IN_PAGE` 2 MB e `MAX_FILES_IN_PAGE` 25 MB); `add_sources(pagina, per_capitolo, registro, lang)` (riga «Fonti del capitolo», hotspot con scheda al passaggio e pannello al clic); `align_chapters(pagina, titoli)`, `align_titles(visti, attesi)`; `improve_docx(dati, graph, narrative, lang=None)` (campo TOC con `updateFields`, Heading 2, corsivo, fonti dei capitoli).
+- **`modules/s3dgraphy/em_narrative.py`** — `export_file(..., media_base=None)` passa dal livello HTML/DOCX; `export_pdf` con indice (`TableOfContents`, due passate), segnalibri del PDF, sottotitoli, corsivo e fonti dei capitoli.
+- **`tests/sync/conftest.py`** — importa per prima la fixture che mette OpenBLAS a un thread: gli arresti intermittenti della suite (dock di GeoArchaeo) venivano da dieci thread di OpenBLAS.
+- Suite: **2366 passati, 2 skip, 1 xfail, 0 falliti** (+26 test), due esecuzioni complete senza arresti.
+
+### English
+
+New `em_narrative_html` layer over the library exports: contents in HTML (anchors, parts grouped, subheadings), PDF (ReportLab TOC with page numbers and PDF outline) and DOCX (TOC field updated by Word on open); Markdown subheadings and italics rendered in all three; a per-chapter sources line following the paradata chain; in the HTML every source is a hotspot (hover card with preview, click panel with the embedded file). The intermittent suite crash came from multi-threaded OpenBLAS (import order in `tests/sync/conftest.py`). Tests: 2366 passed (+26).
+
+---
+
 ## [narrativa-del-file-5.13.128] — 2026-10-17
 
 ### Italiano
