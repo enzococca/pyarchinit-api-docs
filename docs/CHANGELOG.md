@@ -7,6 +7,27 @@
 
 ---
 
+## [geometrie-3d-5.13.134] — 2026-10-18
+
+### Italiano
+
+**Piante e prospetti dai modelli 3D all'import dell'em.json** — pyarchinit tag `geometrie-3d-5.13.134-alpha` (solo dev), commit `4b07a10e`.
+
+- **`modules/s3dgraphy/glb_mesh.py`** (nuovo, numpy) — `read_triangles(source, *, max_triangles=200_000, max_file=100 MB) -> ndarray (n,3,3)`, `glb_info(source) -> GlbInfo(ok, triangles, reason, detail, ymin, ymax)` (solo il JSON), `GlbError(reason, detail)`, `REASONS`; nodi con matrici o TRS, TRIANGLES/STRIP/FAN; rifiuta Draco/meshopt/quantizzazione, accessori sparsi, buffer esterni.
+- **`modules/s3dgraphy/em_drawings.py`** (nuovo, `QgsGeometry`) — `scene_from_gltf`, `Georef`/`georef_of(graph)`, `crs_kind(srid)`, `place(graph, georef, pts, shift_z)` (regola di `s3dgraphy.api.georeference_scene`), `plan_geometry`, `View`/`SITE_VIEWS`, `rose8`, `unit_view(code, plan, unit_c, site_c, xy=None)`, `view_geometry`, `depth`, `site_frame`, `lay_out`, `span_u`, `translated`; nomi `PLAN_NAME`, `side_name`, `unit_drawing_names`, `is_derived_name`; coppie della scheda `without_derived_pairs`, `with_derived_pairs`, `merge_derived_pairs`.
+- **`modules/s3dgraphy/sync/em_drawings_import.py`** (nuovo) — `DrawingUnit`, `Choice`, `Scheda`, `CrsDecision`, `Drawing`, `WriteResult`; `plan_units`, `schede_of(db, sito, keys, graph=None)`, `default_choice`, `layer_srid`, `crs_decision`, `preview_line`, `status_text`, `compute_drawings`, `doc_types`, `write_drawings`, `unfilter_usm_view`, `run_drawings`.
+- **`modules/s3dgraphy/em_drawings_dialog.py`** (nuovo) — `DrawingsDialog(units, choice, georef)`, `position_text`, `quote_text`.
+- **`modules/s3dgraphy/s3dgraphy_dot_bridge.py`** — casella «Ricava piante e prospetti dai modelli 3D» e «Scegli…» nella tab Import; `_geom_plan`, `_on_choose_geom_3d`, `_import_drawings`; controllo del sistema prima di scrivere.
+- **`modules/s3dgraphy/sync/graph_projector.py`**, **`graph_ingestor.py`** — le coppie ricavate fuori dall'export, conservate al reimport.
+- **`modules/s3dgraphy/em_narrative_map.py`** — `drawings_from_db`: piante di tutte le unità dalla vista US, mai i prospetti ricavati; tolleranza sui disegni tenuti.
+- Suite: **2511 passati, 2 skip, 1 xfail, 0 falliti** (+72 test).
+
+### English
+
+Opt-in derivation of GIS geometries from the units' 3D proxies when importing an EMStudio em.json: plans into `pyunitastratigrafiche` (em.json CRS, s3dgraphy georeferencing rule), N/E/S/W site elevations and per-unit elevations into `pyunitastratigrafiche_usm` in drawing coordinates, one Documentazione record per drawing with identical type/name on polygons and in the SU form list. CRS rule checked before any write; derived set replaced on re-import; em.json export unchanged; PostgreSQL gids left to the column default. New modules `glb_mesh`, `em_drawings`, `sync/em_drawings_import`, `em_drawings_dialog`. Tests: 2511 passed (+72).
+
+---
+
 ## [narrativa-3d-rifiniture-5.13.133] — 2026-10-17
 
 ### Italiano
