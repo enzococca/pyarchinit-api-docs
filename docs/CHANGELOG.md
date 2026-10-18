@@ -7,6 +7,25 @@
 
 ---
 
+## [sezioni-3d-5.13.135] — 2026-10-18
+
+### Italiano
+
+**Sezioni lungo le linee dai modelli 3D** — pyarchinit tag `sezioni-3d-5.13.135-alpha` (solo dev), commit `fdd06337`.
+
+- **`modules/s3dgraphy/em_drawings.py`** — `section_geometry(tri_map, a, b)` (piano verticale del tratto, `polygonize`, ritaglio a 0…|ab|, pieno dentro il contorno esterno), `section_line_geometry(tri_map, points)` (u continuo fra i tratti), `section_crosses(tri_map, points)` (modello aperto), `line_length(points)`; `is_derived_name` riconosce `3D-SEZ-…`.
+- **`modules/s3dgraphy/sync/em_sections.py`** (nuovo) — `LINE_LAYER`, `SectionsError`, `SectionLine(gid, id_sezione, descr, area, points, tipo_doc, nome_doc)`, `SectionsResult.summary()`, `section_lines(db, sito) -> (lines, srid)`, `section_names(lines)`, `load_graph(db, sito)`, `section_units(graph, db, sito, *, search_dirs, resize_base)`, `run_sections(db, sito, *, gids, shift_z=None, search_dirs=(), resize_base="", lang=None, progress=None)`.
+- **`modules/s3dgraphy/em_sections_dialog.py`** (nuovo) — `SectionsDialog(lines, units, georef, names, shift_z=None)`, `chosen() -> (gids, shift_z)`.
+- **`modules/s3dgraphy/sync/em_drawings_import.py`** — `write_drawings(..., scope=None)`: senza `scope` sostituisce solo `3D-PLA`/`3D-PRO-…`, con un insieme solo quei nomi.
+- **`pyarchinitPlugin.py`** — `actionEmSections` «Extended Matrix → Sezioni dai modelli 3D…», `_run_em_sections`.
+- Suite: **2537 passati, 2 skip, 1 xfail, 0 falliti** (+26 test).
+
+### English
+
+New "Extended Matrix → Sezioni dai modelli 3D…" command: lines in `pyarchinit_sezioni` cut the units' 3D proxies along their vertical plane; each line becomes a section in `pyunitastratigrafiche_usm` (X along the line from its first point, Y elevation) with one «Sezione» document `3D-SEZ-<id_sezione>` sharing type/name with the polygons, the SU form and the line. Lines reprojected into the em.json CRS; re-cuts replace only their sections; renamed or emptied lines leave no orphans; skipped units report their reason. New modules `sync/em_sections`, `em_sections_dialog`. Tests: 2537 passed (+26).
+
+---
+
 ## [geometrie-3d-5.13.134] — 2026-10-18
 
 ### Italiano
