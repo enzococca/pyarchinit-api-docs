@@ -7,6 +7,26 @@
 
 ---
 
+## [contatori-pg-5.13.136] — 2026-10-19
+
+### Italiano
+
+**Contatori di PostgreSQL in pari, pannello «Verifica rapporti», le cose minori dei disegni dal 3D** — pyarchinit tag `contatori-pg-5.13.136-alpha` (solo dev), commit `2085fbdd`.
+
+- **`modules/utility/db_sequences.py`** (nuovo) — `column_sequence(conn, table, column) -> Optional[str]` (OWNED BY via `pg_get_serial_sequence`, o la sequenza da cui dipende il DEFAULT via `pg_depend`), `sync_sequence_state(conn, table, column) -> "moved" | "ok" | "failed"` (oltre il massimo, mai indietro, in un SAVEPOINT; una transazione propria se la connessione non ne ha), `sync_sequence(...) -> bool`; costanti `MOVED`, `IN_STEP`, `FAILED`. Su SQLite non fa niente.
+- **`modules/utility/qfield_importer.py`** — `SEQUENCED_IDS`, `sync_id_sequences(conn, pairs) -> (spostati, indietro)` prima del commit e dopo le miniature; i contatori rimasti indietro finiscono negli avvisi.
+- **`modules/s3dgraphy/sync/em_drawings_import.py`** — `write_drawings(..., after=None)` (callback nella stessa transazione), contatori in pari prima e dopo la scrittura con ripiego sugli id MAX + 1; `WriteResult.written_names`; `rilievo_text(locators, limit=250)`; messaggio di fermo per layer.
+- **`modules/s3dgraphy/em_drawings.py`** — `unique_names(nomi, riservati=())`; `unit_drawing_names` con i nomi dei lati riservati; `_section_face` e il secondo tentativo solo coi vertici sul piano.
+- **`modules/s3dgraphy/sync/em_sections.py`** — `line_lengths(lines, srid, epsg)`, `_kept_spans`, `_old_right`; nomi unici; sezioni rifatte al loro posto solo se libero; nota col punto A.
+- **`gui/rapporti_check_dialog.py`** — `RapportiCheckPanel.lblStato`, `showEvent` che rilegge i siti; chiavi `m_no_database`, `m_db_unreadable` in `rapporti_check._L` (sei lingue).
+- Suite: **2580 passati, 2 skip, 1 xfail, 0 falliti** (+43 test).
+
+### English
+
+PostgreSQL sequences are brought past the column maximum after hand-written ids (`db_sequences`, also for sequences referenced only by the column default): the QField import syncs the tables it writes, the 3D drawings import syncs gid and document sequences before and after writing (falling back to MAX+1 ids with a warning when the sequence can't be moved). The «Verifica rapporti» panel no longer opens a modal box without a database. Deferred minors of the 3D plans, elevations and sections fixed. Tests: 2580 passed (+43).
+
+---
+
 ## [sezioni-3d-5.13.135] — 2026-10-18
 
 ### Italiano
