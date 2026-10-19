@@ -7,6 +7,23 @@
 
 ---
 
+## [pg-spento-5.13.137] — 2026-10-19
+
+### Italiano
+
+**Un PostgreSQL che non risponde non tiene più QGIS fermo** — pyarchinit tag `pg-spento-5.13.137-alpha` (solo dev), commit `6da3f902`.
+
+- **`modules/db/pyarchinit_db_manager.py`** — `_pg_connect_timeout(conn_str) -> int` (`PGCONNECT_TIMEOUT`, poi `connect_timeout` nella stringa, poi 10); `Pyarchinit_db_management.connection()` per PostgreSQL crea `metadata` e `Session`, poi prova la connessione (`with self.engine.connect(): pass`) **prima** di `check_and_update_postgres_db`: con un server che non risponde torna False dopo un tentativo solo (prima: un tentativo per ogni controllo dell'aggiornamento, senza tempo massimo).
+- **`pyarchinitPlugin.py`** — le sei voci Extended Matrix (`_run_em_export`, `_run_em_sections`, `_run_em_project`, `_run_em_import`, `_run_em_matrix_view`, `_run_room_delivery`) si fermano se `connection()` torna False.
+- **`gui/rapporti_check_dialog.py`** — `RapportiCheckPanel`: niente letture alla costruzione; alla prima apertura della scheda (`showEvent` → `QTimer.singleShot`) «Leggo i siti…» e cursore d'attesa; `btnRiprova` (nascosto senza database); `select_sito` legge solo se non ha mai letto. Chiave `m_loading_sites` in `rapporti_check._L` (sei lingue).
+- Suite: **2591 passati, 2 skip, 1 xfail, 0 falliti** (+11 test).
+
+### English
+
+An unreachable PostgreSQL server no longer freezes QGIS: `connection()` probes the server before the schema updater (whose checks each opened a new connection with no timeout, over 14 minutes frozen with an unreachable host) with a 10 s connect timeout (raisable with `PGCONNECT_TIMEOUT` or `connect_timeout`), creating the session factory first so a shared manager whose first connection failed still saves once the server is back. Extended Matrix actions stop on a failed connection; the «Verifica rapporti» panel loads its sites lazily and retries only on «Riprova». Tests: 2591 passed (+11).
+
+---
+
 ## [contatori-pg-5.13.136] — 2026-10-19
 
 ### Italiano
