@@ -7,6 +7,22 @@
 
 ---
 
+## [numpy-qgis-5.13.138] — 2026-10-26
+
+### Italiano
+
+**Le librerie installate rispettano il numpy di QGIS (issue #666)** — pyarchinit tag `numpy-qgis-5.13.138-alpha` (solo dev), commit `58574708`.
+
+- **`modules/utility/python_env.py`** — `host_numpy_version(ext_dir, path=None)`, `numpy_constraint_args(ext_dir, path=None, workdir=None)` (`--constraint` con `numpy==<QGIS>`, file `mkstemp`, `[]` se non scrivibile), `needs_newer_numpy(ext_dir, numpy_version)` (una distribuzione per nome, la più recente), `numpy_repairs(requirements_path, ext_dir, path=None)` (righe col marcatore giusto, una volta per numpy: `ATTEMPTS`), `note_numpy_attempt`, `prune_stale_dists(ext_dir)`, `drop_ext_numpy(ext_dir, path=None)`.
+- **`__init__.py`** — `PackageManager.install` col vincolo (anche `--user`), pulizia dopo pip, tentativo registrato; `get_missing_packages` aggiunge le riparazioni; `Worker.install_packages` non si ferma su un pacchetto che fallisce.
+- Suite: **2601 passati, 3 skip, 1 xfail, 0 falliti** (+10 test).
+
+### English
+
+Every pip install into `ext_libs` is constrained to QGIS's numpy, so pip no longer picks pandas 3.1 (numpy >= 2.0.2) on QGIS 3.40 with numpy 1.26.4; incompatible `ext_libs` packages are reinstalled once per host numpy at startup (also the reverse case on QGIS 4); stale dist-infos and the numpy copy are pruned after installs. Tests: 2601 passed (+10).
+
+---
+
 ## [pg-spento-5.13.137] — 2026-10-19
 
 ### Italiano
