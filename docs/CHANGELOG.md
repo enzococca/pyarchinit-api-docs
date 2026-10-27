@@ -7,6 +7,23 @@
 
 ---
 
+## [spatialite-qgis344-5.13.140 / v4.9.19] — 2026-10-27
+
+### Italiano
+
+**QGIS 3.44 per macOS: Spatialite dal QGIS che gira, plugin che si carica e installa su master** — pyarchinit tag `spatialite-qgis344-5.13.140-alpha` (dev, commit `0917782c`) e `v4.9.19` (master, commit `e8d344d0`).
+
+- **`modules/utility/spatialite_loader.py`** (nuovo, dev e master) — `spatialite_candidates(system=None, prefix=None, executable=None, app_roots=APP_ROOTS, mac_extra_dirs=MAC_EXTRA_DIRS, linux_dirs=LINUX_DIRS)` (macOS: prima il QGIS che gira, `Contents/Frameworks` del 3.44 e `Contents/MacOS/lib` dei vecchi, poi gli altri QGIS, Homebrew/MacPorts, il nome nudo; mai `libspatialite`), `load_spatialite(dbapi_conn, candidates=None)` (ricorda l'ultimo buono; `sqlite3.OperationalError` con i percorsi provati).
+- **dev** — lo usano `Pyarchinit_db_management.load_spatialite`, `database_sync`, `pyarchinit_db_update`, la configurazione, `response_sql`, l'import da QField, le viste della scheda US; `Gis_Time_controller` senza pip all'import, dottoxml col Python di QGIS (`python_env.pip_interpreter`).
+- **master** — `modules/utility/mac_python.py` (nuovo): `mac_python_candidates(prefix=None, executable=None, app_roots=APP_ROOTS, extra_macos_dirs=())`, `same_python(candidates, timeout=20)`; `PackageManager.install` li usa, Pillow su macOS in `ext_libs`; tolto `from future import standard_library` da `tabs/networkaccessmanager.py`.
+- Suite dev sul QGIS 3.44.15: **2570 passati** (+13); 35 falliti e 16 errori uguali al commit di prima (ambiente).
+
+### English
+
+On the QGIS 3.44 macOS bundle SpatiaLite is `Contents/Frameworks/mod_spatialite.so`: a new shared loader finds it in the running QGIS first (dev and master). Master also loads again (no `future` import), installs its dependencies with the 3.44 `Contents/MacOS/python` launcher (same Python version only) and never touches QGIS's bundled Pillow.
+
+---
+
 ## [font-qgis-mac-5.13.139] — 2026-10-27
 
 ### Italiano
