@@ -7,6 +7,24 @@
 
 ---
 
+## [font-qgis-mac-5.13.139] — 2026-10-27
+
+### Italiano
+
+**Installazione su Mac: ogni QGIS e Cambria che si installa da solo** — pyarchinit tag `font-qgis-mac-5.13.139-alpha` (solo dev), commit `e8fffa72`.
+
+- **`modules/utility/python_env.py`** — `mac_qgis_apps(roots=("/Applications", "~/Applications"))`, `with_qgis_apps(paths, apps)`, `mac_fallback_pythons(apps, version=None)` (prima il lanciatore `Contents/MacOS/python` di QGIS 4).
+- **`modules/utility/font_install.py`** (nuovo) — `REQUIRED`, `CAMBRIA`, `user_fonts_dir(system=None)`, `cambria_installed(fonts_dir)`, `install_cambria(source_dir, fonts_dir, zip_path=None)` (nomi esatti di ReportLab, copia atomica, mai un'eccezione).
+- **`__init__.py`** — `QGIS_PATHS` esteso con ogni QGIS trovato; `FontManager.install_fonts` copia Cambria a ogni avvio (solo quello che manca), avviso solo se non riesce.
+- **`modules/utility/pyarchinit_folder_installation.py`** — `rscripts.zip` e `cambria.zip` non si riestraggono più a ogni avvio.
+- Suite: **2615 passati, 3 skip, 1 xfail, 0 falliti** (+14 test).
+
+### English
+
+macOS installer finds any QGIS app (every QGIS 4 version, also in ~/Applications); Cambria installs itself into the user fonts folder with ReportLab's exact names and atomic copies; no more re-extraction of R scripts and fonts at every start. Tests: 2615 passed (+14).
+
+---
+
 ## [numpy-qgis-5.13.138] — 2026-10-26
 
 ### Italiano
