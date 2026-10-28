@@ -7,6 +7,21 @@
 
 ---
 
+## [v4.9.21] — 2026-10-28
+
+### Italiano
+
+**Cambria: i quattro file si installano da soli (issue #667)** — pyarchinit tag `v4.9.21` (solo master), commit `e8e490f1`.
+
+- **`modules/utility/font_install.py`** (nuovo su master, uguale a quello di dev) — `REQUIRED`, `CAMBRIA`, `user_fonts_dir(system=None)`, `cambria_installed(fonts_dir)`, `install_cambria(source_dir, fonts_dir, zip_path=None)`.
+- **`__init__.py`** — `FontManager.install_fonts()` copia i quattro file (`Cambria.ttc`, `cambriab.ttf`, `cambriai.ttf`, `cambriaz.ttf`) nei font dell'utente da `~/pyarchinit/bin` o da `resources/dbfiles/cambria.zip`, l'avviso solo se la copia non riesce; nuovo `FontManager.add_font_dirs_to_reportlab()` (aggiunge `~/pyarchinit/bin` e i font dell'utente a `reportlab.rl_config.TTFSearchPath`), chiamato in `classFactory` prima dell'import del plugin.
+
+### English
+
+On master the four Cambria files now install themselves into the user's fonts folder (macOS, Linux) and `~/pyarchinit/bin` joins ReportLab's font search path: a missing `cambriai.ttf` no longer stops the plugin from loading.
+
+---
+
 ## [v4.9.20] — 2026-10-28
 
 ### Italiano
