@@ -7,6 +7,22 @@
 
 ---
 
+## [v4.9.20] — 2026-10-28
+
+### Italiano
+
+**macOS: dipendenze compatibili e plugin senza QtWebKit (issue #667)** — pyarchinit tag `v4.9.20` (solo master), commit `be54ebe9`.
+
+- **`modules/utility/pip_pins.py`** (nuovo) — `DB_STACK`, `pinned_lines(requirements_path, version=None, only=None)`, `constraints_file(requirements_path, version=None, workdir=None, only=None)`, `constraint_sets(requirements_path, version=None, workdir=None)` (prima tutte le versioni fissate, poi solo il database), `prune_stale_dists(ext_dir)` (tiene il dist-info più recente, a parità di data la versione più alta).
+- **`modules/utility/qt_webkit_fallback.py`** (nuovo) — `fallback_module()` (QWebView su QTextBrowser: `load`, `setHtml(html, baseUrl=None)`, proprietà `url` dei .ui), `only_for_pyarchinit(probe=...)` (solo durante l'import del plugin).
+- **`__init__.py`** — `PackageManager.install` su macOS passa i vincoli a ogni `pip --target` e pulisce i dist-info; `classFactory` importa il plugin dentro `only_for_pyarchinit()`.
+
+### English
+
+On macOS, pip --target resolved every dependency again and SQLAlchemy-Utils / GeoAlchemy2 pulled SQLAlchemy 2.x over 1.4.27: installs now use the pinned versions as constraints (DB stack only as fallback) and prune stale dist-info folders. QGIS builds without QtWebKit get a QTextBrowser-based QWebView while pyArchInit is imported.
+
+---
+
 ## [spatialite-qgis344-5.13.140 / v4.9.19] — 2026-10-27
 
 ### Italiano
